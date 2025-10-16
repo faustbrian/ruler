@@ -17,7 +17,6 @@ use function array_keys;
 use function array_slice;
 use function count;
 use function implode;
-use function is_array;
 use function is_string;
 use function max;
 use function mb_strlen;
@@ -115,19 +114,23 @@ final readonly class GraphQLFilterValidator
 
             return ValidationResult::success();
         } catch (JsonException $e) {
-            $errors = [[
+            $context = self::extractJsonContext($filter, $e);
+            $error = [
                 'message' => 'Invalid JSON: '.$e->getMessage(),
-                'context' => self::extractJsonContext($filter, $e),
-            ]];
+            ];
 
-            return ValidationResult::failure($errors);
+            if ($context !== null) {
+                $error['context'] = $context;
+            }
+
+            return ValidationResult::failure([$error]);
         } catch (Throwable $e) {
-            $errors = [[
+            $error = [
                 'message' => $e->getMessage(),
                 'context' => self::extractFilterContext($filter),
-            ]];
+            ];
 
-            return ValidationResult::failure($errors);
+            return ValidationResult::failure([$error]);
         }
     }
 
@@ -174,9 +177,9 @@ final readonly class GraphQLFilterValidator
      * Provides a summary of the filter structure to help identify the issue.
      *
      * @param  array<string, mixed>|string $filter The filter being validated
-     * @return null|string                 A summary of the filter structure
+     * @return string                      A summary of the filter structure
      */
-    private static function extractFilterContext(array|string $filter): ?string
+    private static function extractFilterContext(array|string $filter): string
     {
         if (is_string($filter)) {
             // If it's a string, try to show the beginning
@@ -189,18 +192,14 @@ final readonly class GraphQLFilterValidator
             return $filter;
         }
 
-        if (is_array($filter)) {
-            // Show the top-level keys
-            $keys = array_keys($filter);
+        // Show the top-level keys
+        $keys = array_keys($filter);
 
-            if (count($keys) > 5) {
-                $keys = array_slice($keys, 0, 5);
-                $keys[] = '...';
-            }
-
-            return 'Filter with keys: '.implode(', ', $keys);
+        if (count($keys) > 5) {
+            $keys = array_slice($keys, 0, 5);
+            $keys[] = '...';
         }
 
-        return null;
+        return 'Filter with keys: '.implode(', ', $keys);
     }
 }

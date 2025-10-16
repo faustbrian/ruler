@@ -42,7 +42,9 @@ use ReflectionClass;
 use function array_key_exists;
 use function array_key_first;
 use function array_map;
+use function array_values;
 use function count;
+use function is_array;
 use function is_string;
 use function mb_trim;
 use function sprintf;
@@ -103,6 +105,209 @@ final readonly class GraphQLFilterSerializer
         $condition = $conditionProperty->getValue($rule);
 
         return $this->serializeProposition($condition);
+    }
+
+    /**
+     * Serialize a comparison operator.
+     *
+     * @param  Proposition          $proposition The comparison proposition
+     * @param  string               $operator    The GraphQL operator name
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeComparison(Proposition $proposition, string $operator): array
+    {
+        $operands = self::getOperands($proposition);
+
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+        $value = self::extractValue($operands[1]);
+
+        return [$fieldName => [$operator => $value]];
+    }
+
+    /**
+     * Serialize a list operator (in, notIn).
+     *
+     * @param  Proposition          $proposition The list proposition
+     * @param  string               $operator    The GraphQL operator name
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeList(Proposition $proposition, string $operator): array
+    {
+        $operands = self::getOperands($proposition);
+
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('List operator %s requires exactly 2 operands', $operator));
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+        $value = self::extractValue($operands[1]);
+
+        return [$fieldName => [$operator => $value]];
+    }
+
+    /**
+     * Serialize a string operator.
+     *
+     * @param  Proposition          $proposition The string proposition
+     * @param  string               $operator    The GraphQL operator name
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeString(Proposition $proposition, string $operator): array
+    {
+        $operands = self::getOperands($proposition);
+
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operator %s requires exactly 2 operands', $operator));
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+        $value = self::extractValue($operands[1]);
+
+        return [$fieldName => [$operator => $value]];
+    }
+
+    /**
+     * Serialize a matches (regex) operator.
+     *
+     * @param  Matches              $matches The matches proposition
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeMatches(Matches $matches): array
+    {
+        $operands = self::getOperands($matches);
+
+        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+        $pattern = self::extractValue($operands[1]);
+
+        // Remove regex delimiters if present
+        if (is_string($pattern) && str_starts_with($pattern, '/') && str_ends_with($pattern, '/')) {
+            $pattern = mb_trim($pattern, '/');
+        }
+
+        return [$fieldName => ['match' => $pattern]];
+    }
+
+    /**
+     * Serialize a null check operator.
+     *
+     * @param  IsNull               $isNull The null check proposition
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeNull(IsNull $isNull): array
+    {
+        $operands = self::getOperands($isNull);
+
+        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+
+        return [$fieldName => ['isNull' => true]];
+    }
+
+    /**
+     * Serialize a type validation operator.
+     *
+     * @param  Proposition          $proposition The type proposition
+     * @param  string               $typeName    The type name
+     * @return array<string, mixed> The serialized filter
+     */
+    private static function serializeType(Proposition $proposition, string $typeName): array
+    {
+        $operands = self::getOperands($proposition);
+
+        throw_if(count($operands) !== 1, LogicException::class, sprintf('Type operator %s requires exactly 1 operand', $typeName));
+
+        $firstOperand = $operands[0];
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+
+        $fieldName = self::extractFieldName($firstOperand);
+
+        return [$fieldName => ['type' => $typeName]];
+    }
+
+    /**
+     * Extract field name from a Variable operand.
+     *
+     * @param  BuilderVariable|Variable $operand The operand to extract field name from
+     * @return string                   The field name
+     */
+    private static function extractFieldName(Variable|BuilderVariable $operand): string
+    {
+        $name = $operand->getName();
+
+        throw_if($name === null, LogicException::class, 'Variable must have a name');
+
+        return $name;
+    }
+
+    /**
+     * Extract value from a Variable operand.
+     *
+     * @param  mixed $operand The operand to extract value from
+     * @return mixed The extracted value
+     */
+    private static function extractValue(mixed $operand): mixed
+    {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
+        if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
+            return $operand->getValue();
+        }
+
+        return $operand;
+    }
+
+    /**
+     * Get operands from an operator using reflection.
+     *
+     * @param  object            $operator The operator object
+     * @return array<int, mixed> The operands
+     */
+    private static function getOperands(object $operator): array
+    {
+        $reflection = new ReflectionClass($operator);
+
+        // Try to get operands property
+        if ($reflection->hasProperty('operands')) {
+            $operandsProperty = $reflection->getProperty('operands');
+            $value = $operandsProperty->getValue($operator);
+
+            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+
+            return array_values($value);
+        }
+
+        // Fallback: call getOperands() if it exists
+        if ($reflection->hasMethod('getOperands')) {
+            $method = $reflection->getMethod('getOperands');
+            $result = $method->invoke($operator);
+
+            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+
+            return array_values($result);
+        }
+
+        return [];
     }
 
     /**
@@ -187,7 +392,11 @@ final readonly class GraphQLFilterSerializer
 
         // Otherwise, use explicit AND
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -205,7 +414,11 @@ final readonly class GraphQLFilterSerializer
         $operands = self::getOperands($or);
 
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -224,180 +437,9 @@ final readonly class GraphQLFilterSerializer
 
         throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
-        return ['NOT' => $this->serializeProposition($operands[0])];
-    }
+        $operand = $operands[0];
+        throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
 
-    /**
-     * Serialize a comparison operator.
-     *
-     * @param  Proposition          $proposition The comparison proposition
-     * @param  string               $operator    The GraphQL operator name
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeComparison(Proposition $proposition, string $operator): array
-    {
-        $operands = self::getOperands($proposition);
-
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
-
-        $fieldName = self::extractFieldName($operands[0]);
-        $value = self::extractValue($operands[1]);
-
-        return [$fieldName => [$operator => $value]];
-    }
-
-    /**
-     * Serialize a list operator (in, notIn).
-     *
-     * @param  Proposition          $proposition The list proposition
-     * @param  string               $operator    The GraphQL operator name
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeList(Proposition $proposition, string $operator): array
-    {
-        $operands = self::getOperands($proposition);
-
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('List operator %s requires exactly 2 operands', $operator));
-
-        $fieldName = self::extractFieldName($operands[0]);
-        $value = self::extractValue($operands[1]);
-
-        return [$fieldName => [$operator => $value]];
-    }
-
-    /**
-     * Serialize a string operator.
-     *
-     * @param  Proposition          $proposition The string proposition
-     * @param  string               $operator    The GraphQL operator name
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeString(Proposition $proposition, string $operator): array
-    {
-        $operands = self::getOperands($proposition);
-
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operator %s requires exactly 2 operands', $operator));
-
-        $fieldName = self::extractFieldName($operands[0]);
-        $value = self::extractValue($operands[1]);
-
-        return [$fieldName => [$operator => $value]];
-    }
-
-    /**
-     * Serialize a matches (regex) operator.
-     *
-     * @param  Matches              $matches The matches proposition
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeMatches(Matches $matches): array
-    {
-        $operands = self::getOperands($matches);
-
-        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
-
-        $fieldName = self::extractFieldName($operands[0]);
-        $pattern = self::extractValue($operands[1]);
-
-        // Remove regex delimiters if present
-        if (is_string($pattern) && str_starts_with($pattern, '/') && str_ends_with($pattern, '/')) {
-            $pattern = mb_trim($pattern, '/');
-        }
-
-        return [$fieldName => ['match' => $pattern]];
-    }
-
-    /**
-     * Serialize a null check operator.
-     *
-     * @param  IsNull               $isNull The null check proposition
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeNull(IsNull $isNull): array
-    {
-        $operands = self::getOperands($isNull);
-
-        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
-
-        $fieldName = self::extractFieldName($operands[0]);
-
-        return [$fieldName => ['isNull' => true]];
-    }
-
-    /**
-     * Serialize a type validation operator.
-     *
-     * @param  Proposition          $proposition The type proposition
-     * @param  string               $typeName    The type name
-     * @return array<string, mixed> The serialized filter
-     */
-    private static function serializeType(Proposition $proposition, string $typeName): array
-    {
-        $operands = self::getOperands($proposition);
-
-        throw_if(count($operands) !== 1, LogicException::class, sprintf('Type operator %s requires exactly 1 operand', $typeName));
-
-        $fieldName = self::extractFieldName($operands[0]);
-
-        return [$fieldName => ['type' => $typeName]];
-    }
-
-    /**
-     * Extract field name from a Variable operand.
-     *
-     * @param  mixed  $operand The operand to extract field name from
-     * @return string The field name
-     */
-    private static function extractFieldName(mixed $operand): string
-    {
-        if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
-            $name = $operand->getName();
-
-            throw_if($name === null, LogicException::class, 'Variable must have a name');
-
-            return $name;
-        }
-
-        throw new LogicException('Expected Variable operand');
-    }
-
-    /**
-     * Extract value from a Variable operand.
-     *
-     * @param  mixed $operand The operand to extract value from
-     * @return mixed The extracted value
-     */
-    private static function extractValue(mixed $operand): mixed
-    {
-        if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
-            return $operand->getValue();
-        }
-
-        return $operand;
-    }
-
-    /**
-     * Get operands from an operator using reflection.
-     *
-     * @param  object            $operator The operator object
-     * @return array<int, mixed> The operands
-     */
-    private static function getOperands(object $operator): array
-    {
-        $reflection = new ReflectionClass($operator);
-
-        // Try to get operands property
-        if ($reflection->hasProperty('operands')) {
-            $operandsProperty = $reflection->getProperty('operands');
-
-            return $operandsProperty->getValue($operator);
-        }
-
-        // Fallback: call getOperands() if it exists
-        if ($reflection->hasMethod('getOperands')) {
-            return $operator->getOperands();
-        }
-
-        return [];
+        return ['NOT' => $this->serializeProposition($operand)];
     }
 }
