@@ -33,10 +33,13 @@ use ReflectionClass;
 use function array_map;
 use function array_values;
 use function count;
+use function gettype;
 use function implode;
 use function is_array;
 use function is_bool;
+use function is_numeric;
 use function is_string;
+use function method_exists;
 use function sprintf;
 use function throw_if;
 
@@ -261,6 +264,7 @@ final readonly class NaturalLanguageSerializer
      */
     private static function serializeField(mixed $operand): string
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
@@ -281,6 +285,7 @@ final readonly class NaturalLanguageSerializer
     private static function serializeValue(mixed $operand): string
     {
         // Handle Variables with values
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $value = $operand->getValue();
 
@@ -310,8 +315,11 @@ final readonly class NaturalLanguageSerializer
             return 'null';
         }
 
-        // Fallback for other types
-        return (string) $value;
+        if (is_numeric($value)) {
+            return (string) $value;
+        }
+
+        throw new LogicException(sprintf('Cannot format value of type: %s', gettype($value)));
     }
 
     /**
@@ -322,6 +330,7 @@ final readonly class NaturalLanguageSerializer
      */
     private static function getListValues(mixed $operand): array
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $value = $operand->getValue();
 
@@ -366,13 +375,20 @@ final readonly class NaturalLanguageSerializer
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
+            $value = $operandsProperty->getValue($operator);
 
-            return $operandsProperty->getValue($operator);
+            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+
+            return array_values($value);
         }
 
-        // Fallback: call getOperands() if it exists
-        if ($reflection->hasMethod('getOperands')) {
-            return $operator->getOperands();
+        // Fallback: call getOperands() method if it exists
+        if (method_exists($operator, 'getOperands')) {
+            $result = $operator->getOperands();
+
+            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+
+            return array_values($result);
         }
 
         return [];

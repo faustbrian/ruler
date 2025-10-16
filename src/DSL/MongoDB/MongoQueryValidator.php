@@ -10,7 +10,6 @@
 namespace Cline\Ruler\DSL\MongoDB;
 
 use Cline\Ruler\DSL\Wirefilter\ValidationResult;
-use InvalidArgumentException;
 use JsonException;
 use Throwable;
 
@@ -134,9 +133,9 @@ final readonly class MongoQueryValidator
             $this->parser->parse($query);
 
             return ValidationResult::success();
-        } catch (InvalidArgumentException|Throwable $e) {
+        } catch (Throwable $throwable) {
             $errors = [[
-                'message' => $e->getMessage(),
+                'message' => $throwable->getMessage(),
             ]];
 
             return ValidationResult::failure($errors);

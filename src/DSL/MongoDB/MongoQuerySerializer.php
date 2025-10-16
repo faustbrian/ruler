@@ -226,7 +226,11 @@ final readonly class MongoQuerySerializer
     {
         $operands = self::getOperands($and);
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'AND operand must be a Proposition');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -243,7 +247,11 @@ final readonly class MongoQuerySerializer
     {
         $operands = self::getOperands($or);
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'OR operand must be a Proposition');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -260,7 +268,11 @@ final readonly class MongoQuerySerializer
     {
         $operands = self::getOperands($nor);
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'NOR operand must be a Proposition');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -279,7 +291,10 @@ final readonly class MongoQuerySerializer
 
         throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
-        return ['$not' => $this->serializeProposition($operands[0])];
+        $operand = $operands[0];
+        throw_if(!$operand instanceof Proposition, LogicException::class, 'NOT operand must be a Proposition');
+
+        return ['$not' => $this->serializeProposition($operand)];
     }
 
     /**
@@ -292,7 +307,11 @@ final readonly class MongoQuerySerializer
     {
         $operands = self::getOperands($xor);
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'XOR operand must be a Proposition');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -309,7 +328,11 @@ final readonly class MongoQuerySerializer
     {
         $operands = self::getOperands($nand);
         $conditions = array_map(
-            fn ($operand): array => $this->serializeProposition($operand),
+            function ($operand): array {
+                throw_if(!$operand instanceof Proposition, LogicException::class, 'NAND operand must be a Proposition');
+
+                return $this->serializeProposition($operand);
+            },
             $operands,
         );
 
@@ -491,6 +514,7 @@ final readonly class MongoQuerySerializer
      */
     private function extractFieldName(mixed $operand): string
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
@@ -523,6 +547,7 @@ final readonly class MongoQuerySerializer
      */
     private static function extractValue(mixed $operand): mixed
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             return $operand->getValue();
         }

@@ -33,11 +33,14 @@ use ReflectionClass;
 use function array_map;
 use function array_values;
 use function count;
+use function gettype;
 use function implode;
 use function is_array;
 use function is_bool;
+use function is_numeric;
 use function is_string;
 use function mb_strlen;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 use function str_replace;
@@ -416,7 +419,11 @@ final readonly class SQLWhereSerializer
         }
 
         // Fallback for objects or other types
-        return (string) $value;
+        if (is_numeric($value)) {
+            return (string) $value;
+        }
+
+        throw new LogicException(sprintf('Cannot cast value to string: %s', gettype($value)));
     }
 
     /**
@@ -455,13 +462,20 @@ final readonly class SQLWhereSerializer
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
+            $value = $operandsProperty->getValue($operator);
 
-            return $operandsProperty->getValue($operator);
+            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+
+            return array_values($value);
         }
 
-        // Fallback: call getOperands() if it exists
-        if ($reflection->hasMethod('getOperands')) {
-            return $operator->getOperands();
+        // Fallback: call getOperands() method if it exists
+        if (method_exists($operator, 'getOperands')) {
+            $result = $operator->getOperands();
+
+            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+
+            return array_values($result);
         }
 
         return [];

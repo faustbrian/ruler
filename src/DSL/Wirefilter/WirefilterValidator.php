@@ -108,13 +108,21 @@ final readonly class WirefilterValidator
 
             return ValidationResult::success();
         } catch (SyntaxError $e) {
-            $errors = [[
-                'message' => $e->getMessage(),
-                'position' => self::extractPosition($e),
-                'context' => self::extractContext($expression, $e),
-            ]];
+            $error = ['message' => $e->getMessage()];
 
-            return ValidationResult::failure($errors);
+            $position = self::extractPosition($e);
+
+            if ($position !== null) {
+                $error['position'] = $position;
+            }
+
+            $context = self::extractContext($expression, $e);
+
+            if ($context !== null) {
+                $error['context'] = $context;
+            }
+
+            return ValidationResult::failure([$error]);
         } catch (Throwable $e) {
             $errors = [[
                 'message' => $e->getMessage(),
