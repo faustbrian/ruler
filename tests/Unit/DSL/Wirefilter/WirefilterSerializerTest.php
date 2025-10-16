@@ -335,7 +335,8 @@ describe('WirefilterSerializer', function (): void {
 
             $result = $serializer->serialize($rule);
 
-            expect($result)->toContain('stringContains');
+            // StringContains maps to contains() in wirefilter DSL
+            expect($result)->toContain('contains');
         });
     });
 

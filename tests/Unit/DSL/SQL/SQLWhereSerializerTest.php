@@ -11,7 +11,6 @@ use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\DSL\SQL\SQLWhereParser;
 use Cline\Ruler\DSL\SQL\SQLWhereSerializer;
 use Cline\Ruler\Operators\Comparison\Between;
-use Cline\Ruler\Operators\String\StartsWith;
 use Cline\Ruler\Variables\Variable;
 
 describe('SQLWhereSerializer', function (): void {
