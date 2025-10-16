@@ -26,12 +26,15 @@ use LogicException;
 use ReflectionClass;
 
 use function array_map;
+use function array_values;
 use function count;
 use function gettype;
 use function implode;
+use function is_array;
 use function is_bool;
 use function is_numeric;
 use function is_string;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 use function str_replace;
@@ -98,93 +101,6 @@ final readonly class LDAPFilterSerializer
         $condition = $conditionProperty->getValue($rule);
 
         return $this->serializeProposition($condition);
-    }
-
-    /**
-     * Serialize a Proposition to LDAP filter syntax.
-     *
-     * @param  Proposition $proposition The proposition to serialize
-     * @return string      The serialized LDAP filter expression
-     */
-    private function serializeProposition(Proposition $proposition): string
-    {
-        return match (true) {
-            // Logical operators (prefix notation)
-            $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, '&'),
-            $proposition instanceof LogicalOr => $this->serializeLogical($proposition, '|'),
-            $proposition instanceof LogicalNot => $this->serializeNot($proposition),
-            // Comparison operators
-            $proposition instanceof EqualTo => self::serializeComparison($proposition, '='),
-            $proposition instanceof GreaterThanOrEqualTo => self::serializeComparison($proposition, '>='),
-            $proposition instanceof LessThanOrEqualTo => self::serializeComparison($proposition, '<='),
-            $proposition instanceof GreaterThan => self::serializeComparison($proposition, '>'),
-            $proposition instanceof LessThan => self::serializeComparison($proposition, '<'),
-            // String operators (wildcard and approximate)
-            $proposition instanceof Matches => self::serializeMatches($proposition),
-            default => throw new LogicException(sprintf('Unsupported operator for LDAP serialization: %s', $proposition::class)),
-        };
-    }
-
-    /**
-     * Serialize a logical operator (AND, OR) in LDAP prefix notation.
-     *
-     * Format: (&(condition1)(condition2)...) or (|(condition1)(condition2)...)
-     *
-     * @param  Proposition $proposition The logical proposition
-     * @param  string      $operator    The logical operator symbol (& or |)
-     * @return string      The serialized logical expression
-     */
-    private function serializeLogical(Proposition $proposition, string $operator): string
-    {
-        $operands = self::getOperands($proposition);
-
-        $serialized = array_map(
-            fn ($operand): string => $operand instanceof Proposition
-                ? $this->serializeProposition($operand)
-                : throw new LogicException('LDAP logical operators require Proposition operands'),
-            $operands,
-        );
-
-        return sprintf('(%s%s)', $operator, implode('', $serialized));
-    }
-
-    /**
-     * Serialize a NOT operator in LDAP prefix notation.
-     *
-     * Format: (!(condition))
-     * Special case: NOT(field=null) → (field=*) for presence checks
-     *
-     * @param  LogicalNot $not The NOT proposition
-     * @return string     The serialized NOT expression
-     */
-    private function serializeNot(LogicalNot $not): string
-    {
-        $operands = self::getOperands($not);
-
-        throw_if(count($operands) !== 1, LogicException::class, 'LDAP NOT operator requires exactly 1 operand');
-
-        $operand = $operands[0];
-
-        if ($operand instanceof Proposition) {
-            // Special case: NOT(field=null) becomes (field=*) for presence check
-            if ($operand instanceof EqualTo) {
-                $eqOperands = self::getOperands($operand);
-
-                if (count($eqOperands) === 2) {
-                    $value = self::extractValue($eqOperands[1]);
-
-                    if ($value === null) {
-                        $attribute = self::extractAttributeName($eqOperands[0]);
-
-                        return sprintf('(%s=*)', $attribute);
-                    }
-                }
-            }
-
-            return sprintf('(!%s)', $this->serializeProposition($operand));
-        }
-
-        throw new LogicException('LDAP NOT operator requires Proposition operand');
     }
 
     /**
@@ -274,6 +190,7 @@ final readonly class LDAPFilterSerializer
      */
     private static function extractAttributeName(mixed $operand): string
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
@@ -293,6 +210,7 @@ final readonly class LDAPFilterSerializer
      */
     private static function extractValue(mixed $operand): mixed
     {
+        // @phpstan-ignore instanceof.alwaysFalse (BuilderVariable can be mixed at runtime)
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             return $operand->getValue();
         }
@@ -340,15 +258,109 @@ final readonly class LDAPFilterSerializer
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
+            $value = $operandsProperty->getValue($operator);
 
-            return $operandsProperty->getValue($operator);
+            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+
+            return array_values($value);
         }
 
-        // Fallback: call getOperands() if it exists
-        if ($reflection->hasMethod('getOperands')) {
-            return $operator->getOperands();
+        // Fallback: call getOperands() method if it exists
+        if (method_exists($operator, 'getOperands')) {
+            $result = $operator->getOperands();
+
+            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+
+            return array_values($result);
         }
 
         return [];
+    }
+
+    /**
+     * Serialize a Proposition to LDAP filter syntax.
+     *
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized LDAP filter expression
+     */
+    private function serializeProposition(Proposition $proposition): string
+    {
+        return match (true) {
+            // Logical operators (prefix notation)
+            $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, '&'),
+            $proposition instanceof LogicalOr => $this->serializeLogical($proposition, '|'),
+            $proposition instanceof LogicalNot => $this->serializeNot($proposition),
+            // Comparison operators
+            $proposition instanceof EqualTo => self::serializeComparison($proposition, '='),
+            $proposition instanceof GreaterThanOrEqualTo => self::serializeComparison($proposition, '>='),
+            $proposition instanceof LessThanOrEqualTo => self::serializeComparison($proposition, '<='),
+            $proposition instanceof GreaterThan => self::serializeComparison($proposition, '>'),
+            $proposition instanceof LessThan => self::serializeComparison($proposition, '<'),
+            // String operators (wildcard and approximate)
+            $proposition instanceof Matches => self::serializeMatches($proposition),
+            default => throw new LogicException(sprintf('Unsupported operator for LDAP serialization: %s', $proposition::class)),
+        };
+    }
+
+    /**
+     * Serialize a logical operator (AND, OR) in LDAP prefix notation.
+     *
+     * Format: (&(condition1)(condition2)...) or (|(condition1)(condition2)...)
+     *
+     * @param  Proposition $proposition The logical proposition
+     * @param  string      $operator    The logical operator symbol (& or |)
+     * @return string      The serialized logical expression
+     */
+    private function serializeLogical(Proposition $proposition, string $operator): string
+    {
+        $operands = self::getOperands($proposition);
+
+        $serialized = array_map(
+            fn ($operand): string => $operand instanceof Proposition
+                ? $this->serializeProposition($operand)
+                : throw new LogicException('LDAP logical operators require Proposition operands'),
+            $operands,
+        );
+
+        return sprintf('(%s%s)', $operator, implode('', $serialized));
+    }
+
+    /**
+     * Serialize a NOT operator in LDAP prefix notation.
+     *
+     * Format: (!(condition))
+     * Special case: NOT(field=null) → (field=*) for presence checks
+     *
+     * @param  LogicalNot $not The NOT proposition
+     * @return string     The serialized NOT expression
+     */
+    private function serializeNot(LogicalNot $not): string
+    {
+        $operands = self::getOperands($not);
+
+        throw_if(count($operands) !== 1, LogicException::class, 'LDAP NOT operator requires exactly 1 operand');
+
+        $operand = $operands[0];
+
+        if ($operand instanceof Proposition) {
+            // Special case: NOT(field=null) becomes (field=*) for presence check
+            if ($operand instanceof EqualTo) {
+                $eqOperands = self::getOperands($operand);
+
+                if (count($eqOperands) === 2) {
+                    $value = self::extractValue($eqOperands[1]);
+
+                    if ($value === null) {
+                        $attribute = self::extractAttributeName($eqOperands[0]);
+
+                        return sprintf('(%s=*)', $attribute);
+                    }
+                }
+            }
+
+            return sprintf('(!%s)', $this->serializeProposition($operand));
+        }
+
+        throw new LogicException('LDAP NOT operator requires Proposition operand');
     }
 }

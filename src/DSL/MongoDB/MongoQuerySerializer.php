@@ -57,10 +57,13 @@ use ReflectionClass;
 use const JSON_THROW_ON_ERROR;
 
 use function array_map;
+use function array_values;
 use function count;
 use function get_debug_type;
+use function is_array;
 use function is_string;
 use function json_encode;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 use function throw_if;
@@ -540,13 +543,20 @@ final readonly class MongoQuerySerializer
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
+            $value = $operandsProperty->getValue($operator);
 
-            return $operandsProperty->getValue($operator);
+            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+
+            return array_values($value);
         }
 
-        // Fallback: call getOperands() if it exists
-        if ($reflection->hasMethod('getOperands')) {
-            return $operator->getOperands();
+        // Fallback: call getOperands() method if it exists
+        if (method_exists($operator, 'getOperands')) {
+            $result = $operator->getOperands();
+
+            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+
+            return array_values($result);
         }
 
         return [];
