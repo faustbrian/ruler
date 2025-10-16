@@ -59,7 +59,6 @@ use const JSON_THROW_ON_ERROR;
 use function array_map;
 use function count;
 use function get_debug_type;
-use function is_null;
 use function is_string;
 use function json_encode;
 use function preg_match;

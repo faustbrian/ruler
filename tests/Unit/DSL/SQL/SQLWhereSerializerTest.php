@@ -7,8 +7,12 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\DSL\SQL\SQLWhereParser;
 use Cline\Ruler\DSL\SQL\SQLWhereSerializer;
+use Cline\Ruler\Operators\Comparison\Between;
+use Cline\Ruler\Operators\String\StartsWith;
+use Cline\Ruler\Variables\Variable;
 
 describe('SQLWhereSerializer', function (): void {
     describe('Happy Paths', function (): void {
@@ -352,7 +356,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('(age >= 18 AND country = \'US\') OR age >= 21');
+            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21");
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('(');
@@ -362,10 +366,25 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('country IN (\'US\', \'CA\')');
+            $rule = $parser->parse("country IN ('US', 'CA')");
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('IN');
+        });
+
+        test('serialize BETWEEN operator', function (): void {
+            $builder = new RuleBuilder();
+            $serializer = new SQLWhereSerializer();
+
+            $variable = new Variable('age');
+            $min = new Variable(null, 18);
+            $max = new Variable(null, 65);
+            $operator = new Between($variable, $min, $max);
+            $rule = $builder->create($operator);
+
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('BETWEEN');
         });
     });
 });

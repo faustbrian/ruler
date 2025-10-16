@@ -150,5 +150,41 @@ describe('WirefilterValidator', function (): void {
                 ->and($result->getErrors())->toHaveCount(1)
                 ->and($result->getFirstError())->toBe('Test error');
         });
+
+        test('validateWithErrors handles non-SyntaxError exceptions', function (): void {
+            // Create a validator with invalid input that triggers non-SyntaxError exception
+            $validator = new WirefilterValidator();
+
+            // Very long invalid expression might trigger different error types
+            $result = $validator->validateWithErrors('this is not valid wirefilter syntax at all');
+
+            expect($result->isValid())->toBeFalse()
+                ->and($result->getErrors())->not->toBeEmpty()
+                ->and($result->getFirstError())->not->toBeEmpty();
+        });
+
+        test('validateWithErrors provides context for syntax errors', function (): void {
+            $validator = new WirefilterValidator();
+
+            // Expression with error in the middle
+            $result = $validator->validateWithErrors('age >= 18 and country === invalid operator here');
+
+            expect($result->isValid())->toBeFalse()
+                ->and($result->getErrors())->not->toBeEmpty();
+
+            // Check if error details exist
+            $firstError = $result->getErrors()[0];
+            expect($firstError)->toHaveKey('message');
+        });
+
+        test('validateWithErrors handles errors without position info', function (): void {
+            $validator = new WirefilterValidator();
+
+            // Some errors might not have position information
+            $result = $validator->validateWithErrors('');
+
+            expect($result->isValid())->toBeFalse()
+                ->and($result->getErrors())->not->toBeEmpty();
+        });
     });
 });

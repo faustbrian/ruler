@@ -84,7 +84,6 @@ final readonly class JMESPathSerializer
         $reflection = new ReflectionClass($proposition);
         $expressionProperty = $reflection->getProperty('expression');
 
-        /** @var string $expression */
         return $expressionProperty->getValue($proposition);
     }
 }

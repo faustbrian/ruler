@@ -7,8 +7,12 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\DSL\Wirefilter\WirefilterParser;
 use Cline\Ruler\DSL\Wirefilter\WirefilterSerializer;
+use Cline\Ruler\Operators\String\StartsWith;
+use Cline\Ruler\Operators\String\StringContains;
+use Cline\Ruler\Variables\Variable;
 
 describe('WirefilterSerializer', function (): void {
     describe('Happy Paths', function (): void {
@@ -301,6 +305,37 @@ describe('WirefilterSerializer', function (): void {
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('!==');
+        });
+
+        test('serialize generic operator via registry lookup', function (): void {
+            // Test serializeGenericOperator path by using an operator not in explicit match
+            $builder = new RuleBuilder();
+            $serializer = new WirefilterSerializer();
+
+            // Create a rule using StartsWith which isn't in the explicit match cases
+            $variable = new Variable('name');
+            $value = new Variable(null, 'John');
+            $operator = new StartsWith($variable, $value);
+            $rule = $builder->create($operator);
+
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('startsWith');
+        });
+
+        test('serialize operator with getOperands method fallback', function (): void {
+            // Test getOperands fallback path with an operator that might use method instead of property
+            $builder = new RuleBuilder();
+            $serializer = new WirefilterSerializer();
+
+            $variable = new Variable('text');
+            $value = new Variable(null, 'test');
+            $operator = new StringContains($variable, $value);
+            $rule = $builder->create($operator);
+
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('stringContains');
         });
     });
 
