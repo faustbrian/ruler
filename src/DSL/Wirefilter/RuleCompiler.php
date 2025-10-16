@@ -385,14 +385,30 @@ final readonly class RuleCompiler
     private function compileArray(ArrayNode $node): BaseVariable
     {
         $elements = [];
+        $lastWasKey = false;
 
         foreach ($node->nodes as $elementNode) {
             assert($elementNode instanceof Node, 'ArrayNode elements must be Node instances');
 
             $compiled = $this->compileNode($elementNode);
 
-            // Extract raw values from Variables
-            $elements[] = $compiled instanceof BaseVariable ? $compiled->getValue() : $compiled;
+            // Extract raw value
+            $value = $compiled instanceof BaseVariable ? $compiled->getValue() : $compiled;
+
+            // Symfony ArrayNode alternates: key, value, key, value...
+            // For numeric-indexed arrays: 0, "first", 1, "second", ...
+            // We only want the values (odd indices)
+            if ($lastWasKey) {
+                $elements[] = $value;
+                $lastWasKey = false;
+            } else {
+                // This is a key - skip if it's an integer
+                if (!is_int($value)) {
+                    $elements[] = $value;
+                }
+
+                $lastWasKey = true;
+            }
         }
 
         return new BaseVariable(null, $elements);
