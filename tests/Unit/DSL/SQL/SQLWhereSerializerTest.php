@@ -347,5 +347,25 @@ describe('SQLWhereSerializer', function (): void {
 
             expect($serialized)->toBe($original);
         });
+
+        test('serialize nested proposition in operand', function (): void {
+            $parser = new SQLWhereParser();
+            $serializer = new SQLWhereSerializer();
+
+            $rule = $parser->parse('(age >= 18 AND country = \'US\') OR age >= 21');
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('(');
+        });
+
+        test('serialize array values', function (): void {
+            $parser = new SQLWhereParser();
+            $serializer = new SQLWhereSerializer();
+
+            $rule = $parser->parse('country IN (\'US\', \'CA\')');
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('IN');
+        });
     });
 });

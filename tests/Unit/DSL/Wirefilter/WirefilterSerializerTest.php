@@ -271,6 +271,37 @@ describe('WirefilterSerializer', function (): void {
 
             expect($result)->toBe('price > 99.99');
         });
+
+        test('serialize nested proposition in parentheses', function (): void {
+            $parser = new WirefilterParser();
+            $serializer = new WirefilterSerializer();
+
+            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21');
+            $result = $serializer->serialize($rule);
+
+            // Should preserve parentheses for AND inside OR
+            expect($result)->toContain('(');
+        });
+
+        test('serialize same as operator', function (): void {
+            $parser = new WirefilterParser();
+            $serializer = new WirefilterSerializer();
+
+            $rule = $parser->parse('value === 1');
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('===');
+        });
+
+        test('serialize not same as operator', function (): void {
+            $parser = new WirefilterParser();
+            $serializer = new WirefilterSerializer();
+
+            $rule = $parser->parse('value !== 1');
+            $result = $serializer->serialize($rule);
+
+            expect($result)->toContain('!==');
+        });
     });
 
     describe('Round-Trip Tests', function (): void {
