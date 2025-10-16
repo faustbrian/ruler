@@ -42,15 +42,18 @@ use Cline\Ruler\Variables\VariableOperand;
 use LogicException;
 use ReflectionClass;
 
+use function addslashes;
 use function array_map;
+use function array_values;
+use function count;
 use function implode;
+use function in_array;
 use function is_array;
 use function is_bool;
 use function is_null;
-use function is_numeric;
 use function is_string;
-use function json_encode;
 use function sprintf;
+use function throw_if;
 
 /**
  * Serializes Rule objects back to Wirefilter DSL expression strings.
@@ -100,7 +103,6 @@ final readonly class WirefilterSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -111,9 +113,8 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a Proposition to DSL syntax.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
-     * @return string The serialized expression
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized expression
      */
     private function serializeProposition(Proposition $proposition): string
     {
@@ -130,7 +131,6 @@ final readonly class WirefilterSerializer
             $proposition instanceof In => $this->serializeBinary($proposition, 'in'),
             $proposition instanceof NotIn => $this->serializeBinary($proposition, 'not in'),
             $proposition instanceof Between => $this->serializeFunction($proposition, 'between'),
-
             // Logical operators
             $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, 'and'),
             $proposition instanceof LogicalOr => $this->serializeLogical($proposition, 'or'),
@@ -138,10 +138,8 @@ final readonly class WirefilterSerializer
             $proposition instanceof LogicalNand => $this->serializeLogical($proposition, 'nand'),
             $proposition instanceof LogicalNor => $this->serializeLogical($proposition, 'nor'),
             $proposition instanceof LogicalNot => $this->serializeNot($proposition),
-
             // String operators
             $proposition instanceof Matches => $this->serializeBinary($proposition, 'matches'),
-
             default => $this->serializeGenericOperator($proposition),
         };
     }
@@ -149,18 +147,15 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a binary operator.
      *
-     * @param Proposition $proposition The proposition containing two operands
-     * @param string      $operator    The operator symbol or keyword
-     *
-     * @return string The serialized binary expression
+     * @param  Proposition $proposition The proposition containing two operands
+     * @param  string      $operator    The operator symbol or keyword
+     * @return string      The serialized binary expression
      */
     private function serializeBinary(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Binary operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
 
         $left = $this->serializeOperand($operands[0]);
         $right = $this->serializeOperand($operands[1]);
@@ -171,17 +166,16 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a logical operator (and, or, xor, etc.).
      *
-     * @param Proposition $proposition The logical proposition
-     * @param string      $operator    The logical operator keyword
-     *
-     * @return string The serialized logical expression
+     * @param  Proposition $proposition The logical proposition
+     * @param  string      $operator    The logical operator keyword
+     * @return string      The serialized logical expression
      */
     private function serializeLogical(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
         $serialized = array_map(
-            fn ($operand) => $operand instanceof Proposition
+            fn ($operand): string => $operand instanceof Proposition
                 ? $this->wrapIfNeeded($operand, $operator)
                 : $this->serializeOperand($operand),
             $operands,
@@ -193,17 +187,14 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a NOT operator.
      *
-     * @param LogicalNot $not The NOT proposition
-     *
-     * @return string The serialized NOT expression
+     * @param  LogicalNot $not The NOT proposition
+     * @return string     The serialized NOT expression
      */
     private function serializeNot(LogicalNot $not): string
     {
-        $operands = $this->getOperands($not);
+        $operands = self::getOperands($not);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('NOT operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
         $operand = $operands[0];
 
@@ -217,17 +208,16 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a function-style operator.
      *
-     * @param Proposition $proposition The proposition
-     * @param string      $function    The function name
-     *
-     * @return string The serialized function call
+     * @param  Proposition $proposition The proposition
+     * @param  string      $function    The function name
+     * @return string      The serialized function call
      */
     private function serializeFunction(Proposition $proposition, string $function): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
         $args = array_map(
-            fn ($operand) => $this->serializeOperand($operand),
+            fn ($operand): string => $this->serializeOperand($operand),
             $operands,
         );
 
@@ -237,9 +227,8 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a generic operator by looking up its DSL name.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
-     * @return string The serialized expression
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized expression
      */
     private function serializeGenericOperator(Proposition $proposition): string
     {
@@ -250,10 +239,10 @@ final readonly class WirefilterSerializer
         // Find the DSL name for this operator class
         foreach ($registry->all() as $dslName) {
             if ($registry->get($dslName) === $operatorClass) {
-                $operands = $this->getOperands($proposition);
+                $operands = self::getOperands($proposition);
 
                 $args = array_map(
-                    fn ($operand) => $this->serializeOperand($operand),
+                    fn ($operand): string => $this->serializeOperand($operand),
                     $operands,
                 );
 
@@ -267,8 +256,7 @@ final readonly class WirefilterSerializer
     /**
      * Serialize an operand (Variable, VariableOperand, or value).
      *
-     * @param mixed $operand The operand to serialize
-     *
+     * @param  mixed  $operand The operand to serialize
      * @return string The serialized operand
      */
     private function serializeOperand(mixed $operand): string
@@ -304,7 +292,7 @@ final readonly class WirefilterSerializer
         }
 
         if ($operand instanceof Negation) {
-            $innerOperands = $this->getOperands($operand);
+            $innerOperands = self::getOperands($operand);
 
             return sprintf('-%s', $this->serializeOperand($innerOperands[0]));
         }
@@ -321,17 +309,16 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a mathematical operator.
      *
-     * @param VariableOperand $math     The mathematical operator
-     * @param string          $operator The operator symbol
-     *
-     * @return string The serialized mathematical expression
+     * @param  VariableOperand $math     The mathematical operator
+     * @param  string          $operator The operator symbol
+     * @return string          The serialized mathematical expression
      */
     private function serializeMath(VariableOperand $math, string $operator): string
     {
-        $operands = $this->getOperands($math);
+        $operands = self::getOperands($math);
 
         $serialized = array_map(
-            fn ($operand) => $this->serializeOperand($operand),
+            fn ($operand): string => $this->serializeOperand($operand),
             $operands,
         );
 
@@ -341,9 +328,8 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a Variable.
      *
-     * @param Variable|BuilderVariable $variable The variable to serialize
-     *
-     * @return string The serialized variable name
+     * @param  BuilderVariable|Variable $variable The variable to serialize
+     * @return string                   The serialized variable name
      */
     private function serializeVariable(Variable|BuilderVariable $variable): string
     {
@@ -374,8 +360,7 @@ final readonly class WirefilterSerializer
     /**
      * Serialize a raw value (string, number, boolean, null, array).
      *
-     * @param mixed $value The value to serialize
-     *
+     * @param  mixed  $value The value to serialize
      * @return string The serialized value
      */
     private function serializeValue(mixed $value): string
@@ -388,21 +373,17 @@ final readonly class WirefilterSerializer
             return $value ? 'true' : 'false';
         }
 
-        if (is_null($value)) {
+        if (null === $value) {
             return 'null';
         }
 
         if (is_array($value)) {
             $elements = array_map(
-                fn ($item) => $this->serializeValue($item),
+                fn ($item): string => $this->serializeValue($item),
                 array_values($value), // Re-index to remove keys
             );
 
             return sprintf('[%s]', implode(', ', $elements));
-        }
-
-        if (is_numeric($value)) {
-            return (string) $value;
         }
 
         // Fallback for objects or other types
@@ -412,10 +393,9 @@ final readonly class WirefilterSerializer
     /**
      * Wrap expression in parentheses if needed based on operator precedence.
      *
-     * @param Proposition $proposition The proposition to potentially wrap
-     * @param string      $parentOp    The parent operator
-     *
-     * @return string The wrapped or unwrapped expression
+     * @param  Proposition $proposition The proposition to potentially wrap
+     * @param  string      $parentOp    The parent operator
+     * @return string      The wrapped or unwrapped expression
      */
     private function wrapIfNeeded(Proposition $proposition, string $parentOp): string
     {
@@ -438,18 +418,16 @@ final readonly class WirefilterSerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

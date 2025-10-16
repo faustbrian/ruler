@@ -71,9 +71,8 @@ final readonly class SQLWhereValidator
      * Performs quick validation by attempting to parse the expression.
      * Returns true if the expression is syntactically valid, false otherwise.
      *
-     * @param string $expression The SQL WHERE clause expression to validate
-     *
-     * @return bool True if the expression is valid, false otherwise
+     * @param  string $expression The SQL WHERE clause expression to validate
+     * @return bool   True if the expression is valid, false otherwise
      */
     public function validate(string $expression): bool
     {
@@ -87,8 +86,7 @@ final readonly class SQLWhereValidator
      * errors. Returns a ValidationResult with structured error information
      * including error messages and positions when available.
      *
-     * @param string $expression The SQL WHERE clause expression to validate
-     *
+     * @param  string           $expression The SQL WHERE clause expression to validate
      * @return ValidationResult Structured validation result with error details
      */
     public function validateWithErrors(string $expression): ValidationResult
@@ -97,9 +95,9 @@ final readonly class SQLWhereValidator
             $this->builder->parse($expression);
 
             return ValidationResult::success();
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $errors = [[
-                'message' => $e->getMessage(),
+                'message' => $throwable->getMessage(),
             ]];
 
             return ValidationResult::failure($errors);

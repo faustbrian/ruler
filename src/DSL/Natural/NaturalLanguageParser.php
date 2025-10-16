@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\Natural;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use InvalidArgumentException;
 
 /**
  * Public facade for parsing Natural Language DSL expressions into Rules.
@@ -70,7 +71,7 @@ final readonly class NaturalLanguageParser
      *
      * @param string $expression The Natural Language DSL expression to parse
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws InvalidArgumentException When expression cannot be parsed
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -90,7 +91,7 @@ final readonly class NaturalLanguageParser
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws InvalidArgumentException When expression cannot be parsed
      *
      * @return Rule The compiled Rule with attached action callback
      */

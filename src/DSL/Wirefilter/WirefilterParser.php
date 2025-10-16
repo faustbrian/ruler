@@ -11,6 +11,8 @@ namespace Cline\Ruler\DSL\Wirefilter;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use LogicException;
+use Symfony\Component\ExpressionLanguage\SyntaxError;
 
 /**
  * Public facade for parsing Wirefilter DSL expressions into Rules.
@@ -68,8 +70,8 @@ final readonly class WirefilterParser
      *
      * @param string $expression The Wirefilter DSL expression to parse
      *
-     * @throws \LogicException When compilation fails
-     * @throws \Symfony\Component\ExpressionLanguage\SyntaxError When expression syntax is invalid
+     * @throws LogicException When compilation fails
+     * @throws SyntaxError    When expression syntax is invalid
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -89,8 +91,8 @@ final readonly class WirefilterParser
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \LogicException When compilation fails
-     * @throws \Symfony\Component\ExpressionLanguage\SyntaxError When expression syntax is invalid
+     * @throws LogicException When compilation fails
+     * @throws SyntaxError    When expression syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */

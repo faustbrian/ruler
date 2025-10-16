@@ -39,16 +39,16 @@ use Cline\Ruler\Variables\Variable;
 use LogicException;
 use ReflectionClass;
 
+use function array_key_exists;
+use function array_key_first;
 use function array_map;
-use function array_merge;
 use function count;
-use function is_array;
-use function is_bool;
-use function is_null;
-use function is_numeric;
 use function is_string;
+use function mb_trim;
 use function sprintf;
-use function trim;
+use function str_ends_with;
+use function str_starts_with;
+use function throw_if;
 
 /**
  * Serializes Rule objects back to GraphQL Filter DSL syntax.
@@ -98,7 +98,6 @@ final readonly class GraphQLFilterSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -109,8 +108,7 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a Proposition to GraphQL filter syntax.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
+     * @param  Proposition          $proposition The proposition to serialize
      * @return array<string, mixed> The serialized filter
      */
     private function serializeProposition(Proposition $proposition): array
@@ -120,35 +118,30 @@ final readonly class GraphQLFilterSerializer
             $proposition instanceof LogicalAnd => $this->serializeAnd($proposition),
             $proposition instanceof LogicalOr => $this->serializeOr($proposition),
             $proposition instanceof LogicalNot => $this->serializeNot($proposition),
-
             // Comparison operators
-            $proposition instanceof EqualTo => $this->serializeComparison($proposition, 'eq'),
-            $proposition instanceof NotEqualTo => $this->serializeComparison($proposition, 'ne'),
-            $proposition instanceof GreaterThan => $this->serializeComparison($proposition, 'gt'),
-            $proposition instanceof GreaterThanOrEqualTo => $this->serializeComparison($proposition, 'gte'),
-            $proposition instanceof LessThan => $this->serializeComparison($proposition, 'lt'),
-            $proposition instanceof LessThanOrEqualTo => $this->serializeComparison($proposition, 'lte'),
-
+            $proposition instanceof EqualTo => self::serializeComparison($proposition, 'eq'),
+            $proposition instanceof NotEqualTo => self::serializeComparison($proposition, 'ne'),
+            $proposition instanceof GreaterThan => self::serializeComparison($proposition, 'gt'),
+            $proposition instanceof GreaterThanOrEqualTo => self::serializeComparison($proposition, 'gte'),
+            $proposition instanceof LessThan => self::serializeComparison($proposition, 'lt'),
+            $proposition instanceof LessThanOrEqualTo => self::serializeComparison($proposition, 'lte'),
             // List operators
-            $proposition instanceof In => $this->serializeList($proposition, 'in'),
-            $proposition instanceof NotIn => $this->serializeList($proposition, 'notIn'),
-
+            $proposition instanceof In => self::serializeList($proposition, 'in'),
+            $proposition instanceof NotIn => self::serializeList($proposition, 'notIn'),
             // String operators
-            $proposition instanceof StringContains => $this->serializeString($proposition, 'contains'),
-            $proposition instanceof StringContainsInsensitive => $this->serializeString($proposition, 'containsInsensitive'),
-            $proposition instanceof StringDoesNotContain => $this->serializeString($proposition, 'notContains'),
-            $proposition instanceof StringDoesNotContainInsensitive => $this->serializeString($proposition, 'notContainsInsensitive'),
-            $proposition instanceof StartsWith => $this->serializeString($proposition, 'startsWith'),
-            $proposition instanceof EndsWith => $this->serializeString($proposition, 'endsWith'),
-            $proposition instanceof Matches => $this->serializeMatches($proposition),
-
+            $proposition instanceof StringContains => self::serializeString($proposition, 'contains'),
+            $proposition instanceof StringContainsInsensitive => self::serializeString($proposition, 'containsInsensitive'),
+            $proposition instanceof StringDoesNotContain => self::serializeString($proposition, 'notContains'),
+            $proposition instanceof StringDoesNotContainInsensitive => self::serializeString($proposition, 'notContainsInsensitive'),
+            $proposition instanceof StartsWith => self::serializeString($proposition, 'startsWith'),
+            $proposition instanceof EndsWith => self::serializeString($proposition, 'endsWith'),
+            $proposition instanceof Matches => self::serializeMatches($proposition),
             // Type operators
-            $proposition instanceof IsNull => $this->serializeNull($proposition),
-            $proposition instanceof IsString => $this->serializeType($proposition, 'string'),
-            $proposition instanceof IsNumeric => $this->serializeType($proposition, 'numeric'),
-            $proposition instanceof IsBoolean => $this->serializeType($proposition, 'boolean'),
-            $proposition instanceof IsArray => $this->serializeType($proposition, 'array'),
-
+            $proposition instanceof IsNull => self::serializeNull($proposition),
+            $proposition instanceof IsString => self::serializeType($proposition, 'string'),
+            $proposition instanceof IsNumeric => self::serializeType($proposition, 'numeric'),
+            $proposition instanceof IsBoolean => self::serializeType($proposition, 'boolean'),
+            $proposition instanceof IsArray => self::serializeType($proposition, 'array'),
             default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
         };
     }
@@ -156,13 +149,12 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize an AND logical operator.
      *
-     * @param LogicalAnd $and The AND proposition
-     *
+     * @param  LogicalAnd           $and The AND proposition
      * @return array<string, mixed> The serialized filter
      */
     private function serializeAnd(LogicalAnd $and): array
     {
-        $operands = $this->getOperands($and);
+        $operands = self::getOperands($and);
 
         // Check if all operands are field comparisons (can be implicit AND)
         $canBeImplicit = true;
@@ -178,7 +170,7 @@ final readonly class GraphQLFilterSerializer
             $serialized = $this->serializeProposition($operand);
 
             // Check if it's a simple field condition (single key-value)
-            if (count($serialized) === 1 && !isset($serialized['AND']) && !isset($serialized['OR']) && !isset($serialized['NOT'])) {
+            if (count($serialized) === 1 && !array_key_exists('AND', $serialized) && !array_key_exists('OR', $serialized) && !array_key_exists('NOT', $serialized)) {
                 $fieldName = array_key_first($serialized);
                 $fields[$fieldName] = $serialized[$fieldName];
             } else {
@@ -189,13 +181,13 @@ final readonly class GraphQLFilterSerializer
         }
 
         // If can be implicit, return merged fields
-        if ($canBeImplicit && count($fields) > 0) {
+        if ($canBeImplicit && $fields !== []) {
             return $fields;
         }
 
         // Otherwise, use explicit AND
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -205,16 +197,15 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize an OR logical operator.
      *
-     * @param LogicalOr $or The OR proposition
-     *
+     * @param  LogicalOr            $or The OR proposition
      * @return array<string, mixed> The serialized filter
      */
     private function serializeOr(LogicalOr $or): array
     {
-        $operands = $this->getOperands($or);
+        $operands = self::getOperands($or);
 
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -224,17 +215,14 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a NOT logical operator.
      *
-     * @param LogicalNot $not The NOT proposition
-     *
+     * @param  LogicalNot           $not The NOT proposition
      * @return array<string, mixed> The serialized filter
      */
     private function serializeNot(LogicalNot $not): array
     {
-        $operands = $this->getOperands($not);
+        $operands = self::getOperands($not);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('NOT operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
         return ['NOT' => $this->serializeProposition($operands[0])];
     }
@@ -242,21 +230,18 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a comparison operator.
      *
-     * @param Proposition $proposition The comparison proposition
-     * @param string      $operator    The GraphQL operator name
-     *
+     * @param  Proposition          $proposition The comparison proposition
+     * @param  string               $operator    The GraphQL operator name
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeComparison(Proposition $proposition, string $operator): array
+    private static function serializeComparison(Proposition $proposition, string $operator): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Comparison operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
 
-        $fieldName = $this->extractFieldName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $fieldName = self::extractFieldName($operands[0]);
+        $value = self::extractValue($operands[1]);
 
         return [$fieldName => [$operator => $value]];
     }
@@ -264,21 +249,18 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a list operator (in, notIn).
      *
-     * @param Proposition $proposition The list proposition
-     * @param string      $operator    The GraphQL operator name
-     *
+     * @param  Proposition          $proposition The list proposition
+     * @param  string               $operator    The GraphQL operator name
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeList(Proposition $proposition, string $operator): array
+    private static function serializeList(Proposition $proposition, string $operator): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('List operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('List operator %s requires exactly 2 operands', $operator));
 
-        $fieldName = $this->extractFieldName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $fieldName = self::extractFieldName($operands[0]);
+        $value = self::extractValue($operands[1]);
 
         return [$fieldName => [$operator => $value]];
     }
@@ -286,21 +268,18 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a string operator.
      *
-     * @param Proposition $proposition The string proposition
-     * @param string      $operator    The GraphQL operator name
-     *
+     * @param  Proposition          $proposition The string proposition
+     * @param  string               $operator    The GraphQL operator name
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeString(Proposition $proposition, string $operator): array
+    private static function serializeString(Proposition $proposition, string $operator): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('String operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operator %s requires exactly 2 operands', $operator));
 
-        $fieldName = $this->extractFieldName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $fieldName = self::extractFieldName($operands[0]);
+        $value = self::extractValue($operands[1]);
 
         return [$fieldName => [$operator => $value]];
     }
@@ -308,24 +287,21 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a matches (regex) operator.
      *
-     * @param Matches $matches The matches proposition
-     *
+     * @param  Matches              $matches The matches proposition
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeMatches(Matches $matches): array
+    private static function serializeMatches(Matches $matches): array
     {
-        $operands = $this->getOperands($matches);
+        $operands = self::getOperands($matches);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('Matches operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
 
-        $fieldName = $this->extractFieldName($operands[0]);
-        $pattern = $this->extractValue($operands[1]);
+        $fieldName = self::extractFieldName($operands[0]);
+        $pattern = self::extractValue($operands[1]);
 
         // Remove regex delimiters if present
         if (is_string($pattern) && str_starts_with($pattern, '/') && str_ends_with($pattern, '/')) {
-            $pattern = trim($pattern, '/');
+            $pattern = mb_trim($pattern, '/');
         }
 
         return [$fieldName => ['match' => $pattern]];
@@ -334,19 +310,16 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a null check operator.
      *
-     * @param IsNull $isNull The null check proposition
-     *
+     * @param  IsNull               $isNull The null check proposition
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeNull(IsNull $isNull): array
+    private static function serializeNull(IsNull $isNull): array
     {
-        $operands = $this->getOperands($isNull);
+        $operands = self::getOperands($isNull);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('IsNull operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
 
-        $fieldName = $this->extractFieldName($operands[0]);
+        $fieldName = self::extractFieldName($operands[0]);
 
         return [$fieldName => ['isNull' => true]];
     }
@@ -354,20 +327,17 @@ final readonly class GraphQLFilterSerializer
     /**
      * Serialize a type validation operator.
      *
-     * @param Proposition $proposition The type proposition
-     * @param string      $typeName    The type name
-     *
+     * @param  Proposition          $proposition The type proposition
+     * @param  string               $typeName    The type name
      * @return array<string, mixed> The serialized filter
      */
-    private function serializeType(Proposition $proposition, string $typeName): array
+    private static function serializeType(Proposition $proposition, string $typeName): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 1) {
-            throw new LogicException(sprintf('Type operator %s requires exactly 1 operand', $typeName));
-        }
+        throw_if(count($operands) !== 1, LogicException::class, sprintf('Type operator %s requires exactly 1 operand', $typeName));
 
-        $fieldName = $this->extractFieldName($operands[0]);
+        $fieldName = self::extractFieldName($operands[0]);
 
         return [$fieldName => ['type' => $typeName]];
     }
@@ -375,18 +345,15 @@ final readonly class GraphQLFilterSerializer
     /**
      * Extract field name from a Variable operand.
      *
-     * @param mixed $operand The operand to extract field name from
-     *
+     * @param  mixed  $operand The operand to extract field name from
      * @return string The field name
      */
-    private function extractFieldName(mixed $operand): string
+    private static function extractFieldName(mixed $operand): string
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
-            if ($name === null) {
-                throw new LogicException('Variable must have a name');
-            }
+            throw_if($name === null, LogicException::class, 'Variable must have a name');
 
             return $name;
         }
@@ -397,11 +364,10 @@ final readonly class GraphQLFilterSerializer
     /**
      * Extract value from a Variable operand.
      *
-     * @param mixed $operand The operand to extract value from
-     *
+     * @param  mixed $operand The operand to extract value from
      * @return mixed The extracted value
      */
-    private function extractValue(mixed $operand): mixed
+    private static function extractValue(mixed $operand): mixed
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             return $operand->getValue();
@@ -413,18 +379,16 @@ final readonly class GraphQLFilterSerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

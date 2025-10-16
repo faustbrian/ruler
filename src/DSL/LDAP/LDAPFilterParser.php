@@ -11,6 +11,8 @@ namespace Cline\Ruler\DSL\LDAP;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use LogicException;
+use RuntimeException;
 
 /**
  * Public facade for parsing LDAP Filter DSL expressions into Rules.
@@ -74,8 +76,8 @@ final readonly class LDAPFilterParser
      *
      * @param string $expression The LDAP filter expression to parse (e.g., '(&(age>=18)(country=US))')
      *
-     * @throws \LogicException When compilation fails
-     * @throws \RuntimeException When filter syntax is invalid
+     * @throws LogicException   When compilation fails
+     * @throws RuntimeException When filter syntax is invalid
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -95,8 +97,8 @@ final readonly class LDAPFilterParser
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \LogicException When compilation fails
-     * @throws \RuntimeException When filter syntax is invalid
+     * @throws LogicException   When compilation fails
+     * @throws RuntimeException When filter syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */

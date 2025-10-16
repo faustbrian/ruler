@@ -57,12 +57,14 @@ use ReflectionClass;
 use const JSON_THROW_ON_ERROR;
 
 use function array_map;
-use function is_bool;
+use function count;
+use function get_debug_type;
 use function is_null;
-use function is_numeric;
 use function is_string;
 use function json_encode;
+use function preg_match;
 use function sprintf;
+use function throw_if;
 
 /**
  * Serializes Rule objects back to MongoDB Query DSL documents.
@@ -111,7 +113,6 @@ final readonly class MongoQuerySerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -137,7 +138,6 @@ final readonly class MongoQuerySerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -148,20 +148,19 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a Proposition to MongoDB query document structure.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
+     * @param  Proposition          $proposition The proposition to serialize
      * @return array<string, mixed> The serialized query document fragment
      */
     private function serializeProposition(Proposition $proposition): array
     {
         // Special case: LogicalNot(EqualTo(field, null)) => {field: {$exists: true}}
         if ($proposition instanceof LogicalNot) {
-            $operands = $this->getOperands($proposition);
+            $operands = self::getOperands($proposition);
 
             if (count($operands) === 1 && $operands[0] instanceof EqualTo) {
-                $eqOperands = $this->getOperands($operands[0]);
+                $eqOperands = self::getOperands($operands[0]);
 
-                if (count($eqOperands) === 2 && is_null($this->extractValue($eqOperands[1]))) {
+                if (count($eqOperands) === 2 && null === self::extractValue($eqOperands[1])) {
                     $field = $this->extractFieldName($eqOperands[0]);
 
                     return [$field => ['$exists' => true]];
@@ -177,7 +176,6 @@ final readonly class MongoQuerySerializer
             $proposition instanceof LogicalNot => $this->serializeNot($proposition),
             $proposition instanceof LogicalXor => $this->serializeXor($proposition),
             $proposition instanceof LogicalNand => $this->serializeNand($proposition),
-
             // Comparison operators
             $proposition instanceof EqualTo => $this->serializeEqualTo($proposition),
             $proposition instanceof NotEqualTo => $this->serializeFieldOperator($proposition, '$ne'),
@@ -190,7 +188,6 @@ final readonly class MongoQuerySerializer
             $proposition instanceof In => $this->serializeFieldOperator($proposition, '$in'),
             $proposition instanceof NotIn => $this->serializeFieldOperator($proposition, '$nin'),
             $proposition instanceof Between => $this->serializeBetween($proposition),
-
             // String operators
             $proposition instanceof Matches => $this->serializeRegex($proposition),
             $proposition instanceof DoesNotMatch => $this->serializeFieldOperator($proposition, '$notRegex'),
@@ -202,12 +199,10 @@ final readonly class MongoQuerySerializer
             $proposition instanceof StringContainsInsensitive => $this->serializeFieldOperator($proposition, '$containsi'),
             $proposition instanceof StringDoesNotContain => $this->serializeFieldOperator($proposition, '$notContains'),
             $proposition instanceof StringDoesNotContainInsensitive => $this->serializeFieldOperator($proposition, '$notContainsi'),
-
             // Date operators
             $proposition instanceof After => $this->serializeFieldOperator($proposition, '$after'),
             $proposition instanceof Before => $this->serializeFieldOperator($proposition, '$before'),
             $proposition instanceof IsBetweenDates => $this->serializeBetweenDates($proposition),
-
             // Type operators
             $proposition instanceof IsNull => $this->serializeIsNull($proposition),
             $proposition instanceof IsArray => $this->serializeTypeCheck($proposition, 'array'),
@@ -215,7 +210,6 @@ final readonly class MongoQuerySerializer
             $proposition instanceof IsNumeric => $this->serializeTypeCheck($proposition, 'number'),
             $proposition instanceof IsString => $this->serializeTypeCheck($proposition, 'string'),
             $proposition instanceof IsEmpty => $this->serializeEmpty($proposition),
-
             default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
         };
     }
@@ -223,15 +217,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalAnd to $and operator.
      *
-     * @param LogicalAnd $and The AND proposition
-     *
+     * @param  LogicalAnd           $and The AND proposition
      * @return array<string, mixed> The $and query fragment
      */
     private function serializeAnd(LogicalAnd $and): array
     {
-        $operands = $this->getOperands($and);
+        $operands = self::getOperands($and);
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -241,15 +234,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalOr to $or operator.
      *
-     * @param LogicalOr $or The OR proposition
-     *
+     * @param  LogicalOr            $or The OR proposition
      * @return array<string, mixed> The $or query fragment
      */
     private function serializeOr(LogicalOr $or): array
     {
-        $operands = $this->getOperands($or);
+        $operands = self::getOperands($or);
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -259,15 +251,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalNor to $nor operator.
      *
-     * @param LogicalNor $nor The NOR proposition
-     *
+     * @param  LogicalNor           $nor The NOR proposition
      * @return array<string, mixed> The $nor query fragment
      */
     private function serializeNor(LogicalNor $nor): array
     {
-        $operands = $this->getOperands($nor);
+        $operands = self::getOperands($nor);
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -277,17 +268,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalNot to $not operator.
      *
-     * @param LogicalNot $not The NOT proposition
-     *
+     * @param  LogicalNot           $not The NOT proposition
      * @return array<string, mixed> The $not query fragment
      */
     private function serializeNot(LogicalNot $not): array
     {
-        $operands = $this->getOperands($not);
+        $operands = self::getOperands($not);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('NOT operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
         return ['$not' => $this->serializeProposition($operands[0])];
     }
@@ -295,15 +283,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalXor to $xor operator.
      *
-     * @param LogicalXor $xor The XOR proposition
-     *
+     * @param  LogicalXor           $xor The XOR proposition
      * @return array<string, mixed> The $xor query fragment
      */
     private function serializeXor(LogicalXor $xor): array
     {
-        $operands = $this->getOperands($xor);
+        $operands = self::getOperands($xor);
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -313,15 +300,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a LogicalNand to $nand operator.
      *
-     * @param LogicalNand $nand The NAND proposition
-     *
+     * @param  LogicalNand          $nand The NAND proposition
      * @return array<string, mixed> The $nand query fragment
      */
     private function serializeNand(LogicalNand $nand): array
     {
-        $operands = $this->getOperands($nand);
+        $operands = self::getOperands($nand);
         $conditions = array_map(
-            fn ($operand) => $this->serializeProposition($operand),
+            fn ($operand): array => $this->serializeProposition($operand),
             $operands,
         );
 
@@ -333,23 +319,20 @@ final readonly class MongoQuerySerializer
      *
      * Handles special case of null comparison for $exists: false.
      *
-     * @param EqualTo $equalTo The EqualTo proposition
-     *
+     * @param  EqualTo              $equalTo The EqualTo proposition
      * @return array<string, mixed> The field query fragment
      */
     private function serializeEqualTo(EqualTo $equalTo): array
     {
-        $operands = $this->getOperands($equalTo);
+        $operands = self::getOperands($equalTo);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('EqualTo operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'EqualTo operator requires exactly 2 operands');
 
         $field = $this->extractFieldName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $value = self::extractValue($operands[1]);
 
         // Special case: {field: {$eq: null}} => {field: {$exists: false}}
-        if (is_null($value)) {
+        if (null === $value) {
             return [$field => ['$exists' => false]];
         }
 
@@ -360,21 +343,18 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a field-based operator.
      *
-     * @param Proposition $proposition The proposition
-     * @param string      $operator    The MongoDB operator
-     *
+     * @param  Proposition          $proposition The proposition
+     * @param  string               $operator    The MongoDB operator
      * @return array<string, mixed> The field query fragment
      */
     private function serializeFieldOperator(Proposition $proposition, string $operator): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Binary operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
 
         $field = $this->extractFieldName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $value = self::extractValue($operands[1]);
 
         return [$field => [$operator => $value]];
     }
@@ -382,21 +362,18 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a Between operator to $between.
      *
-     * @param Between $between The Between proposition
-     *
+     * @param  Between              $between The Between proposition
      * @return array<string, mixed> The $between query fragment
      */
     private function serializeBetween(Between $between): array
     {
-        $operands = $this->getOperands($between);
+        $operands = self::getOperands($between);
 
-        if (count($operands) !== 3) {
-            throw new LogicException('Between operator requires exactly 3 operands');
-        }
+        throw_if(count($operands) !== 3, LogicException::class, 'Between operator requires exactly 3 operands');
 
         $field = $this->extractFieldName($operands[0]);
-        $min = $this->extractValue($operands[1]);
-        $max = $this->extractValue($operands[2]);
+        $min = self::extractValue($operands[1]);
+        $max = self::extractValue($operands[2]);
 
         return [$field => ['$between' => [$min, $max]]];
     }
@@ -404,21 +381,18 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize an IsBetweenDates operator to $betweenDates.
      *
-     * @param IsBetweenDates $betweenDates The IsBetweenDates proposition
-     *
+     * @param  IsBetweenDates       $betweenDates The IsBetweenDates proposition
      * @return array<string, mixed> The $betweenDates query fragment
      */
     private function serializeBetweenDates(IsBetweenDates $betweenDates): array
     {
-        $operands = $this->getOperands($betweenDates);
+        $operands = self::getOperands($betweenDates);
 
-        if (count($operands) !== 3) {
-            throw new LogicException('BetweenDates operator requires exactly 3 operands');
-        }
+        throw_if(count($operands) !== 3, LogicException::class, 'BetweenDates operator requires exactly 3 operands');
 
         $field = $this->extractFieldName($operands[0]);
-        $start = $this->extractValue($operands[1]);
-        $end = $this->extractValue($operands[2]);
+        $start = self::extractValue($operands[1]);
+        $end = self::extractValue($operands[2]);
 
         return [$field => ['$betweenDates' => [$start, $end]]];
     }
@@ -426,20 +400,17 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a Matches operator to $regex.
      *
-     * @param Matches $matches The Matches proposition
-     *
+     * @param  Matches              $matches The Matches proposition
      * @return array<string, mixed> The $regex query fragment
      */
     private function serializeRegex(Matches $matches): array
     {
-        $operands = $this->getOperands($matches);
+        $operands = self::getOperands($matches);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('Matches operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
 
         $field = $this->extractFieldName($operands[0]);
-        $pattern = $this->extractValue($operands[1]);
+        $pattern = self::extractValue($operands[1]);
 
         // Extract pattern and flags from PHP regex format
         if (is_string($pattern) && preg_match('#^/(.+)/([imsux]*)$#', $pattern, $matches)) {
@@ -461,17 +432,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize an IsNull operator to $exists: false.
      *
-     * @param IsNull $isNull The IsNull proposition
-     *
+     * @param  IsNull               $isNull The IsNull proposition
      * @return array<string, mixed> The $exists query fragment
      */
     private function serializeIsNull(IsNull $isNull): array
     {
-        $operands = $this->getOperands($isNull);
+        $operands = self::getOperands($isNull);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('IsNull operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -481,17 +449,14 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize an IsEmpty operator to $empty.
      *
-     * @param IsEmpty $isEmpty The IsEmpty proposition
-     *
+     * @param  IsEmpty              $isEmpty The IsEmpty proposition
      * @return array<string, mixed> The $empty query fragment
      */
     private function serializeEmpty(IsEmpty $isEmpty): array
     {
-        $operands = $this->getOperands($isEmpty);
+        $operands = self::getOperands($isEmpty);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('IsEmpty operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'IsEmpty operator requires exactly 1 operand');
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -501,18 +466,15 @@ final readonly class MongoQuerySerializer
     /**
      * Serialize a type check operator to $type.
      *
-     * @param Proposition $proposition The type check proposition
-     * @param string      $typeName    The MongoDB type name
-     *
+     * @param  Proposition          $proposition The type check proposition
+     * @param  string               $typeName    The MongoDB type name
      * @return array<string, mixed> The $type query fragment
      */
     private function serializeTypeCheck(Proposition $proposition, string $typeName): array
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('Type check operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'Type check operator requires exactly 1 operand');
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -522,8 +484,7 @@ final readonly class MongoQuerySerializer
     /**
      * Extract field name from a Variable.
      *
-     * @param mixed $operand The operand (should be a Variable)
-     *
+     * @param  mixed  $operand The operand (should be a Variable)
      * @return string The field name
      */
     private function extractFieldName(mixed $operand): string
@@ -531,22 +492,20 @@ final readonly class MongoQuerySerializer
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
-            if ($name === null) {
-                throw new LogicException('Variable must have a name to serialize as field');
-            }
+            throw_if($name === null, LogicException::class, 'Variable must have a name to serialize as field');
 
             return $name;
         }
 
         // Handle special cases like StringLength, ArrayCount
         if ($operand instanceof StringLength) {
-            $innerOperands = $this->getOperands($operand);
+            $innerOperands = self::getOperands($operand);
 
             return $this->extractFieldName($innerOperands[0]);
         }
 
         if ($operand instanceof ArrayCount) {
-            $innerOperands = $this->getOperands($operand);
+            $innerOperands = self::getOperands($operand);
 
             return $this->extractFieldName($innerOperands[0]);
         }
@@ -557,11 +516,10 @@ final readonly class MongoQuerySerializer
     /**
      * Extract value from a Variable or literal.
      *
-     * @param mixed $operand The operand
-     *
+     * @param  mixed $operand The operand
      * @return mixed The extracted value
      */
-    private function extractValue(mixed $operand): mixed
+    private static function extractValue(mixed $operand): mixed
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             return $operand->getValue();
@@ -573,18 +531,16 @@ final readonly class MongoQuerySerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

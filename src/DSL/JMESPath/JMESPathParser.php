@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\JMESPath;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Exception;
 
 /**
  * Public facade for parsing JMESPath filter expressions into Rules.
@@ -68,7 +69,7 @@ final readonly class JMESPathParser
      *
      * @param string $expression The JMESPath filter expression to parse
      *
-     * @throws \Exception When expression evaluation fails
+     * @throws Exception When expression evaluation fails
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -88,7 +89,7 @@ final readonly class JMESPathParser
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \Exception When expression evaluation fails
+     * @throws Exception When expression evaluation fails
      *
      * @return Rule The compiled Rule with attached action callback
      */

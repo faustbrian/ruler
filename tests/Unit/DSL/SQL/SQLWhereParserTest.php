@@ -257,28 +257,28 @@ describe('SQLWhereParser', function (): void {
         test('throws exception for invalid syntax', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn () => $parser->parse('age > >'))
+            expect(fn (): Rule => $parser->parse('age > >'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for incomplete expression', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn () => $parser->parse('age >'))
+            expect(fn (): Rule => $parser->parse('age >'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for missing operand', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn () => $parser->parse('AND age > 18'))
+            expect(fn (): Rule => $parser->parse('AND age > 18'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for unmatched parentheses', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn () => $parser->parse('(age > 18'))
+            expect(fn (): Rule => $parser->parse('(age > 18'))
                 ->toThrow(InvalidArgumentException::class);
         });
     });

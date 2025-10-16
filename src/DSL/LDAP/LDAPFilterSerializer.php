@@ -26,6 +26,8 @@ use LogicException;
 use ReflectionClass;
 
 use function array_map;
+use function count;
+use function gettype;
 use function implode;
 use function is_bool;
 use function is_null;
@@ -34,6 +36,8 @@ use function is_string;
 use function preg_match;
 use function sprintf;
 use function str_replace;
+use function throw_if;
+use function throw_unless;
 
 /**
  * Serializes Rule objects back to LDAP Filter DSL expression strings.
@@ -90,7 +94,6 @@ final readonly class LDAPFilterSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -101,9 +104,8 @@ final readonly class LDAPFilterSerializer
     /**
      * Serialize a Proposition to LDAP filter syntax.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
-     * @return string The serialized LDAP filter expression
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized LDAP filter expression
      */
     private function serializeProposition(Proposition $proposition): string
     {
@@ -112,17 +114,14 @@ final readonly class LDAPFilterSerializer
             $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, '&'),
             $proposition instanceof LogicalOr => $this->serializeLogical($proposition, '|'),
             $proposition instanceof LogicalNot => $this->serializeNot($proposition),
-
             // Comparison operators
-            $proposition instanceof EqualTo => $this->serializeComparison($proposition, '='),
-            $proposition instanceof GreaterThanOrEqualTo => $this->serializeComparison($proposition, '>='),
-            $proposition instanceof LessThanOrEqualTo => $this->serializeComparison($proposition, '<='),
-            $proposition instanceof GreaterThan => $this->serializeComparison($proposition, '>'),
-            $proposition instanceof LessThan => $this->serializeComparison($proposition, '<'),
-
+            $proposition instanceof EqualTo => self::serializeComparison($proposition, '='),
+            $proposition instanceof GreaterThanOrEqualTo => self::serializeComparison($proposition, '>='),
+            $proposition instanceof LessThanOrEqualTo => self::serializeComparison($proposition, '<='),
+            $proposition instanceof GreaterThan => self::serializeComparison($proposition, '>'),
+            $proposition instanceof LessThan => self::serializeComparison($proposition, '<'),
             // String operators (wildcard and approximate)
-            $proposition instanceof Matches => $this->serializeMatches($proposition),
-
+            $proposition instanceof Matches => self::serializeMatches($proposition),
             default => throw new LogicException(sprintf('Unsupported operator for LDAP serialization: %s', $proposition::class)),
         };
     }
@@ -132,17 +131,16 @@ final readonly class LDAPFilterSerializer
      *
      * Format: (&(condition1)(condition2)...) or (|(condition1)(condition2)...)
      *
-     * @param Proposition $proposition The logical proposition
-     * @param string      $operator    The logical operator symbol (& or |)
-     *
-     * @return string The serialized logical expression
+     * @param  Proposition $proposition The logical proposition
+     * @param  string      $operator    The logical operator symbol (& or |)
+     * @return string      The serialized logical expression
      */
     private function serializeLogical(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
         $serialized = array_map(
-            fn ($operand) => $operand instanceof Proposition
+            fn ($operand): string => $operand instanceof Proposition
                 ? $this->serializeProposition($operand)
                 : throw new LogicException('LDAP logical operators require Proposition operands'),
             $operands,
@@ -157,30 +155,27 @@ final readonly class LDAPFilterSerializer
      * Format: (!(condition))
      * Special case: NOT(field=null) → (field=*) for presence checks
      *
-     * @param LogicalNot $not The NOT proposition
-     *
-     * @return string The serialized NOT expression
+     * @param  LogicalNot $not The NOT proposition
+     * @return string     The serialized NOT expression
      */
     private function serializeNot(LogicalNot $not): string
     {
-        $operands = $this->getOperands($not);
+        $operands = self::getOperands($not);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('LDAP NOT operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'LDAP NOT operator requires exactly 1 operand');
 
         $operand = $operands[0];
 
         if ($operand instanceof Proposition) {
             // Special case: NOT(field=null) becomes (field=*) for presence check
             if ($operand instanceof EqualTo) {
-                $eqOperands = $this->getOperands($operand);
+                $eqOperands = self::getOperands($operand);
 
                 if (count($eqOperands) === 2) {
-                    $value = $this->extractValue($eqOperands[1]);
+                    $value = self::extractValue($eqOperands[1]);
 
                     if ($value === null) {
-                        $attribute = $this->extractAttributeName($eqOperands[0]);
+                        $attribute = self::extractAttributeName($eqOperands[0]);
 
                         return sprintf('(%s=*)', $attribute);
                     }
@@ -200,21 +195,18 @@ final readonly class LDAPFilterSerializer
      * Special cases:
      * - (attribute=*) for presence checks (NOT(field=null))
      *
-     * @param Proposition $proposition The comparison proposition
-     * @param string      $operator    The comparison operator symbol (=, >=, <=, >, <)
-     *
-     * @return string The serialized comparison expression
+     * @param  Proposition $proposition The comparison proposition
+     * @param  string      $operator    The comparison operator symbol (=, >=, <=, >, <)
+     * @return string      The serialized comparison expression
      */
-    private function serializeComparison(Proposition $proposition, string $operator): string
+    private static function serializeComparison(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Comparison operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
 
-        $attribute = $this->extractAttributeName($operands[0]);
-        $value = $this->extractValue($operands[1]);
+        $attribute = self::extractAttributeName($operands[0]);
+        $value = self::extractValue($operands[1]);
 
         // Special case: presence check (field=*)
         if ($operator === '=' && $value === null) {
@@ -223,7 +215,7 @@ final readonly class LDAPFilterSerializer
             return sprintf('(%s=*)', $attribute);
         }
 
-        $valueStr = $this->formatValue($value);
+        $valueStr = self::formatValue($value);
 
         return sprintf('(%s%s%s)', $attribute, $operator, $valueStr);
     }
@@ -235,24 +227,19 @@ final readonly class LDAPFilterSerializer
      * - /^literal$/i → (attribute~=literal) for approximate match
      * - /^.*pattern.*$/ → (attribute=*pattern*) for wildcard
      *
-     * @param Matches $matches The Matches proposition
-     *
-     * @return string The serialized match expression
+     * @param  Matches $matches The Matches proposition
+     * @return string  The serialized match expression
      */
-    private function serializeMatches(Matches $matches): string
+    private static function serializeMatches(Matches $matches): string
     {
-        $operands = $this->getOperands($matches);
+        $operands = self::getOperands($matches);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('Matches operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
 
-        $attribute = $this->extractAttributeName($operands[0]);
-        $pattern = $this->extractValue($operands[1]);
+        $attribute = self::extractAttributeName($operands[0]);
+        $pattern = self::extractValue($operands[1]);
 
-        if (!is_string($pattern)) {
-            throw new LogicException('Matches pattern must be a string');
-        }
+        throw_unless(is_string($pattern), LogicException::class, 'Matches pattern must be a string');
 
         // Detect approximate match (case-insensitive pattern without wildcards)
         if (preg_match('/^\/(.+)\/i$/', $pattern, $matches)) {
@@ -283,18 +270,15 @@ final readonly class LDAPFilterSerializer
     /**
      * Extract attribute name from a Variable operand.
      *
-     * @param mixed $operand The operand to extract attribute name from
-     *
+     * @param  mixed  $operand The operand to extract attribute name from
      * @return string The attribute name
      */
-    private function extractAttributeName(mixed $operand): string
+    private static function extractAttributeName(mixed $operand): string
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
-            if ($name === null) {
-                throw new LogicException('Variable must have a name for LDAP serialization');
-            }
+            throw_if($name === null, LogicException::class, 'Variable must have a name for LDAP serialization');
 
             return $name;
         }
@@ -305,11 +289,10 @@ final readonly class LDAPFilterSerializer
     /**
      * Extract value from a Variable operand.
      *
-     * @param mixed $operand The operand to extract value from
-     *
+     * @param  mixed $operand The operand to extract value from
      * @return mixed The extracted value
      */
-    private function extractValue(mixed $operand): mixed
+    private static function extractValue(mixed $operand): mixed
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             return $operand->getValue();
@@ -321,11 +304,10 @@ final readonly class LDAPFilterSerializer
     /**
      * Format a value for LDAP filter syntax.
      *
-     * @param mixed $value The value to format
-     *
+     * @param  mixed  $value The value to format
      * @return string The formatted value string
      */
-    private function formatValue(mixed $value): string
+    private static function formatValue(mixed $value): string
     {
         if (is_string($value)) {
             return $value;
@@ -335,7 +317,7 @@ final readonly class LDAPFilterSerializer
             return $value ? 'true' : 'false';
         }
 
-        if (is_null($value)) {
+        if (null === $value) {
             return 'null';
         }
 
@@ -349,18 +331,16 @@ final readonly class LDAPFilterSerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

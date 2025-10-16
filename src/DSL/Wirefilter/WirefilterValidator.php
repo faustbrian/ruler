@@ -12,6 +12,12 @@ namespace Cline\Ruler\DSL\Wirefilter;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Throwable;
 
+use function max;
+use function mb_strlen;
+use function mb_substr;
+use function min;
+use function preg_match;
+
 /**
  * Validates Wirefilter DSL expressions without full compilation.
  *
@@ -71,9 +77,8 @@ final readonly class WirefilterValidator
      * Performs quick validation by attempting to parse the expression.
      * Returns true if the expression is syntactically valid, false otherwise.
      *
-     * @param string $expression The Wirefilter DSL expression to validate
-     *
-     * @return bool True if the expression is valid, false otherwise
+     * @param  string $expression The Wirefilter DSL expression to validate
+     * @return bool   True if the expression is valid, false otherwise
      */
     public function validate(string $expression): bool
     {
@@ -93,8 +98,7 @@ final readonly class WirefilterValidator
      * errors. Returns a ValidationResult with structured error information
      * including error messages and positions when available.
      *
-     * @param string $expression The Wirefilter DSL expression to validate
-     *
+     * @param  string           $expression The Wirefilter DSL expression to validate
      * @return ValidationResult Structured validation result with error details
      */
     public function validateWithErrors(string $expression): ValidationResult
@@ -106,8 +110,8 @@ final readonly class WirefilterValidator
         } catch (SyntaxError $e) {
             $errors = [[
                 'message' => $e->getMessage(),
-                'position' => $this->extractPosition($e),
-                'context' => $this->extractContext($expression, $e),
+                'position' => self::extractPosition($e),
+                'context' => self::extractContext($expression, $e),
             ]];
 
             return ValidationResult::failure($errors);
@@ -123,11 +127,10 @@ final readonly class WirefilterValidator
     /**
      * Extract position information from SyntaxError.
      *
-     * @param SyntaxError $error The syntax error to extract position from
-     *
-     * @return null|int The character position where the error occurred, or null if unavailable
+     * @param  SyntaxError $error The syntax error to extract position from
+     * @return null|int    The character position where the error occurred, or null if unavailable
      */
-    private function extractPosition(SyntaxError $error): ?int
+    private static function extractPosition(SyntaxError $error): ?int
     {
         // Try to extract position from error message
         // SyntaxError message format: "message around position X"
@@ -144,14 +147,13 @@ final readonly class WirefilterValidator
      * Provides a snippet of the expression around where the error occurred
      * to help users identify and fix the issue.
      *
-     * @param string      $expression The original expression being validated
-     * @param SyntaxError $error      The syntax error containing position info
-     *
+     * @param  string      $expression The original expression being validated
+     * @param  SyntaxError $error      The syntax error containing position info
      * @return null|string A snippet of the expression around the error, or null if position unavailable
      */
-    private function extractContext(string $expression, SyntaxError $error): ?string
+    private static function extractContext(string $expression, SyntaxError $error): ?string
     {
-        $position = $this->extractPosition($error);
+        $position = self::extractPosition($error);
 
         if ($position === null) {
             return null;

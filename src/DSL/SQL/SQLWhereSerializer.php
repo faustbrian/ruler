@@ -31,15 +31,19 @@ use LogicException;
 use ReflectionClass;
 
 use function array_map;
+use function array_values;
+use function count;
 use function implode;
 use function is_array;
 use function is_bool;
 use function is_null;
-use function is_numeric;
 use function is_string;
+use function mb_strlen;
 use function preg_match;
 use function sprintf;
 use function str_replace;
+use function throw_if;
+use function throw_unless;
 
 /**
  * Serializes Rule objects back to SQL WHERE clause expression strings.
@@ -89,7 +93,6 @@ final readonly class SQLWhereSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -100,9 +103,8 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a Proposition to SQL syntax.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
-     * @return string The serialized expression
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized expression
      */
     private function serializeProposition(Proposition $proposition): string
     {
@@ -117,16 +119,13 @@ final readonly class SQLWhereSerializer
             $proposition instanceof In => $this->serializeIn($proposition, false),
             $proposition instanceof NotIn => $this->serializeIn($proposition, true),
             $proposition instanceof Between => $this->serializeBetween($proposition),
-
             // Logical operators
             $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, 'AND'),
             $proposition instanceof LogicalOr => $this->serializeLogical($proposition, 'OR'),
             $proposition instanceof LogicalNot => $this->serializeNot($proposition),
-
             // String operators (LIKE/NOT LIKE)
             $proposition instanceof Matches => $this->serializeLike($proposition, false),
             $proposition instanceof DoesNotMatch => $this->serializeLike($proposition, true),
-
             default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
         };
     }
@@ -134,18 +133,15 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a binary operator.
      *
-     * @param Proposition $proposition The proposition containing two operands
-     * @param string      $operator    The operator symbol
-     *
-     * @return string The serialized binary expression
+     * @param  Proposition $proposition The proposition containing two operands
+     * @param  string      $operator    The operator symbol
+     * @return string      The serialized binary expression
      */
     private function serializeBinary(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Binary operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
 
         $left = $this->serializeOperand($operands[0]);
         $right = $this->serializeOperand($operands[1]);
@@ -163,17 +159,16 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a logical operator (AND, OR).
      *
-     * @param Proposition $proposition The logical proposition
-     * @param string      $operator    The logical operator keyword
-     *
-     * @return string The serialized logical expression
+     * @param  Proposition $proposition The logical proposition
+     * @param  string      $operator    The logical operator keyword
+     * @return string      The serialized logical expression
      */
     private function serializeLogical(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
         $serialized = array_map(
-            fn ($operand) => $operand instanceof Proposition
+            fn ($operand): string => $operand instanceof Proposition
                 ? $this->wrapIfNeeded($operand, $operator)
                 : $this->serializeOperand($operand),
             $operands,
@@ -185,23 +180,20 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a NOT operator.
      *
-     * @param LogicalNot $not The NOT proposition
-     *
-     * @return string The serialized NOT expression
+     * @param  LogicalNot $not The NOT proposition
+     * @return string     The serialized NOT expression
      */
     private function serializeNot(LogicalNot $not): string
     {
-        $operands = $this->getOperands($not);
+        $operands = self::getOperands($not);
 
-        if (count($operands) !== 1) {
-            throw new LogicException('NOT operator requires exactly 1 operand');
-        }
+        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
 
         $operand = $operands[0];
 
         // Special handling for IS NOT NULL (represented as NOT(IS NULL))
         if ($operand instanceof EqualTo) {
-            $innerOperands = $this->getOperands($operand);
+            $innerOperands = self::getOperands($operand);
 
             if (count($innerOperands) === 2) {
                 $right = $innerOperands[1];
@@ -224,18 +216,15 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize an IN or NOT IN operator.
      *
-     * @param In|NotIn $proposition The IN proposition
-     * @param bool     $negated     Whether this is NOT IN
-     *
-     * @return string The serialized IN expression
+     * @param  In|NotIn $proposition The IN proposition
+     * @param  bool     $negated     Whether this is NOT IN
+     * @return string   The serialized IN expression
      */
     private function serializeIn(In|NotIn $proposition, bool $negated): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('IN operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'IN operator requires exactly 2 operands');
 
         $field = $this->serializeOperand($operands[0]);
         $values = $operands[1];
@@ -243,12 +232,10 @@ final readonly class SQLWhereSerializer
         // Extract array from Variable
         $array = $values instanceof Variable ? $values->getValue() : $values;
 
-        if (!is_array($array)) {
-            throw new LogicException('IN operator requires array of values');
-        }
+        throw_unless(is_array($array), LogicException::class, 'IN operator requires array of values');
 
         $serializedValues = array_map(
-            fn ($value) => $this->serializeValue($value),
+            fn ($value): string => $this->serializeValue($value),
             $array,
         );
 
@@ -261,17 +248,14 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a BETWEEN operator.
      *
-     * @param Between $proposition The BETWEEN proposition
-     *
-     * @return string The serialized BETWEEN expression
+     * @param  Between $proposition The BETWEEN proposition
+     * @return string  The serialized BETWEEN expression
      */
     private function serializeBetween(Between $proposition): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 3) {
-            throw new LogicException('BETWEEN operator requires exactly 3 operands');
-        }
+        throw_if(count($operands) !== 3, LogicException::class, 'BETWEEN operator requires exactly 3 operands');
 
         $field = $this->serializeOperand($operands[0]);
         $min = $this->serializeOperand($operands[1]);
@@ -283,18 +267,15 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a LIKE or NOT LIKE operator.
      *
-     * @param Matches|DoesNotMatch $proposition The LIKE proposition
-     * @param bool                 $negated     Whether this is NOT LIKE
-     *
-     * @return string The serialized LIKE expression
+     * @param  DoesNotMatch|Matches $proposition The LIKE proposition
+     * @param  bool                 $negated     Whether this is NOT LIKE
+     * @return string               The serialized LIKE expression
      */
     private function serializeLike(Matches|DoesNotMatch $proposition, bool $negated): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('LIKE operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'LIKE operator requires exactly 2 operands');
 
         $field = $this->serializeOperand($operands[0]);
         $pattern = $operands[1];
@@ -302,12 +283,10 @@ final readonly class SQLWhereSerializer
         // Extract regex from Variable and convert back to SQL LIKE pattern
         $regex = $pattern instanceof Variable ? $pattern->getValue() : $pattern;
 
-        if (!is_string($regex)) {
-            throw new LogicException('LIKE pattern must be a string');
-        }
+        throw_unless(is_string($regex), LogicException::class, 'LIKE pattern must be a string');
 
         // Convert regex back to SQL LIKE pattern
-        $sqlPattern = $this->regexToLikePattern($regex);
+        $sqlPattern = self::regexToLikePattern($regex);
         $operator = $negated ? 'NOT LIKE' : 'LIKE';
 
         return sprintf('%s %s %s', $field, $operator, $this->serializeValue($sqlPattern));
@@ -316,11 +295,10 @@ final readonly class SQLWhereSerializer
     /**
      * Convert regex pattern back to SQL LIKE pattern.
      *
-     * @param string $regex The regex pattern
-     *
+     * @param  string $regex The regex pattern
      * @return string The SQL LIKE pattern
      */
-    private function regexToLikePattern(string $regex): string
+    private static function regexToLikePattern(string $regex): string
     {
         // Remove anchors: /^...$/
         if (preg_match('/^\/\^(.+)\$\/$/', $regex, $matches)) {
@@ -334,7 +312,7 @@ final readonly class SQLWhereSerializer
         // . -> _
         // Escaped characters -> literal
         $result = '';
-        $length = \mb_strlen($pattern);
+        $length = mb_strlen($pattern);
         $i = 0;
 
         while ($i < $length) {
@@ -354,6 +332,7 @@ final readonly class SQLWhereSerializer
                 } else {
                     $result .= $nextChar;
                 }
+
                 $i += 2;
             } else {
                 $result .= $char;
@@ -367,8 +346,7 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize an operand (Variable or value).
      *
-     * @param mixed $operand The operand to serialize
-     *
+     * @param  mixed  $operand The operand to serialize
      * @return string The serialized operand
      */
     private function serializeOperand(mixed $operand): string
@@ -390,9 +368,8 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a Variable.
      *
-     * @param Variable|BuilderVariable $variable The variable to serialize
-     *
-     * @return string The serialized variable name or value
+     * @param  BuilderVariable|Variable $variable The variable to serialize
+     * @return string                   The serialized variable name or value
      */
     private function serializeVariable(Variable|BuilderVariable $variable): string
     {
@@ -410,8 +387,7 @@ final readonly class SQLWhereSerializer
     /**
      * Serialize a raw value (string, number, boolean, null, array).
      *
-     * @param mixed $value The value to serialize
-     *
+     * @param  mixed  $value The value to serialize
      * @return string The serialized value
      */
     private function serializeValue(mixed $value): string
@@ -427,21 +403,17 @@ final readonly class SQLWhereSerializer
             return $value ? 'TRUE' : 'FALSE';
         }
 
-        if (is_null($value)) {
+        if (null === $value) {
             return 'NULL';
         }
 
         if (is_array($value)) {
             $elements = array_map(
-                fn ($item) => $this->serializeValue($item),
+                fn ($item): string => $this->serializeValue($item),
                 array_values($value), // Re-index to remove keys
             );
 
             return sprintf('(%s)', implode(', ', $elements));
-        }
-
-        if (is_numeric($value)) {
-            return (string) $value;
         }
 
         // Fallback for objects or other types
@@ -454,10 +426,9 @@ final readonly class SQLWhereSerializer
      * SQL operator precedence (high to low): NOT, AND, OR
      * We need to wrap lower precedence operators when they appear as children of higher precedence operators.
      *
-     * @param Proposition $proposition The proposition to potentially wrap
-     * @param string      $parentOp    The parent operator
-     *
-     * @return string The wrapped or unwrapped expression
+     * @param  Proposition $proposition The proposition to potentially wrap
+     * @param  string      $parentOp    The parent operator
+     * @return string      The wrapped or unwrapped expression
      */
     private function wrapIfNeeded(Proposition $proposition, string $parentOp): string
     {
@@ -475,18 +446,16 @@ final readonly class SQLWhereSerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

@@ -9,6 +9,8 @@
 
 namespace Cline\Ruler\DSL\Wirefilter;
 
+use function array_map;
+
 /**
  * Represents the result of validating a Wirefilter DSL expression.
  *
@@ -35,7 +37,7 @@ namespace Cline\Ruler\DSL\Wirefilter;
 final readonly class ValidationResult
 {
     /**
-     * @param bool                 $valid  Whether the expression is valid
+     * @param bool $valid Whether the expression is valid
      * @param array<int, array{
      *     message: string,
      *     position?: int,
@@ -65,7 +67,6 @@ final readonly class ValidationResult
      *     position?: int,
      *     context?: string
      * }> $errors Array of validation errors
-     *
      * @return self A ValidationResult indicating failed validation
      */
     public static function failure(array $errors): self

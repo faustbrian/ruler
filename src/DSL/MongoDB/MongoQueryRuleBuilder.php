@@ -100,10 +100,9 @@ final readonly class MongoQueryRuleBuilder
      * Creates a Rule that executes the provided callback when the parsed
      * condition evaluates to true.
      *
-     * @param array<string, mixed> $query  MongoDB-style query document with fields and operators
-     * @param callable             $action Callback to execute when rule evaluates to true
-     *
-     * @return Rule Compiled rule with attached action callback
+     * @param  array<string, mixed> $query  MongoDB-style query document with fields and operators
+     * @param  callable             $action Callback to execute when rule evaluates to true
+     * @return Rule                 Compiled rule with attached action callback
      */
     public function parseWithAction(array $query, callable $action): Rule
     {

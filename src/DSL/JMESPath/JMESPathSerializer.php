@@ -13,6 +13,8 @@ use Cline\Ruler\Core\Rule;
 use LogicException;
 use ReflectionClass;
 
+use function throw_unless;
+
 /**
  * Serializes Rule objects back to JMESPath filter expression strings.
  *
@@ -62,34 +64,27 @@ final readonly class JMESPathSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var mixed $condition */
         $condition = $conditionProperty->getValue($rule);
 
-        if (!$condition instanceof JMESPathProposition) {
-            throw new LogicException('Rule must contain a JMESPathProposition to serialize to JMESPath');
-        }
+        throw_unless($condition instanceof JMESPathProposition, LogicException::class, 'Rule must contain a JMESPathProposition to serialize to JMESPath');
 
-        return $this->extractExpression($condition);
+        return self::extractExpression($condition);
     }
 
     /**
      * Extract the expression from a JMESPathProposition.
      *
-     * @param JMESPathProposition $proposition The proposition to extract from
-     *
-     * @return string The JMESPath expression
+     * @param  JMESPathProposition $proposition The proposition to extract from
+     * @return string              The JMESPath expression
      */
-    private function extractExpression(JMESPathProposition $proposition): string
+    private static function extractExpression(JMESPathProposition $proposition): string
     {
         $reflection = new ReflectionClass($proposition);
         $expressionProperty = $reflection->getProperty('expression');
-        $expressionProperty->setAccessible(true);
 
         /** @var string $expression */
-        $expression = $expressionProperty->getValue($proposition);
-
-        return $expression;
+        return $expressionProperty->getValue($proposition);
     }
 }

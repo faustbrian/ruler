@@ -71,9 +71,8 @@ final readonly class LDAPFilterValidator
      * Performs quick validation by attempting to parse the expression.
      * Returns true if the expression is syntactically valid, false otherwise.
      *
-     * @param string $expression The LDAP filter expression to validate
-     *
-     * @return bool True if the expression is valid, false otherwise
+     * @param  string $expression The LDAP filter expression to validate
+     * @return bool   True if the expression is valid, false otherwise
      */
     public function validate(string $expression): bool
     {
@@ -93,8 +92,7 @@ final readonly class LDAPFilterValidator
      * errors. Returns a ValidationResult with structured error information
      * including error messages.
      *
-     * @param string $expression The LDAP filter expression to validate
-     *
+     * @param  string           $expression The LDAP filter expression to validate
      * @return ValidationResult Structured validation result with error details
      */
     public function validateWithErrors(string $expression): ValidationResult
@@ -103,9 +101,9 @@ final readonly class LDAPFilterValidator
             $this->parser->parse($expression);
 
             return ValidationResult::success();
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $errors = [[
-                'message' => $e->getMessage(),
+                'message' => $throwable->getMessage(),
             ]];
 
             return ValidationResult::failure($errors);

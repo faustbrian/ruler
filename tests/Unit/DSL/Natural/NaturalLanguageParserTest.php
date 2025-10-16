@@ -296,14 +296,14 @@ describe('NaturalLanguageParser', function (): void {
         test('throws exception for invalid expression', function (): void {
             $parser = new NaturalLanguageParser();
 
-            expect(fn () => $parser->parse('age invalid operator 18'))
+            expect(fn (): Rule => $parser->parse('age invalid operator 18'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for empty expression', function (): void {
             $parser = new NaturalLanguageParser();
 
-            expect(fn () => $parser->parse(''))
+            expect(fn (): Rule => $parser->parse(''))
                 ->toThrow(InvalidArgumentException::class);
         });
     });

@@ -216,7 +216,7 @@ describe('GraphQLFilterSerializer', function (): void {
             // Multiple operators on same field become implicit AND with separate keys
             expect($result)->toBeArray()
                 ->and($result)->toHaveKey('age')
-                ->and(isset($result['age']['gte']) || isset($result['age']['lte']))->toBeTrue();
+                ->and(array_key_exists('gte', $result['age']) || array_key_exists('lte', $result['age']))->toBeTrue();
         });
 
         test('serialize complex nested expression', function (): void {

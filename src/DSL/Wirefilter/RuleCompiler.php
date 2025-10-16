@@ -27,6 +27,7 @@ use Symfony\Component\ExpressionLanguage\ParsedExpression;
 use function array_map;
 use function assert;
 use function in_array;
+use function is_int;
 use function is_string;
 use function iterator_to_array;
 use function sprintf;

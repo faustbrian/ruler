@@ -72,9 +72,8 @@ final readonly class JMESPathValidator
      * with empty data. Returns true if the expression is syntactically
      * valid, false otherwise.
      *
-     * @param string $expression The JMESPath filter expression to validate
-     *
-     * @return bool True if the expression is valid, false otherwise
+     * @param  string $expression The JMESPath filter expression to validate
+     * @return bool   True if the expression is valid, false otherwise
      */
     public function validate(string $expression): bool
     {
@@ -94,8 +93,7 @@ final readonly class JMESPathValidator
      * syntax or runtime errors. Returns a ValidationResult with structured
      * error information including error messages.
      *
-     * @param string $expression The JMESPath filter expression to validate
-     *
+     * @param  string           $expression The JMESPath filter expression to validate
      * @return ValidationResult Structured validation result with error details
      */
     public function validateWithErrors(string $expression): ValidationResult
@@ -104,9 +102,9 @@ final readonly class JMESPathValidator
             $this->adapter->evaluate($expression, []);
 
             return ValidationResult::success();
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $errors = [[
-                'message' => $e->getMessage(),
+                'message' => $throwable->getMessage(),
             ]];
 
             return ValidationResult::failure($errors);

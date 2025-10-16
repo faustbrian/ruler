@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\SQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use InvalidArgumentException;
 
 /**
  * Public facade for parsing SQL WHERE clause expressions into Rules.
@@ -68,7 +69,7 @@ final readonly class SQLWhereParser
      *
      * @param string $expression The SQL WHERE clause expression to parse (without 'WHERE' keyword)
      *
-     * @throws \InvalidArgumentException When SQL syntax is invalid
+     * @throws InvalidArgumentException When SQL syntax is invalid
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -88,7 +89,7 @@ final readonly class SQLWhereParser
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \InvalidArgumentException When SQL syntax is invalid
+     * @throws InvalidArgumentException When SQL syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */

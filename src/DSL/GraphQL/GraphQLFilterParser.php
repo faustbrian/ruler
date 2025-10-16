@@ -11,6 +11,8 @@ namespace Cline\Ruler\DSL\GraphQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use InvalidArgumentException;
+use JsonException;
 
 /**
  * Public facade for parsing GraphQL Filter DSL expressions into Rules.
@@ -69,8 +71,8 @@ final readonly class GraphQLFilterParser
      *
      * @param array<string, mixed>|string $filter The GraphQL filter expression as array or JSON string
      *
-     * @throws \InvalidArgumentException When filter format is invalid
-     * @throws \JsonException When JSON parsing fails
+     * @throws InvalidArgumentException When filter format is invalid
+     * @throws JsonException            When JSON parsing fails
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -90,8 +92,8 @@ final readonly class GraphQLFilterParser
      * @param callable                    $action Callback to execute when rule evaluates to true.
      *                                            Receives the context array as parameter.
      *
-     * @throws \InvalidArgumentException When filter format is invalid
-     * @throws \JsonException When JSON parsing fails
+     * @throws InvalidArgumentException When filter format is invalid
+     * @throws JsonException            When JSON parsing fails
      *
      * @return Rule The compiled Rule with attached action callback
      */

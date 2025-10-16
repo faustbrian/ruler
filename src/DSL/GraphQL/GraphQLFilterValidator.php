@@ -13,9 +13,17 @@ use Cline\Ruler\DSL\Wirefilter\ValidationResult;
 use JsonException;
 use Throwable;
 
+use function array_keys;
+use function array_slice;
+use function count;
+use function implode;
 use function is_array;
 use function is_string;
-use function json_decode;
+use function max;
+use function mb_strlen;
+use function mb_substr;
+use function min;
+use function preg_match;
 
 /**
  * Validates GraphQL Filter DSL expressions without full compilation.
@@ -76,9 +84,8 @@ final readonly class GraphQLFilterValidator
      * Performs quick validation by attempting to parse the expression.
      * Returns true if the expression is syntactically valid, false otherwise.
      *
-     * @param array<string, mixed>|string $filter The GraphQL filter expression as array or JSON string
-     *
-     * @return bool True if the expression is valid, false otherwise
+     * @param  array<string, mixed>|string $filter The GraphQL filter expression as array or JSON string
+     * @return bool                        True if the expression is valid, false otherwise
      */
     public function validate(array|string $filter): bool
     {
@@ -98,9 +105,8 @@ final readonly class GraphQLFilterValidator
      * errors. Returns a ValidationResult with structured error information
      * including error messages and context when available.
      *
-     * @param array<string, mixed>|string $filter The GraphQL filter expression as array or JSON string
-     *
-     * @return ValidationResult Structured validation result with error details
+     * @param  array<string, mixed>|string $filter The GraphQL filter expression as array or JSON string
+     * @return ValidationResult            Structured validation result with error details
      */
     public function validateWithErrors(array|string $filter): ValidationResult
     {
@@ -111,14 +117,14 @@ final readonly class GraphQLFilterValidator
         } catch (JsonException $e) {
             $errors = [[
                 'message' => 'Invalid JSON: '.$e->getMessage(),
-                'context' => $this->extractJsonContext($filter, $e),
+                'context' => self::extractJsonContext($filter, $e),
             ]];
 
             return ValidationResult::failure($errors);
         } catch (Throwable $e) {
             $errors = [[
                 'message' => $e->getMessage(),
-                'context' => $this->extractFilterContext($filter),
+                'context' => self::extractFilterContext($filter),
             ]];
 
             return ValidationResult::failure($errors);
@@ -128,12 +134,11 @@ final readonly class GraphQLFilterValidator
     /**
      * Extract context around JSON parsing error.
      *
-     * @param array<string, mixed>|string $filter The filter that failed to parse
-     * @param JsonException               $error  The JSON exception
-     *
-     * @return null|string A snippet of the JSON around the error
+     * @param  array<string, mixed>|string $filter The filter that failed to parse
+     * @param  JsonException               $error  The JSON exception
+     * @return null|string                 A snippet of the JSON around the error
      */
-    private function extractJsonContext(array|string $filter, JsonException $error): ?string
+    private static function extractJsonContext(array|string $filter, JsonException $error): ?string
     {
         if (!is_string($filter)) {
             return null;
@@ -168,15 +173,15 @@ final readonly class GraphQLFilterValidator
      *
      * Provides a summary of the filter structure to help identify the issue.
      *
-     * @param array<string, mixed>|string $filter The filter being validated
-     *
-     * @return null|string A summary of the filter structure
+     * @param  array<string, mixed>|string $filter The filter being validated
+     * @return null|string                 A summary of the filter structure
      */
-    private function extractFilterContext(array|string $filter): ?string
+    private static function extractFilterContext(array|string $filter): ?string
     {
         if (is_string($filter)) {
             // If it's a string, try to show the beginning
             $maxLength = 100;
+
             if (mb_strlen($filter) > $maxLength) {
                 return mb_substr($filter, 0, $maxLength).'...';
             }
@@ -187,6 +192,7 @@ final readonly class GraphQLFilterValidator
         if (is_array($filter)) {
             // Show the top-level keys
             $keys = array_keys($filter);
+
             if (count($keys) > 5) {
                 $keys = array_slice($keys, 0, 5);
                 $keys[] = '...';

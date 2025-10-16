@@ -31,13 +31,15 @@ use LogicException;
 use ReflectionClass;
 
 use function array_map;
+use function array_values;
+use function count;
 use function implode;
 use function is_array;
 use function is_bool;
 use function is_null;
-use function is_numeric;
 use function is_string;
 use function sprintf;
+use function throw_if;
 
 /**
  * Serializes Rule objects back to Natural Language DSL expression strings.
@@ -87,7 +89,6 @@ final readonly class NaturalLanguageSerializer
     {
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
-        $conditionProperty->setAccessible(true);
 
         /** @var Proposition $condition */
         $condition = $conditionProperty->getValue($rule);
@@ -98,33 +99,29 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a Proposition to DSL syntax.
      *
-     * @param Proposition $proposition The proposition to serialize
-     *
-     * @return string The serialized expression
+     * @param  Proposition $proposition The proposition to serialize
+     * @return string      The serialized expression
      */
     private function serializeProposition(Proposition $proposition): string
     {
         return match (true) {
             // Comparison operators
-            $proposition instanceof EqualTo => $this->serializeComparison($proposition, 'equals'),
-            $proposition instanceof NotEqualTo => $this->serializeComparison($proposition, 'is not'),
-            $proposition instanceof GreaterThan => $this->serializeComparison($proposition, 'is greater than'),
-            $proposition instanceof GreaterThanOrEqualTo => $this->serializeComparison($proposition, 'is greater than or equal to'),
-            $proposition instanceof LessThan => $this->serializeComparison($proposition, 'is less than'),
-            $proposition instanceof LessThanOrEqualTo => $this->serializeComparison($proposition, 'is less than or equal to'),
-            $proposition instanceof Between => $this->serializeBetween($proposition),
-            $proposition instanceof In => $this->serializeIn($proposition),
-            $proposition instanceof NotIn => $this->serializeNotIn($proposition),
-
+            $proposition instanceof EqualTo => self::serializeComparison($proposition, 'equals'),
+            $proposition instanceof NotEqualTo => self::serializeComparison($proposition, 'is not'),
+            $proposition instanceof GreaterThan => self::serializeComparison($proposition, 'is greater than'),
+            $proposition instanceof GreaterThanOrEqualTo => self::serializeComparison($proposition, 'is greater than or equal to'),
+            $proposition instanceof LessThan => self::serializeComparison($proposition, 'is less than'),
+            $proposition instanceof LessThanOrEqualTo => self::serializeComparison($proposition, 'is less than or equal to'),
+            $proposition instanceof Between => self::serializeBetween($proposition),
+            $proposition instanceof In => self::serializeIn($proposition),
+            $proposition instanceof NotIn => self::serializeNotIn($proposition),
             // Logical operators
             $proposition instanceof LogicalAnd => $this->serializeLogical($proposition, 'and'),
             $proposition instanceof LogicalOr => $this->serializeLogical($proposition, 'or'),
-
             // String operators
-            $proposition instanceof StringContains => $this->serializeStringOperation($proposition, 'contains'),
-            $proposition instanceof StartsWith => $this->serializeStringOperation($proposition, 'starts with'),
-            $proposition instanceof EndsWith => $this->serializeStringOperation($proposition, 'ends with'),
-
+            $proposition instanceof StringContains => self::serializeStringOperation($proposition, 'contains'),
+            $proposition instanceof StartsWith => self::serializeStringOperation($proposition, 'starts with'),
+            $proposition instanceof EndsWith => self::serializeStringOperation($proposition, 'ends with'),
             default => throw new LogicException(sprintf('Unsupported operator for natural language serialization: %s', $proposition::class)),
         };
     }
@@ -132,21 +129,18 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a comparison operator.
      *
-     * @param Proposition $proposition The proposition containing two operands
-     * @param string      $operator    The natural language operator phrase
-     *
-     * @return string The serialized comparison expression
+     * @param  Proposition $proposition The proposition containing two operands
+     * @param  string      $operator    The natural language operator phrase
+     * @return string      The serialized comparison expression
      */
-    private function serializeComparison(Proposition $proposition, string $operator): string
+    private static function serializeComparison(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('Comparison operator %s requires exactly 2 operands', $operator));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
 
-        $field = $this->serializeField($operands[0]);
-        $value = $this->serializeValue($operands[1]);
+        $field = self::serializeField($operands[0]);
+        $value = self::serializeValue($operands[1]);
 
         return sprintf('%s %s %s', $field, $operator, $value);
     }
@@ -154,21 +148,18 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a between range check.
      *
-     * @param Between $between The between proposition
-     *
-     * @return string The serialized between expression
+     * @param  Between $between The between proposition
+     * @return string  The serialized between expression
      */
-    private function serializeBetween(Between $between): string
+    private static function serializeBetween(Between $between): string
     {
-        $operands = $this->getOperands($between);
+        $operands = self::getOperands($between);
 
-        if (count($operands) !== 3) {
-            throw new LogicException('Between operator requires exactly 3 operands');
-        }
+        throw_if(count($operands) !== 3, LogicException::class, 'Between operator requires exactly 3 operands');
 
-        $field = $this->serializeField($operands[0]);
-        $min = $this->serializeValue($operands[1]);
-        $max = $this->serializeValue($operands[2]);
+        $field = self::serializeField($operands[0]);
+        $min = self::serializeValue($operands[1]);
+        $max = self::serializeValue($operands[2]);
 
         return sprintf('%s is between %s and %s', $field, $min, $max);
     }
@@ -176,27 +167,24 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize an In list membership check.
      *
-     * @param In $in The in proposition
-     *
+     * @param  In     $in The in proposition
      * @return string The serialized in expression
      */
-    private function serializeIn(In $in): string
+    private static function serializeIn(In $in): string
     {
-        $operands = $this->getOperands($in);
+        $operands = self::getOperands($in);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('In operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'In operator requires exactly 2 operands');
 
-        $field = $this->serializeField($operands[0]);
-        $values = $this->getListValues($operands[1]);
+        $field = self::serializeField($operands[0]);
+        $values = self::getListValues($operands[1]);
 
         if (count($values) === 2) {
-            return sprintf('%s is either %s or %s', $field, $this->serializeValue($values[0]), $this->serializeValue($values[1]));
+            return sprintf('%s is either %s or %s', $field, self::serializeValue($values[0]), self::serializeValue($values[1]));
         }
 
         $serializedValues = array_map(
-            fn ($value) => $this->serializeValue($value),
+            fn ($value): string => self::serializeValue($value),
             $values,
         );
 
@@ -206,23 +194,20 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a NotIn list membership check.
      *
-     * @param NotIn $notIn The not in proposition
-     *
+     * @param  NotIn  $notIn The not in proposition
      * @return string The serialized not in expression
      */
-    private function serializeNotIn(NotIn $notIn): string
+    private static function serializeNotIn(NotIn $notIn): string
     {
-        $operands = $this->getOperands($notIn);
+        $operands = self::getOperands($notIn);
 
-        if (count($operands) !== 2) {
-            throw new LogicException('NotIn operator requires exactly 2 operands');
-        }
+        throw_if(count($operands) !== 2, LogicException::class, 'NotIn operator requires exactly 2 operands');
 
-        $field = $this->serializeField($operands[0]);
-        $values = $this->getListValues($operands[1]);
+        $field = self::serializeField($operands[0]);
+        $values = self::getListValues($operands[1]);
 
         $serializedValues = array_map(
-            fn ($value) => $this->serializeValue($value),
+            fn ($value): string => self::serializeValue($value),
             $values,
         );
 
@@ -232,21 +217,18 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a string operation.
      *
-     * @param Proposition $proposition The proposition containing two operands
-     * @param string      $operation   The natural language operation phrase
-     *
-     * @return string The serialized string operation expression
+     * @param  Proposition $proposition The proposition containing two operands
+     * @param  string      $operation   The natural language operation phrase
+     * @return string      The serialized string operation expression
      */
-    private function serializeStringOperation(Proposition $proposition, string $operation): string
+    private static function serializeStringOperation(Proposition $proposition, string $operation): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
-        if (count($operands) !== 2) {
-            throw new LogicException(sprintf('String operation %s requires exactly 2 operands', $operation));
-        }
+        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operation %s requires exactly 2 operands', $operation));
 
-        $field = $this->serializeField($operands[0]);
-        $value = $this->serializeValue($operands[1]);
+        $field = self::serializeField($operands[0]);
+        $value = self::serializeValue($operands[1]);
 
         return sprintf('%s %s %s', $field, $operation, $value);
     }
@@ -254,19 +236,18 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a logical operator (and, or).
      *
-     * @param Proposition $proposition The logical proposition
-     * @param string      $operator    The logical operator keyword
-     *
-     * @return string The serialized logical expression
+     * @param  Proposition $proposition The logical proposition
+     * @param  string      $operator    The logical operator keyword
+     * @return string      The serialized logical expression
      */
     private function serializeLogical(Proposition $proposition, string $operator): string
     {
-        $operands = $this->getOperands($proposition);
+        $operands = self::getOperands($proposition);
 
         $serialized = array_map(
-            fn ($operand) => $operand instanceof Proposition
+            fn ($operand): string => $operand instanceof Proposition
                 ? $this->wrapIfNeeded($operand, $operator)
-                : $this->serializeValue($operand),
+                : self::serializeValue($operand),
             $operands,
         );
 
@@ -276,11 +257,10 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a field reference (Variable).
      *
-     * @param mixed $operand The operand to serialize as a field
-     *
+     * @param  mixed  $operand The operand to serialize as a field
      * @return string The serialized field name
      */
-    private function serializeField(mixed $operand): string
+    private static function serializeField(mixed $operand): string
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
@@ -296,30 +276,28 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a value (string, number, boolean, null).
      *
-     * @param mixed $operand The operand to serialize as a value
-     *
+     * @param  mixed  $operand The operand to serialize as a value
      * @return string The serialized value
      */
-    private function serializeValue(mixed $operand): string
+    private static function serializeValue(mixed $operand): string
     {
         // Handle Variables with values
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $value = $operand->getValue();
 
-            return $this->formatValue($value);
+            return self::formatValue($value);
         }
 
-        return $this->formatValue($operand);
+        return self::formatValue($operand);
     }
 
     /**
      * Format a raw value as natural language syntax.
      *
-     * @param mixed $value The value to format
-     *
+     * @param  mixed  $value The value to format
      * @return string The formatted value
      */
-    private function formatValue(mixed $value): string
+    private static function formatValue(mixed $value): string
     {
         if (is_string($value)) {
             return $value;
@@ -329,12 +307,8 @@ final readonly class NaturalLanguageSerializer
             return $value ? 'true' : 'false';
         }
 
-        if (is_null($value)) {
+        if (null === $value) {
             return 'null';
-        }
-
-        if (is_numeric($value)) {
-            return (string) $value;
         }
 
         // Fallback for other types
@@ -344,11 +318,10 @@ final readonly class NaturalLanguageSerializer
     /**
      * Get list values from a Variable operand.
      *
-     * @param mixed $operand The operand containing list values
-     *
+     * @param  mixed             $operand The operand containing list values
      * @return array<int, mixed> The list values
      */
-    private function getListValues(mixed $operand): array
+    private static function getListValues(mixed $operand): array
     {
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $value = $operand->getValue();
@@ -364,10 +337,9 @@ final readonly class NaturalLanguageSerializer
     /**
      * Wrap expression in parentheses if needed based on operator precedence.
      *
-     * @param Proposition $proposition The proposition to potentially wrap
-     * @param string      $parentOp    The parent operator
-     *
-     * @return string The wrapped or unwrapped expression
+     * @param  Proposition $proposition The proposition to potentially wrap
+     * @param  string      $parentOp    The parent operator
+     * @return string      The wrapped or unwrapped expression
      */
     private function wrapIfNeeded(Proposition $proposition, string $parentOp): string
     {
@@ -385,18 +357,16 @@ final readonly class NaturalLanguageSerializer
     /**
      * Get operands from an operator using reflection.
      *
-     * @param object $operator The operator object
-     *
+     * @param  object            $operator The operator object
      * @return array<int, mixed> The operands
      */
-    private function getOperands(object $operator): array
+    private static function getOperands(object $operator): array
     {
         $reflection = new ReflectionClass($operator);
 
         // Try to get operands property
         if ($reflection->hasProperty('operands')) {
             $operandsProperty = $reflection->getProperty('operands');
-            $operandsProperty->setAccessible(true);
 
             return $operandsProperty->getValue($operator);
         }

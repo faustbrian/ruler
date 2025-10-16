@@ -18,6 +18,7 @@ use const JSON_THROW_ON_ERROR;
 
 use function is_array;
 use function json_decode;
+use function sprintf;
 
 /**
  * Validates MongoDB Query DSL documents without full compilation.
@@ -83,9 +84,8 @@ final readonly class MongoQueryValidator
      * Performs quick validation by attempting to parse the query.
      * Returns true if the query is syntactically valid, false otherwise.
      *
-     * @param array<string, mixed> $query The MongoDB query document to validate
-     *
-     * @return bool True if the query is valid, false otherwise
+     * @param  array<string, mixed> $query The MongoDB query document to validate
+     * @return bool                 True if the query is valid, false otherwise
      */
     public function validate(array $query): bool
     {
@@ -104,9 +104,8 @@ final readonly class MongoQueryValidator
      * Decodes the JSON and validates the resulting query document.
      * Returns true if the JSON is valid and the query is syntactically valid.
      *
-     * @param string $json JSON-encoded MongoDB query document
-     *
-     * @return bool True if the query is valid, false otherwise
+     * @param  string $json JSON-encoded MongoDB query document
+     * @return bool   True if the query is valid, false otherwise
      */
     public function validateJson(string $json): bool
     {
@@ -126,9 +125,8 @@ final readonly class MongoQueryValidator
      * errors. Returns a ValidationResult with structured error information
      * including error messages.
      *
-     * @param array<string, mixed> $query The MongoDB query document to validate
-     *
-     * @return ValidationResult Structured validation result with error details
+     * @param  array<string, mixed> $query The MongoDB query document to validate
+     * @return ValidationResult     Structured validation result with error details
      */
     public function validateWithErrors(array $query): ValidationResult
     {
@@ -136,13 +134,7 @@ final readonly class MongoQueryValidator
             $this->parser->parse($query);
 
             return ValidationResult::success();
-        } catch (InvalidArgumentException $e) {
-            $errors = [[
-                'message' => $e->getMessage(),
-            ]];
-
-            return ValidationResult::failure($errors);
-        } catch (Throwable $e) {
+        } catch (InvalidArgumentException|Throwable $e) {
             $errors = [[
                 'message' => $e->getMessage(),
             ]];
@@ -157,8 +149,7 @@ final readonly class MongoQueryValidator
      * Attempts to decode and parse the query, capturing any JSON or compilation
      * errors. Returns a ValidationResult with structured error information.
      *
-     * @param string $json JSON-encoded MongoDB query document
-     *
+     * @param  string           $json JSON-encoded MongoDB query document
      * @return ValidationResult Structured validation result with error details
      */
     public function validateJsonWithErrors(string $json): ValidationResult
