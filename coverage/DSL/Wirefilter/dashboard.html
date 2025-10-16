@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /usr/src/myapp/src/DSL/Wirefilter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../../_css/bootstrap.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/nv.d3.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/style.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../../index.html">/usr/src/myapp/src</a></li>
+         <li class="breadcrumb-item"><a href="../index.html">DSL</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Wirefilter</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WirefilterValidator.php.html#59">Cline\Ruler\DSL\Wirefilter\WirefilterValidator</a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="WirefilterSerializer.php.html#86">Cline\Ruler\DSL\Wirefilter\WirefilterSerializer</a></td><td class="text-right">89%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WirefilterSerializer.php.html#86">Cline\Ruler\DSL\Wirefilter\WirefilterSerializer</a></td><td class="text-right">75</td></tr>
+       <tr><td><a href="WirefilterValidator.php.html#59">Cline\Ruler\DSL\Wirefilter\WirefilterValidator</a></td><td class="text-right">13</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WirefilterSerializer.php.html#214"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterSerializer::serializeFunction">serializeFunction</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="WirefilterSerializer.php.html#423"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">57%</td></tr>
+       <tr><td><a href="WirefilterValidator.php.html#104"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterValidator::validateWithErrors">validateWithErrors</abbr></a></td><td class="text-right">64%</td></tr>
+       <tr><td><a href="WirefilterValidator.php.html#133"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterValidator::extractPosition">extractPosition</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="WirefilterSerializer.php.html#192"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterSerializer::serializeNot">serializeNot</abbr></a></td><td class="text-right">83%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="WirefilterSerializer.php.html#423"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="WirefilterValidator.php.html#104"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterValidator::validateWithErrors">validateWithErrors</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="WirefilterValidator.php.html#133"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterValidator::extractPosition">extractPosition</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="WirefilterSerializer.php.html#192"><abbr title="Cline\Ruler\DSL\Wirefilter\WirefilterSerializer::serializeNot">serializeNot</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.11</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.13</a> and <a href="https://phpunit.de/">PHPUnit 11.5.33</a> at Thu Oct 16 3:56:40 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../../_js/jquery.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/nv.d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,0,0,1,1,1,6], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([1,0,0,0,0,0,1,2,0,1,4,49], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[100,8,"<a href=\"ExpressionParser.php.html#31\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser<\/a>"],[100,7,"<a href=\"FieldResolver.php.html#29\">Cline\\Ruler\\DSL\\Wirefilter\\FieldResolver<\/a>"],[100,3,"<a href=\"OperatorRegistry.php.html#87\">Cline\\Ruler\\DSL\\Wirefilter\\OperatorRegistry<\/a>"],[99.07407407407408,57,"<a href=\"RuleCompiler.php.html#47\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler<\/a>"],[100,3,"<a href=\"StringRuleBuilder.php.html#35\">Cline\\Ruler\\DSL\\Wirefilter\\StringRuleBuilder<\/a>"],[100,7,"<a href=\"ValidationResult.php.html#37\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult<\/a>"],[100,3,"<a href=\"WirefilterParser.php.html#44\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterParser<\/a>"],[89.76377952755905,70,"<a href=\"WirefilterSerializer.php.html#86\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer<\/a>"],[78.78787878787878,12,"<a href=\"WirefilterValidator.php.html#59\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"ExpressionParser.php.html#44\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser::__construct<\/a>"],[100,1,"<a href=\"ExpressionParser.php.html#59\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser::parse<\/a>"],[100,4,"<a href=\"ExpressionParser.php.html#78\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser::extractVariableNames<\/a>"],[100,1,"<a href=\"ExpressionParser.php.html#116\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser::registerCustomFunctions<\/a>"],[100,1,"<a href=\"ExpressionParser.php.html#194\">Cline\\Ruler\\DSL\\Wirefilter\\ExpressionParser::registerFunction<\/a>"],[100,1,"<a href=\"FieldResolver.php.html#46\">Cline\\Ruler\\DSL\\Wirefilter\\FieldResolver::__construct<\/a>"],[100,4,"<a href=\"FieldResolver.php.html#66\">Cline\\Ruler\\DSL\\Wirefilter\\FieldResolver::resolve<\/a>"],[100,1,"<a href=\"FieldResolver.php.html#100\">Cline\\Ruler\\DSL\\Wirefilter\\FieldResolver::clearCache<\/a>"],[100,1,"<a href=\"FieldResolver.php.html#113\">Cline\\Ruler\\DSL\\Wirefilter\\FieldResolver::getRuleBuilder<\/a>"],[100,1,"<a href=\"OperatorRegistry.php.html#176\">Cline\\Ruler\\DSL\\Wirefilter\\OperatorRegistry::get<\/a>"],[100,1,"<a href=\"OperatorRegistry.php.html#192\">Cline\\Ruler\\DSL\\Wirefilter\\OperatorRegistry::has<\/a>"],[100,1,"<a href=\"OperatorRegistry.php.html#205\">Cline\\Ruler\\DSL\\Wirefilter\\OperatorRegistry::all<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#58\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::__construct<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#76\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compile<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#94\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileConstant<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#102\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::throwUnsupportedNodeType<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#110\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::throwUnsupportedUnaryOperator<\/a>"],[100,9,"<a href=\"RuleCompiler.php.html#127\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileNode<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#150\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileName<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#167\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileGetAttr<\/a>"],[100,4,"<a href=\"RuleCompiler.php.html#191\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::buildFieldPath<\/a>"],[100,23,"<a href=\"RuleCompiler.php.html#238\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileBinary<\/a>"],[100,5,"<a href=\"RuleCompiler.php.html#303\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileUnary<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#342\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileFunction<\/a>"],[100,1,"<a href=\"RuleCompiler.php.html#366\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileArguments<\/a>"],[92.3076923076923,5,"<a href=\"RuleCompiler.php.html#386\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::compileArray<\/a>"],[100,2,"<a href=\"RuleCompiler.php.html#432\">Cline\\Ruler\\DSL\\Wirefilter\\RuleCompiler::createOperator<\/a>"],[100,1,"<a href=\"StringRuleBuilder.php.html#57\">Cline\\Ruler\\DSL\\Wirefilter\\StringRuleBuilder::__construct<\/a>"],[100,1,"<a href=\"StringRuleBuilder.php.html#82\">Cline\\Ruler\\DSL\\Wirefilter\\StringRuleBuilder::parse<\/a>"],[100,1,"<a href=\"StringRuleBuilder.php.html#108\">Cline\\Ruler\\DSL\\Wirefilter\\StringRuleBuilder::parseWithAction<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#47\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::__construct<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#57\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::success<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#72\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::failure<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#82\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::isValid<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#96\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::getErrors<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#106\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::getErrorMessages<\/a>"],[100,1,"<a href=\"ValidationResult.php.html#119\">Cline\\Ruler\\DSL\\Wirefilter\\ValidationResult::getFirstError<\/a>"],[100,1,"<a href=\"WirefilterParser.php.html#58\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterParser::__construct<\/a>"],[100,1,"<a href=\"WirefilterParser.php.html#78\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterParser::parse<\/a>"],[100,1,"<a href=\"WirefilterParser.php.html#99\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterParser::parseWithAction<\/a>"],[100,1,"<a href=\"WirefilterSerializer.php.html#101\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serialize<\/a>"],[100,20,"<a href=\"WirefilterSerializer.php.html#118\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeProposition<\/a>"],[100,1,"<a href=\"WirefilterSerializer.php.html#153\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeBinary<\/a>"],[100,2,"<a href=\"WirefilterSerializer.php.html#172\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeLogical<\/a>"],[83.33333333333334,2,"<a href=\"WirefilterSerializer.php.html#192\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeNot<\/a>"],[0,1,"<a href=\"WirefilterSerializer.php.html#214\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeFunction<\/a>"],[90.9090909090909,3,"<a href=\"WirefilterSerializer.php.html#232\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeGenericOperator<\/a>"],[90,11,"<a href=\"WirefilterSerializer.php.html#261\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeOperand<\/a>"],[100,1,"<a href=\"WirefilterSerializer.php.html#315\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeMath<\/a>"],[100,9,"<a href=\"WirefilterSerializer.php.html#333\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeVariable<\/a>"],[100,6,"<a href=\"WirefilterSerializer.php.html#365\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::serializeValue<\/a>"],[100,10,"<a href=\"WirefilterSerializer.php.html#399\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::wrapIfNeeded<\/a>"],[57.14285714285714,3,"<a href=\"WirefilterSerializer.php.html#423\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterSerializer::getOperands<\/a>"],[100,1,"<a href=\"WirefilterValidator.php.html#69\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator::__construct<\/a>"],[100,2,"<a href=\"WirefilterValidator.php.html#83\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator::validate<\/a>"],[64.28571428571429,3,"<a href=\"WirefilterValidator.php.html#104\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator::validateWithErrors<\/a>"],[66.66666666666666,2,"<a href=\"WirefilterValidator.php.html#133\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator::extractPosition<\/a>"],[90.9090909090909,4,"<a href=\"WirefilterValidator.php.html#154\">Cline\\Ruler\\DSL\\Wirefilter\\WirefilterValidator::extractContext<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

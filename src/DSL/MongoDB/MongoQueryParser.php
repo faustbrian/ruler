@@ -90,8 +90,7 @@ final readonly class MongoQueryParser
      *
      * @param string $json JSON-encoded MongoDB query document
      *
-     * @throws InvalidArgumentException If JSON doesn't decode to an array or query is invalid
-     * @throws JsonException            If JSON string is malformed or cannot be decoded
+     * @throws JsonException If JSON string is malformed or cannot be decoded
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -130,8 +129,7 @@ final readonly class MongoQueryParser
      * @param callable $action Callback to execute when rule evaluates to true.
      *                         Receives the context array as parameter.
      *
-     * @throws InvalidArgumentException If JSON doesn't decode to an array or query is invalid
-     * @throws JsonException            If JSON string is malformed or cannot be decoded
+     * @throws JsonException If JSON string is malformed or cannot be decoded
      *
      * @return Rule The compiled Rule with attached action callback
      */

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /usr/src/myapp/src/DSL/LDAP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../../_css/bootstrap.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/nv.d3.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/style.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../../index.html">/usr/src/myapp/src</a></li>
+         <li class="breadcrumb-item"><a href="../index.html">DSL</a></li>
+         <li class="breadcrumb-item"><a href="index.html">LDAP</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="LDAPFilterSerializer.php.html#78">Cline\Ruler\DSL\LDAP\LDAPFilterSerializer</a></td><td class="text-right">87%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="LDAPFilterSerializer.php.html#78">Cline\Ruler\DSL\LDAP\LDAPFilterSerializer</a></td><td class="text-right">42</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="LDAPFilterSerializer.php.html#336"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">57%</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#294"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::extractValue">extractValue</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#309"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::formatValue">formatValue</abbr></a></td><td class="text-right">77%</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#275"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::extractAttributeName">extractAttributeName</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#201"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::serializeComparison">serializeComparison</abbr></a></td><td class="text-right">87%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="LDAPFilterSerializer.php.html#309"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::formatValue">formatValue</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#336"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#294"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::extractValue">extractValue</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#275"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::extractAttributeName">extractAttributeName</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="LDAPFilterSerializer.php.html#201"><abbr title="Cline\Ruler\DSL\LDAP\LDAPFilterSerializer::serializeComparison">serializeComparison</abbr></a></td><td class="text-right">3</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.11</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.13</a> and <a href="https://phpunit.de/">PHPUnit 11.5.33</a> at Thu Oct 16 3:56:40 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../../_js/jquery.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/nv.d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,0,0,0,1,0,14], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,1,1,1,2,2,43], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"ApproximateNode.php.html#20\">Cline\\Ruler\\DSL\\LDAP\\ApproximateNode<\/a>"],[100,1,"<a href=\"ComparisonNode.php.html#20\">Cline\\Ruler\\DSL\\LDAP\\ComparisonNode<\/a>"],[100,20,"<a href=\"LDAPCompiler.php.html#38\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler<\/a>"],[100,3,"<a href=\"LDAPFilterParser.php.html#50\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterParser<\/a>"],[100,5,"<a href=\"LDAPFilterRuleBuilder.php.html#35\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterRuleBuilder<\/a>"],[87.8048780487805,40,"<a href=\"LDAPFilterSerializer.php.html#78\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer<\/a>"],[100,5,"<a href=\"LDAPFilterValidator.php.html#53\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterValidator<\/a>"],[100,18,"<a href=\"LDAPLexer.php.html#29\">Cline\\Ruler\\DSL\\LDAP\\LDAPLexer<\/a>"],[100,0,"<a href=\"LDAPNode.php.html#21\">Cline\\Ruler\\DSL\\LDAP\\LDAPNode<\/a>"],[100,2,"<a href=\"LDAPOperatorRegistry.php.html#36\">Cline\\Ruler\\DSL\\LDAP\\LDAPOperatorRegistry<\/a>"],[100,20,"<a href=\"LDAPParser.php.html#40\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser<\/a>"],[100,1,"<a href=\"LogicalNode.php.html#21\">Cline\\Ruler\\DSL\\LDAP\\LogicalNode<\/a>"],[100,1,"<a href=\"PresenceNode.php.html#21\">Cline\\Ruler\\DSL\\LDAP\\PresenceNode<\/a>"],[100,1,"<a href=\"Token.php.html#23\">Cline\\Ruler\\DSL\\LDAP\\Token<\/a>"],[100,1,"<a href=\"WildcardNode.php.html#22\">Cline\\Ruler\\DSL\\LDAP\\WildcardNode<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"ApproximateNode.php.html#32\">Cline\\Ruler\\DSL\\LDAP\\ApproximateNode::__construct<\/a>"],[100,1,"<a href=\"ComparisonNode.php.html#34\">Cline\\Ruler\\DSL\\LDAP\\ComparisonNode::__construct<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#50\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::__construct<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#67\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compile<\/a>"],[100,6,"<a href=\"LDAPCompiler.php.html#88\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::parseValue<\/a>"],[100,7,"<a href=\"LDAPCompiler.php.html#124\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compileNode<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#148\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compileLogical<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#176\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compileComparison<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#205\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compileWildcard<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#234\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compilePresence<\/a>"],[100,1,"<a href=\"LDAPCompiler.php.html#262\">Cline\\Ruler\\DSL\\LDAP\\LDAPCompiler::compileApproximate<\/a>"],[100,1,"<a href=\"LDAPFilterParser.php.html#64\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterParser::__construct<\/a>"],[100,1,"<a href=\"LDAPFilterParser.php.html#84\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterParser::parse<\/a>"],[100,1,"<a href=\"LDAPFilterParser.php.html#105\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterParser::parseWithAction<\/a>"],[100,1,"<a href=\"LDAPFilterRuleBuilder.php.html#49\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterRuleBuilder::__construct<\/a>"],[100,1,"<a href=\"LDAPFilterRuleBuilder.php.html#69\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterRuleBuilder::parse<\/a>"],[100,1,"<a href=\"LDAPFilterRuleBuilder.php.html#90\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterRuleBuilder::parseWithAction<\/a>"],[100,2,"<a href=\"LDAPFilterRuleBuilder.php.html#109\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterRuleBuilder::validate<\/a>"],[100,1,"<a href=\"LDAPFilterSerializer.php.html#92\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serialize<\/a>"],[100,11,"<a href=\"LDAPFilterSerializer.php.html#109\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serializeProposition<\/a>"],[100,2,"<a href=\"LDAPFilterSerializer.php.html#137\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serializeLogical<\/a>"],[92.3076923076923,5,"<a href=\"LDAPFilterSerializer.php.html#160\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serializeNot<\/a>"],[87.5,3,"<a href=\"LDAPFilterSerializer.php.html#201\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serializeComparison<\/a>"],[93.33333333333333,3,"<a href=\"LDAPFilterSerializer.php.html#232\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::serializeMatches<\/a>"],[80,3,"<a href=\"LDAPFilterSerializer.php.html#275\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::extractAttributeName<\/a>"],[66.66666666666666,3,"<a href=\"LDAPFilterSerializer.php.html#294\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::extractValue<\/a>"],[77.77777777777779,6,"<a href=\"LDAPFilterSerializer.php.html#309\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::formatValue<\/a>"],[57.14285714285714,3,"<a href=\"LDAPFilterSerializer.php.html#336\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterSerializer::getOperands<\/a>"],[100,1,"<a href=\"LDAPFilterValidator.php.html#63\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterValidator::__construct<\/a>"],[100,2,"<a href=\"LDAPFilterValidator.php.html#77\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterValidator::validate<\/a>"],[100,2,"<a href=\"LDAPFilterValidator.php.html#98\">Cline\\Ruler\\DSL\\LDAP\\LDAPFilterValidator::validateWithErrors<\/a>"],[100,1,"<a href=\"LDAPLexer.php.html#43\">Cline\\Ruler\\DSL\\LDAP\\LDAPLexer::__construct<\/a>"],[100,8,"<a href=\"LDAPLexer.php.html#59\">Cline\\Ruler\\DSL\\LDAP\\LDAPLexer::tokenize<\/a>"],[100,2,"<a href=\"LDAPLexer.php.html#107\">Cline\\Ruler\\DSL\\LDAP\\LDAPLexer::parseItem<\/a>"],[100,7,"<a href=\"LDAPLexer.php.html#133\">Cline\\Ruler\\DSL\\LDAP\\LDAPLexer::readItem<\/a>"],[100,1,"<a href=\"LDAPOperatorRegistry.php.html#64\">Cline\\Ruler\\DSL\\LDAP\\LDAPOperatorRegistry::getComparison<\/a>"],[100,1,"<a href=\"LDAPOperatorRegistry.php.html#80\">Cline\\Ruler\\DSL\\LDAP\\LDAPOperatorRegistry::getLogical<\/a>"],[100,1,"<a href=\"LDAPParser.php.html#60\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parse<\/a>"],[100,6,"<a href=\"LDAPParser.php.html#79\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parseFilter<\/a>"],[100,2,"<a href=\"LDAPParser.php.html#108\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parseAnd<\/a>"],[100,2,"<a href=\"LDAPParser.php.html#133\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parseOr<\/a>"],[100,1,"<a href=\"LDAPParser.php.html#155\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parseNot<\/a>"],[100,5,"<a href=\"LDAPParser.php.html#171\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::parseItem<\/a>"],[100,1,"<a href=\"LDAPParser.php.html#207\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::current<\/a>"],[100,1,"<a href=\"LDAPParser.php.html#219\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::advance<\/a>"],[100,1,"<a href=\"LDAPParser.php.html#233\">Cline\\Ruler\\DSL\\LDAP\\LDAPParser::expect<\/a>"],[100,1,"<a href=\"LogicalNode.php.html#35\">Cline\\Ruler\\DSL\\LDAP\\LogicalNode::__construct<\/a>"],[100,1,"<a href=\"PresenceNode.php.html#31\">Cline\\Ruler\\DSL\\LDAP\\PresenceNode::__construct<\/a>"],[100,1,"<a href=\"Token.php.html#71\">Cline\\Ruler\\DSL\\LDAP\\Token::__construct<\/a>"],[100,1,"<a href=\"WildcardNode.php.html#35\">Cline\\Ruler\\DSL\\LDAP\\WildcardNode::__construct<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

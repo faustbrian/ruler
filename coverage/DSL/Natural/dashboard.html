@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /usr/src/myapp/src/DSL/Natural</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../../_css/bootstrap.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/nv.d3.min.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/style.css?v=11.0.11" rel="stylesheet" type="text/css">
+  <link href="../../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../../index.html">/usr/src/myapp/src</a></li>
+         <li class="breadcrumb-item"><a href="../index.html">DSL</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Natural</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#362"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">57%</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#262"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::serializeField">serializeField</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#323"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::getListValues">getListValues</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#299"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::formatValue">formatValue</abbr></a></td><td class="text-right">85%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#299"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::formatValue">formatValue</abbr></a></td><td class="text-right">5</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#262"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::serializeField">serializeField</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#323"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::getListValues">getListValues</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="NaturalLanguageSerializer.php.html#362"><abbr title="Cline\Ruler\DSL\Natural\NaturalLanguageSerializer::getOperands">getOperands</abbr></a></td><td class="text-right">3</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.11</a> using <a href="https://www.php.net/" target="_top">PHP 8.4.13</a> and <a href="https://phpunit.de/">PHPUnit 11.5.33</a> at Thu Oct 16 3:56:40 UTC 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../../_js/jquery.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script src="../../_js/nv.d3.min.js?v=11.0.11" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,0,0,0,0,1,5], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,1,0,0,3,0,37], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[100,49,"<a href=\"ASTParser.php.html#41\">Cline\\Ruler\\DSL\\Natural\\ASTParser<\/a>"],[100,28,"<a href=\"NaturalLanguageCompiler.php.html#46\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler<\/a>"],[100,3,"<a href=\"NaturalLanguageParser.php.html#43\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageParser<\/a>"],[100,3,"<a href=\"NaturalLanguageRuleBuilder.php.html#28\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageRuleBuilder<\/a>"],[93.81443298969072,49,"<a href=\"NaturalLanguageSerializer.php.html#73\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer<\/a>"],[100,5,"<a href=\"NaturalLanguageValidator.php.html#53\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageValidator<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"ASTParser.php.html#52\">Cline\\Ruler\\DSL\\Natural\\ASTParser::parse<\/a>"],[100,1,"<a href=\"ASTParser.php.html#65\">Cline\\Ruler\\DSL\\Natural\\ASTParser::normalize<\/a>"],[100,5,"<a href=\"ASTParser.php.html#84\">Cline\\Ruler\\DSL\\Natural\\ASTParser::parseCondition<\/a>"],[100,2,"<a href=\"ASTParser.php.html#107\">Cline\\Ruler\\DSL\\Natural\\ASTParser::tryParseBetween<\/a>"],[100,3,"<a href=\"ASTParser.php.html#132\">Cline\\Ruler\\DSL\\Natural\\ASTParser::tryParseListMembership<\/a>"],[100,4,"<a href=\"ASTParser.php.html#178\">Cline\\Ruler\\DSL\\Natural\\ASTParser::tryParseStringOperation<\/a>"],[100,5,"<a href=\"ASTParser.php.html#226\">Cline\\Ruler\\DSL\\Natural\\ASTParser::tryParseComparison<\/a>"],[100,9,"<a href=\"ASTParser.php.html#292\">Cline\\Ruler\\DSL\\Natural\\ASTParser::parseValue<\/a>"],[100,9,"<a href=\"ASTParser.php.html#334\">Cline\\Ruler\\DSL\\Natural\\ASTParser::splitByLogical<\/a>"],[100,2,"<a href=\"ASTParser.php.html#375\">Cline\\Ruler\\DSL\\Natural\\ASTParser::hasTopLevelParentheses<\/a>"],[100,8,"<a href=\"ASTParser.php.html#394\">Cline\\Ruler\\DSL\\Natural\\ASTParser::parseExpression<\/a>"],[100,1,"<a href=\"NaturalLanguageCompiler.php.html#59\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::__construct<\/a>"],[100,7,"<a href=\"NaturalLanguageCompiler.php.html#76\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compile<\/a>"],[100,4,"<a href=\"NaturalLanguageCompiler.php.html#100\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compileLogical<\/a>"],[100,8,"<a href=\"NaturalLanguageCompiler.php.html#129\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compileComparison<\/a>"],[100,1,"<a href=\"NaturalLanguageCompiler.php.html#156\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compileBetween<\/a>"],[100,2,"<a href=\"NaturalLanguageCompiler.php.html#173\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compileIn<\/a>"],[100,5,"<a href=\"NaturalLanguageCompiler.php.html#196\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageCompiler::compileString<\/a>"],[100,1,"<a href=\"NaturalLanguageParser.php.html#57\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageParser::__construct<\/a>"],[100,1,"<a href=\"NaturalLanguageParser.php.html#78\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageParser::parse<\/a>"],[100,1,"<a href=\"NaturalLanguageParser.php.html#98\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageParser::parseWithAction<\/a>"],[100,1,"<a href=\"NaturalLanguageRuleBuilder.php.html#52\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageRuleBuilder::__construct<\/a>"],[100,1,"<a href=\"NaturalLanguageRuleBuilder.php.html#72\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageRuleBuilder::parse<\/a>"],[100,1,"<a href=\"NaturalLanguageRuleBuilder.php.html#93\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageRuleBuilder::parseWithAction<\/a>"],[100,1,"<a href=\"NaturalLanguageSerializer.php.html#87\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serialize<\/a>"],[100,16,"<a href=\"NaturalLanguageSerializer.php.html#104\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeProposition<\/a>"],[100,1,"<a href=\"NaturalLanguageSerializer.php.html#135\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeComparison<\/a>"],[100,1,"<a href=\"NaturalLanguageSerializer.php.html#153\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeBetween<\/a>"],[100,2,"<a href=\"NaturalLanguageSerializer.php.html#172\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeIn<\/a>"],[100,1,"<a href=\"NaturalLanguageSerializer.php.html#199\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeNotIn<\/a>"],[100,1,"<a href=\"NaturalLanguageSerializer.php.html#223\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeStringOperation<\/a>"],[100,2,"<a href=\"NaturalLanguageSerializer.php.html#242\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeLogical<\/a>"],[80,4,"<a href=\"NaturalLanguageSerializer.php.html#262\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeField<\/a>"],[100,3,"<a href=\"NaturalLanguageSerializer.php.html#281\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::serializeValue<\/a>"],[85.71428571428571,5,"<a href=\"NaturalLanguageSerializer.php.html#299\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::formatValue<\/a>"],[80,4,"<a href=\"NaturalLanguageSerializer.php.html#323\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::getListValues<\/a>"],[100,5,"<a href=\"NaturalLanguageSerializer.php.html#343\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::wrapIfNeeded<\/a>"],[57.14285714285714,3,"<a href=\"NaturalLanguageSerializer.php.html#362\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageSerializer::getOperands<\/a>"],[100,1,"<a href=\"NaturalLanguageValidator.php.html#63\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageValidator::__construct<\/a>"],[100,2,"<a href=\"NaturalLanguageValidator.php.html#77\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageValidator::validate<\/a>"],[100,2,"<a href=\"NaturalLanguageValidator.php.html#98\">Cline\\Ruler\\DSL\\Natural\\NaturalLanguageValidator::validateWithErrors<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

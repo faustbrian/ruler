@@ -35,7 +35,14 @@ use Cline\Ruler\Operators\Set\ContainsSubset;
 use Cline\Ruler\Operators\Set\DoesNotContainSubset;
 use Cline\Ruler\Operators\Set\SetContains;
 use Cline\Ruler\Operators\Set\SetDoesNotContain;
+use Cline\Ruler\Operators\String\EndsWith;
+use Cline\Ruler\Operators\String\EndsWithInsensitive;
+use Cline\Ruler\Operators\String\StartsWith;
+use Cline\Ruler\Operators\String\StartsWithInsensitive;
+use Cline\Ruler\Operators\String\StringContainsInsensitive;
 use Cline\Ruler\Values\Value;
+
+
 
 describe('Variable', function (): void {
     describe('Happy Paths', function (): void {
@@ -349,6 +356,41 @@ describe('Variable', function (): void {
             expect($result)->toBeInstanceOf(Variable::class);
             expect($result->getValue())->toBeInstanceOf(Abs::class);
             expect($result->prepareValue($context)->getValue())->toBe(5);
+        });
+
+        test('stringContainsInsensitive', function (): void {
+            $rb = new RuleBuilder();
+            $var = new Variable($rb, 'text', 'Hello World');
+            $op = $var->stringContainsInsensitive('WORLD');
+            expect($op)->toBeInstanceOf(StringContainsInsensitive::class);
+        });
+
+        test('startsWith', function (): void {
+            $rb = new RuleBuilder();
+            $var = new Variable($rb, 'text', 'Hello World');
+            $op = $var->startsWith('Hello');
+            expect($op)->toBeInstanceOf(StartsWith::class);
+        });
+
+        test('startsWithInsensitive', function (): void {
+            $rb = new RuleBuilder();
+            $var = new Variable($rb, 'text', 'Hello World');
+            $op = $var->startsWithInsensitive('hello');
+            expect($op)->toBeInstanceOf(StartsWithInsensitive::class);
+        });
+
+        test('endsWith', function (): void {
+            $rb = new RuleBuilder();
+            $var = new Variable($rb, 'text', 'Hello World');
+            $op = $var->endsWith('World');
+            expect($op)->toBeInstanceOf(EndsWith::class);
+        });
+
+        test('endsWithInsensitive', function (): void {
+            $rb = new RuleBuilder();
+            $var = new Variable($rb, 'text', 'Hello World');
+            $op = $var->endsWithInsensitive('world');
+            expect($op)->toBeInstanceOf(EndsWithInsensitive::class);
         });
     });
 });

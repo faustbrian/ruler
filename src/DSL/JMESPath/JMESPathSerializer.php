@@ -13,6 +13,7 @@ use Cline\Ruler\Core\Rule;
 use LogicException;
 use ReflectionClass;
 
+use function is_string;
 use function throw_unless;
 
 /**
@@ -83,7 +84,10 @@ final readonly class JMESPathSerializer
     {
         $reflection = new ReflectionClass($proposition);
         $expressionProperty = $reflection->getProperty('expression');
+        $expression = $expressionProperty->getValue($proposition);
 
-        return $expressionProperty->getValue($proposition);
+        throw_unless(is_string($expression), LogicException::class, 'Expression must be a string');
+
+        return $expression;
     }
 }
