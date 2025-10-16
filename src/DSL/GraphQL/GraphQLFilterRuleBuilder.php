@@ -92,4 +92,23 @@ final readonly class GraphQLFilterRuleBuilder
     {
         return $this->parse($json);
     }
+
+    /**
+     * Parse GraphQL filter syntax and build an executable rule with an action callback.
+     *
+     * Creates a Rule that executes the provided callback when the parsed condition
+     * evaluates to true. The callback receives the evaluation context as its argument.
+     *
+     * @param  array<string, mixed>|string $filter GraphQL filter query as JSON string or PHP array
+     * @param  callable                    $action Callback to execute when rule evaluates to true.
+     *                                             Receives the context array as parameter.
+     * @return Rule                        compiled rule with attached action callback
+     */
+    public function parseWithAction(string|array $filter, callable $action): Rule
+    {
+        $ast = $this->parser->parse($filter);
+        $proposition = $this->compiler->compile($ast);
+
+        return $this->ruleBuilder->create($proposition, $action);
+    }
 }

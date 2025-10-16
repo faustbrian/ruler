@@ -93,4 +93,45 @@ final readonly class MongoQueryRuleBuilder
 
         return $this->parse($query);
     }
+
+    /**
+     * Parse a MongoDB query document and attach an action callback.
+     *
+     * Creates a Rule that executes the provided callback when the parsed
+     * condition evaluates to true.
+     *
+     * @param array<string, mixed> $query  MongoDB-style query document with fields and operators
+     * @param callable             $action Callback to execute when rule evaluates to true
+     *
+     * @return Rule Compiled rule with attached action callback
+     */
+    public function parseWithAction(array $query, callable $action): Rule
+    {
+        $proposition = $this->compiler->compile($query);
+
+        return $this->ruleBuilder->create($proposition, $action);
+    }
+
+    /**
+     * Parse a JSON-encoded MongoDB query string and attach an action callback.
+     *
+     * Creates a Rule from JSON that executes the provided callback when the
+     * parsed condition evaluates to true.
+     *
+     * @param string   $json   JSON-encoded MongoDB query document
+     * @param callable $action Callback to execute when rule evaluates to true
+     *
+     * @throws JsonException If JSON string is malformed or cannot be decoded
+     *
+     * @return Rule Compiled rule with attached action callback
+     */
+    public function parseJsonWithAction(string $json, callable $action): Rule
+    {
+        $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        /** @var array<string, mixed> $query */
+        $query = is_array($decoded) ? $decoded : throw new InvalidArgumentException('JSON must decode to array');
+
+        return $this->parseWithAction($query, $action);
+    }
 }

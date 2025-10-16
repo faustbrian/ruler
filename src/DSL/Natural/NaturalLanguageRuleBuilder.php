@@ -35,7 +35,7 @@ final readonly class NaturalLanguageRuleBuilder
     /**
      * Parser for converting text to AST.
      */
-    private NaturalLanguageParser $parser;
+    private ASTParser $parser;
 
     /**
      * Compiler for converting AST to propositions.
@@ -52,7 +52,7 @@ final readonly class NaturalLanguageRuleBuilder
     public function __construct(?RuleBuilder $ruleBuilder = null)
     {
         $this->ruleBuilder = $ruleBuilder ?? new RuleBuilder();
-        $this->parser = new NaturalLanguageParser();
+        $this->parser = new ASTParser();
         $this->compiler = new NaturalLanguageCompiler($this->ruleBuilder);
     }
 
@@ -75,5 +75,26 @@ final readonly class NaturalLanguageRuleBuilder
         $proposition = $this->compiler->compile($ast);
 
         return $this->ruleBuilder->create($proposition);
+    }
+
+    /**
+     * Parse a natural language expression with an action callback.
+     *
+     * Converts a human-readable rule expression into an executable Rule object
+     * with an attached action that executes when the rule evaluates to true.
+     *
+     * @param string   $text   Natural language rule expression to parse
+     * @param callable $action Callback to execute when rule evaluates to true
+     *
+     * @throws InvalidArgumentException If expression cannot be parsed
+     *
+     * @return Rule Compiled rule with action callback
+     */
+    public function parseWithAction(string $text, callable $action): Rule
+    {
+        $ast = $this->parser->parse($text);
+        $proposition = $this->compiler->compile($ast);
+
+        return $this->ruleBuilder->create($proposition, $action);
     }
 }

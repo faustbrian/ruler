@@ -67,6 +67,27 @@ final readonly class JMESPathRuleBuilder
     }
 
     /**
+     * Parses a JMESPath expression into a Rule with an action callback.
+     *
+     * Creates a JMESPathProposition from the expression, wraps it in a Rule,
+     * and attaches the provided action callback to execute when the rule
+     * evaluates to true.
+     *
+     * @param  string   $expression JMESPath query expression to parse
+     * @param  callable $action     Callback to execute when rule evaluates to true
+     * @return Rule     The compiled Rule with attached action callback
+     */
+    public function parseWithAction(string $expression, callable $action): Rule
+    {
+        $rb = $this->ruleBuilder ?? new RuleBuilder();
+
+        return $rb->create(
+            new JMESPathProposition($expression, $this->adapter),
+            $action,
+        );
+    }
+
+    /**
      * Validates JMESPath expression syntax.
      *
      * Attempts to evaluate the expression with empty data to check for syntax

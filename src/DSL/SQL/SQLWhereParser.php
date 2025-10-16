@@ -7,17 +7,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Ruler\DSL\Natural;
+namespace Cline\Ruler\DSL\SQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 
 /**
- * Public facade for parsing Natural Language DSL expressions into Rules.
+ * Public facade for parsing SQL WHERE clause expressions into Rules.
  *
- * Provides a clean interface for converting human-readable natural language
- * expressions into executable Rule objects. This class follows the standardized
- * DSL facade pattern that should be replicated across all DSL implementations.
+ * Provides a clean interface for converting SQL WHERE clause syntax into
+ * executable Rule objects. This class follows the standardized DSL facade
+ * pattern that should be replicated across all DSL implementations.
  *
  * Pattern: Each DSL should provide three public classes:
  * - {DSL}Parser: Parse DSL strings → Rule objects
@@ -26,28 +26,28 @@ use Cline\Ruler\Core\Rule;
  *
  * Example usage:
  * ```php
- * $parser = new NaturalLanguageParser();
- * $rule = $parser->parse('age is greater than or equal to 18 and country equals US');
+ * $parser = new SQLWhereParser();
+ * $rule = $parser->parse("age >= 18 AND country = 'US'");
  * $result = $rule->evaluate($context);
  * ```
  *
  * @author Brian Faust <brian@cline.sh>
  *
- * @see NaturalLanguageRuleBuilder Internal implementation used by this facade
- * @see NaturalLanguageSerializer For converting Rules back to DSL strings
- * @see NaturalLanguageValidator For validating DSL strings
+ * @see SqlWhereRuleBuilder Internal implementation used by this facade
+ * @see SQLWhereSerializer For converting Rules back to SQL WHERE strings
+ * @see SQLWhereValidator For validating SQL WHERE strings
  *
  * @psalm-immutable
  */
-final readonly class NaturalLanguageParser
+final readonly class SQLWhereParser
 {
     /**
      * Internal DSL rule builder.
      */
-    private NaturalLanguageRuleBuilder $builder;
+    private SqlWhereRuleBuilder $builder;
 
     /**
-     * Create a new NaturalLanguageParser instance.
+     * Create a new SQLWhereParser instance.
      *
      * @param null|RuleBuilder $ruleBuilder Optional RuleBuilder for creating Variables and Rules.
      *                                      If not provided, a new instance will be created
@@ -56,21 +56,19 @@ final readonly class NaturalLanguageParser
     public function __construct(
         ?RuleBuilder $ruleBuilder = null,
     ) {
-        $this->builder = new NaturalLanguageRuleBuilder($ruleBuilder);
+        $this->builder = new SqlWhereRuleBuilder($ruleBuilder);
     }
 
     /**
-     * Parse a Natural Language DSL expression string into a Rule.
+     * Parse a SQL WHERE clause expression into a Rule.
      *
-     * Parses natural language expressions like "age is greater than or equal to 18 and
-     * country equals US" into executable Rule objects. Supports comparison operators
-     * (is, is greater than, is less than, etc.), logical operators (and, or), range
-     * checks (is between), list membership (is one of), and string operations
-     * (contains, starts with, ends with).
+     * Parses SQL WHERE clause syntax like "age >= 18 AND country = 'US'"
+     * into executable Rule objects. Does not require the WHERE keyword prefix.
+     * Supports all SQL operators including comparison, logical, set, and null checks.
      *
-     * @param string $expression The Natural Language DSL expression to parse
+     * @param string $expression The SQL WHERE clause expression to parse (without 'WHERE' keyword)
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws \InvalidArgumentException When SQL syntax is invalid
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -80,17 +78,17 @@ final readonly class NaturalLanguageParser
     }
 
     /**
-     * Parse a Natural Language DSL expression and attach an action callback.
+     * Parse a SQL WHERE clause expression and attach an action callback.
      *
      * Creates a Rule that executes the provided callback when the parsed
      * condition evaluates to true. The callback receives the evaluation
      * context as its argument.
      *
-     * @param string   $expression The Natural Language DSL expression to parse
+     * @param string   $expression The SQL WHERE clause expression to parse
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws \InvalidArgumentException When SQL syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */

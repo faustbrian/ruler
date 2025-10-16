@@ -7,17 +7,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Ruler\DSL\Natural;
+namespace Cline\Ruler\DSL\JMESPath;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 
 /**
- * Public facade for parsing Natural Language DSL expressions into Rules.
+ * Public facade for parsing JMESPath filter expressions into Rules.
  *
- * Provides a clean interface for converting human-readable natural language
- * expressions into executable Rule objects. This class follows the standardized
- * DSL facade pattern that should be replicated across all DSL implementations.
+ * Provides a clean interface for converting JMESPath filter expressions
+ * into executable Rule objects. This class follows the standardized DSL facade
+ * pattern that should be replicated across all DSL implementations.
  *
  * Pattern: Each DSL should provide three public classes:
  * - {DSL}Parser: Parse DSL strings → Rule objects
@@ -26,28 +26,28 @@ use Cline\Ruler\Core\Rule;
  *
  * Example usage:
  * ```php
- * $parser = new NaturalLanguageParser();
- * $rule = $parser->parse('age is greater than or equal to 18 and country equals US');
+ * $parser = new JMESPathParser();
+ * $rule = $parser->parse('user.age >= `18` && user.country == `"US"`');
  * $result = $rule->evaluate($context);
  * ```
  *
  * @author Brian Faust <brian@cline.sh>
  *
- * @see NaturalLanguageRuleBuilder Internal implementation used by this facade
- * @see NaturalLanguageSerializer For converting Rules back to DSL strings
- * @see NaturalLanguageValidator For validating DSL strings
+ * @see JMESPathRuleBuilder Internal implementation used by this facade
+ * @see JMESPathSerializer For converting Rules back to DSL strings
+ * @see JMESPathValidator For validating DSL strings
  *
  * @psalm-immutable
  */
-final readonly class NaturalLanguageParser
+final readonly class JMESPathParser
 {
     /**
      * Internal DSL rule builder.
      */
-    private NaturalLanguageRuleBuilder $builder;
+    private JMESPathRuleBuilder $builder;
 
     /**
-     * Create a new NaturalLanguageParser instance.
+     * Create a new JMESPathParser instance.
      *
      * @param null|RuleBuilder $ruleBuilder Optional RuleBuilder for creating Variables and Rules.
      *                                      If not provided, a new instance will be created
@@ -56,21 +56,19 @@ final readonly class NaturalLanguageParser
     public function __construct(
         ?RuleBuilder $ruleBuilder = null,
     ) {
-        $this->builder = new NaturalLanguageRuleBuilder($ruleBuilder);
+        $this->builder = new JMESPathRuleBuilder($ruleBuilder);
     }
 
     /**
-     * Parse a Natural Language DSL expression string into a Rule.
+     * Parse a JMESPath filter expression string into a Rule.
      *
-     * Parses natural language expressions like "age is greater than or equal to 18 and
-     * country equals US" into executable Rule objects. Supports comparison operators
-     * (is, is greater than, is less than, etc.), logical operators (and, or), range
-     * checks (is between), list membership (is one of), and string operations
-     * (contains, starts with, ends with).
+     * Parses JMESPath-style filter expressions like "user.age >= `18`"
+     * into executable Rule objects. Supports JMESPath comparison operators,
+     * functions, and filter syntax.
      *
-     * @param string $expression The Natural Language DSL expression to parse
+     * @param string $expression The JMESPath filter expression to parse
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws \Exception When expression evaluation fails
      *
      * @return Rule The compiled Rule ready for evaluation
      */
@@ -80,17 +78,17 @@ final readonly class NaturalLanguageParser
     }
 
     /**
-     * Parse a Natural Language DSL expression and attach an action callback.
+     * Parse a JMESPath filter expression and attach an action callback.
      *
      * Creates a Rule that executes the provided callback when the parsed
      * condition evaluates to true. The callback receives the evaluation
      * context as its argument.
      *
-     * @param string   $expression The Natural Language DSL expression to parse
+     * @param string   $expression The JMESPath filter expression to parse
      * @param callable $action     Callback to execute when rule evaluates to true.
      *                             Receives the context array as parameter.
      *
-     * @throws \InvalidArgumentException When expression cannot be parsed
+     * @throws \Exception When expression evaluation fails
      *
      * @return Rule The compiled Rule with attached action callback
      */
