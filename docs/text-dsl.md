@@ -1,8 +1,3 @@
----
-title: Text-Based DSL
-description: Create rules using natural, readable text syntax with the Wirefilter-style DSL.
----
-
 Ruler supports a Wirefilter-style text-based DSL for creating rules using natural, readable syntax. This complements the fluent PHP API—both produce identical results.
 
 ## Quick Start

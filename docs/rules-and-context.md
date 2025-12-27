@@ -1,8 +1,3 @@
----
-title: Rules and Context
-description: Working with rules, rule sets, and dynamic context for complex business logic.
----
-
 ## Working with Rules
 
 ### Combining Rules

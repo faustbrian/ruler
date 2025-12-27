@@ -1,8 +1,3 @@
----
-title: Operators
-description: Complete reference for Ruler's 50+ comparison, mathematical, set, and logical operators.
----
-
 Ruler provides over 50 operators for building expressive rule conditions.
 
 ## Comparison Operators

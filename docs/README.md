@@ -1,8 +1,3 @@
----
-title: Getting Started
-description: Install and start using Ruler for fluent rule evaluation and conditional business logic in PHP.
----
-
 Ruler is a fluent rule engine with proposition-based evaluation and 50+ operators for building conditional business logic. Create readable, testable rules using either the fluent PHP API or text-based DSL syntax.
 
 ## Installation

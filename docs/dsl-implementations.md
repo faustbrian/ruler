@@ -1,8 +1,3 @@
----
-title: DSL Implementations
-description: Overview of Ruler's five DSL implementations and when to use each one.
----
-
 Ruler provides five distinct DSL implementations for different use cases. Each produces the same Ruler operators but with syntax optimized for specific contexts.
 
 ## Quick Comparison
