@@ -91,5 +91,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom operator support
 - Comprehensive test suite
 
-[2.0.0]: https://github.com/faustbrian/ruler/compare/1.0.0...2.0.0
-[1.0.0]: https://github.com/faustbrian/ruler/releases/tag/1.0.0
+[2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
+[1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0
