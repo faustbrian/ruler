@@ -81,7 +81,10 @@ final readonly class RuleEvaluator
         array $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
     ): self {
-        return new self($rules, $compiledRuleCache ?? new InMemoryCompiledRuleCache());
+        $evaluator = new self($rules, $compiledRuleCache ?? new InMemoryCompiledRuleCache());
+        $evaluator->getCompiledRule();
+
+        return $evaluator;
     }
 
     /**

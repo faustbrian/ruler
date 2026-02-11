@@ -411,11 +411,24 @@ YAML;
             expect($secondResult->getResult())->toBeFalse();
             expect($cache->writes)->toBe(1);
             expect($cache->misses)->toBe(1);
-            expect($cache->hits)->toBe(1);
+            expect($cache->hits)->toBe(3);
         });
     });
 
     describe('Sad Paths', function (): void {
+        test('throws on invalid combinator during construction', function (): void {
+            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
+                'combinator' => 'nandd',
+                'value' => [
+                    [
+                        'field' => 'status',
+                        'operator' => 'sameAs',
+                        'value' => 'active',
+                    ],
+                ],
+            ]))->toThrow(RuleEvaluatorException::class);
+        });
+
         test('returns false when propositions fail', function (): void {
             // Arrange
             $evaluator = RuleEvaluator::createFromArray([
@@ -434,8 +447,7 @@ YAML;
         });
 
         test('throws exception when not combinator has multiple operands', function (): void {
-            // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
                 'combinator' => 'not',
                 'value' => [
                     [
@@ -449,36 +461,22 @@ YAML;
                         'value' => true,
                     ],
                 ],
-            ]);
-
-            // Act & Assert
-            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray(['status' => 'active', 'enabled' => true]))
-                ->toThrow(RuleEvaluatorException::class);
+            ]))->toThrow(RuleEvaluatorException::class);
         });
 
         test('throws exception when not combinator has no operands', function (): void {
-            // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
                 'combinator' => 'not',
                 'value' => [],
-            ]);
-
-            // Act & Assert
-            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray([]))
-                ->toThrow(RuleEvaluatorException::class);
+            ]))->toThrow(RuleEvaluatorException::class);
         });
 
         test('throws exception for invalid rule structure without combinator or operator', function (): void {
-            // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
                 'field' => 'status',
                 'value' => 'active',
                 // Missing 'operator' key
-            ]);
-
-            // Act & Assert
-            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray(['status' => 'active']))
-                ->toThrow(RuleEvaluatorException::class);
+            ]))->toThrow(RuleEvaluatorException::class);
         });
 
         test('returns false when json evaluation fails validation', function (): void {
