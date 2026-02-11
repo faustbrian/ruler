@@ -126,6 +126,24 @@ describe('Rule', function (): void {
             expect($result->actionExecuted)->toBeTrue();
             expect($actionExecuted)->toBeTrue();
         });
+
+        test('action can receive context when callback expects parameter', function (): void {
+            $capturedContext = null;
+            $context = new Context(['userId' => 99]);
+
+            $rule = new Rule(
+                new TrueProposition(),
+                function (Context $ctx) use (&$capturedContext): void {
+                    $capturedContext = $ctx;
+                },
+            );
+
+            $result = $rule->executeWithResult($context);
+
+            expect($result->matched)->toBeTrue();
+            expect($result->actionExecuted)->toBeTrue();
+            expect($capturedContext)->toBe($context);
+        });
     });
 
     describe('Sad Paths', function (): void {

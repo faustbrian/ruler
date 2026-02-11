@@ -130,6 +130,19 @@ describe('WirefilterParser', function (): void {
             expect($executed)->toBeFalse();
         });
 
+        test('parseWithAction passes context when callback expects it', function (): void {
+            $parser = new WirefilterParser();
+            $capturedContext = null;
+            $rule = $parser->parseWithAction('age >= 18', function (Context $context) use (&$capturedContext): void {
+                $capturedContext = $context;
+            });
+
+            $context = new Context(['age' => 25]);
+            $rule->execute($context);
+
+            expect($capturedContext)->toBe($context);
+        });
+
         test('parse in operator with array', function (): void {
             $parser = new WirefilterParser();
             $rule = $parser->parse('country in ["US", "CA", "UK"]');
