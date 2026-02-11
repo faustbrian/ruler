@@ -261,6 +261,100 @@ describe('RuleSet', function (): void {
             expect($executed)->toBe(['A']);
             expect($report->getResults())->toHaveCount(3);
         });
+
+        test('can disable and enable rule by id', function (): void {
+            $context = new Context();
+            $true = new TrueProposition();
+            $executed = [];
+
+            $ruleA = new Rule(
+                $true,
+                function () use (&$executed): void {
+                    $executed[] = 'A';
+                },
+                'rule-a',
+                'A',
+            );
+            $ruleB = new Rule(
+                $true,
+                function () use (&$executed): void {
+                    $executed[] = 'B';
+                },
+                'rule-b',
+                'B',
+            );
+
+            $ruleset = new RuleSet([$ruleA, $ruleB]);
+            $ruleset->disableRule('rule-a');
+            $ruleset->executeRules($context);
+
+            expect($ruleset->isRuleEnabled('rule-a'))->toBeFalse();
+            expect($executed)->toBe(['B']);
+
+            $executed = [];
+            $ruleset->enableRule('rule-a');
+            $ruleset->executeRules($context);
+
+            expect($ruleset->isRuleEnabled('rule-a'))->toBeTrue();
+            expect($executed)->toBe(['A', 'B']);
+        });
+
+        test('removeRule and replaceRule update executable set', function (): void {
+            $context = new Context();
+            $true = new TrueProposition();
+            $executed = [];
+
+            $original = new Rule(
+                $true,
+                function () use (&$executed): void {
+                    $executed[] = 'original';
+                },
+                'original',
+                'Original',
+            );
+
+            $replacement = new Rule(
+                $true,
+                function () use (&$executed): void {
+                    $executed[] = 'replacement';
+                },
+                'replacement',
+                'Replacement',
+            );
+
+            $removeMe = new Rule(
+                $true,
+                function () use (&$executed): void {
+                    $executed[] = 'remove';
+                },
+                'remove',
+                'Remove',
+            );
+
+            $ruleset = new RuleSet([$original, $removeMe]);
+            $ruleset->replaceRule($original, $replacement);
+            $ruleset->removeRule($removeMe);
+
+            $ruleset->executeRules($context);
+
+            expect($executed)->toBe(['replacement']);
+            expect($ruleset->getRules())->toHaveCount(1);
+            expect($ruleset->getRules()[0]->getId())->toBe('replacement');
+        });
+
+        test('clearRules removes all rules and resets lifecycle state', function (): void {
+            $true = new TrueProposition();
+            $ruleA = new Rule($true, null, 'a', 'A');
+            $ruleB = new Rule($true, null, 'b', 'B');
+
+            $ruleset = new RuleSet([$ruleA, $ruleB]);
+            $ruleset->disableRule('a');
+            $ruleset->clearRules();
+
+            expect($ruleset->getRules())->toBe([]);
+            expect($ruleset->isRuleEnabled('a'))->toBeFalse();
+            expect($ruleset->isRuleEnabled('b'))->toBeFalse();
+        });
     });
 
     describe('Sad Paths', function (): void {

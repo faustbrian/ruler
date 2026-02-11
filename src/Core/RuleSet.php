@@ -12,7 +12,9 @@ namespace Cline\Ruler\Core;
 use Cline\Ruler\Enums\ConflictResolutionStrategy;
 use RuntimeException;
 
+use function array_filter;
 use function array_values;
+use function throw_unless;
 use function uasort;
 use function spl_object_hash;
 
@@ -45,6 +47,13 @@ final class RuleSet
      * Next insertion order value.
      */
     private int $nextOrder = 0;
+
+    /**
+     * Runtime-disabled rules keyed by object hash.
+     *
+     * @var array<string, true>
+     */
+    private array $disabledRules = [];
 
     /**
      * Conflict resolution strategy used for execution ordering.
@@ -87,6 +96,95 @@ final class RuleSet
         if (!isset($this->ruleOrder[$hash])) {
             $this->ruleOrder[$hash] = $this->nextOrder++;
         }
+    }
+
+    /**
+     * Remove a rule from the set.
+     */
+    public function removeRule(Rule $rule): void
+    {
+        $hash = spl_object_hash($rule);
+
+        unset($this->rules[$hash], $this->ruleOrder[$hash], $this->disabledRules[$hash]);
+    }
+
+    /**
+     * Replace an existing rule instance while preserving insertion order.
+     *
+     * @throws RuntimeException When the rule to replace is not in the set
+     */
+    public function replaceRule(Rule $existing, Rule $replacement): void
+    {
+        $existingHash = spl_object_hash($existing);
+        throw_unless(isset($this->rules[$existingHash]), RuntimeException::class, 'Cannot replace a rule that does not exist in this RuleSet.');
+
+        $order = $this->ruleOrder[$existingHash];
+        $wasDisabled = isset($this->disabledRules[$existingHash]);
+
+        unset($this->rules[$existingHash], $this->ruleOrder[$existingHash], $this->disabledRules[$existingHash]);
+
+        $replacementHash = spl_object_hash($replacement);
+        $this->rules[$replacementHash] = $replacement;
+        $this->ruleOrder[$replacementHash] = $order;
+
+        if ($wasDisabled) {
+            $this->disabledRules[$replacementHash] = true;
+        }
+    }
+
+    /**
+     * Clear all rules and lifecycle state.
+     */
+    public function clearRules(): void
+    {
+        $this->rules = [];
+        $this->ruleOrder = [];
+        $this->disabledRules = [];
+        $this->nextOrder = 0;
+    }
+
+    /**
+     * Disable a rule at RuleSet level by instance or rule id.
+     */
+    public function disableRule(Rule|string $rule): void
+    {
+        $hash = $this->resolveRuleHash($rule);
+
+        if ($hash !== null) {
+            $this->disabledRules[$hash] = true;
+        }
+    }
+
+    /**
+     * Enable a previously disabled rule by instance or rule id.
+     */
+    public function enableRule(Rule|string $rule): void
+    {
+        $hash = $this->resolveRuleHash($rule);
+
+        if ($hash !== null) {
+            unset($this->disabledRules[$hash]);
+        }
+    }
+
+    /**
+     * Check if a rule is currently enabled in this RuleSet.
+     */
+    public function isRuleEnabled(Rule|string $rule): bool
+    {
+        $hash = $this->resolveRuleHash($rule);
+
+        return $hash !== null && !isset($this->disabledRules[$hash]);
+    }
+
+    /**
+     * Get rules in current execution order.
+     *
+     * @return array<int, Rule>
+     */
+    public function getRules(): array
+    {
+        return $this->getOrderedRules();
     }
 
     /**
@@ -200,10 +298,18 @@ final class RuleSet
     private function getOrderedRules(): array
     {
         if ($this->conflictResolutionStrategy === ConflictResolutionStrategy::InsertionOrder) {
-            return array_values($this->rules);
+            return array_values(
+                array_filter(
+                    $this->rules,
+                    fn (Rule $rule): bool => !isset($this->disabledRules[spl_object_hash($rule)]),
+                ),
+            );
         }
 
-        $rules = $this->rules;
+        $rules = array_filter(
+            $this->rules,
+            fn (Rule $rule): bool => !isset($this->disabledRules[spl_object_hash($rule)]),
+        );
 
         uasort($rules, function (Rule $left, Rule $right): int {
             $leftHash = spl_object_hash($left);
@@ -225,5 +331,25 @@ final class RuleSet
         });
 
         return array_values($rules);
+    }
+
+    /**
+     * Resolve rule object hash from a Rule instance or rule identifier.
+     */
+    private function resolveRuleHash(Rule|string $rule): ?string
+    {
+        if ($rule instanceof Rule) {
+            $hash = spl_object_hash($rule);
+
+            return isset($this->rules[$hash]) ? $hash : null;
+        }
+
+        foreach ($this->rules as $hash => $candidate) {
+            if ($candidate->getId() === $rule) {
+                return $hash;
+            }
+        }
+
+        return null;
     }
 }
