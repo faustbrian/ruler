@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-02-11
+
+### Breaking Changes (Consumer Impact)
+
+- **Read the migration guide first**: see [UPGRADE.md](UPGRADE.md).
+- **`RuleEvaluator` construction changed**:
+  `RuleEvaluator::createFrom*()` was replaced by non-throwing
+  `RuleEvaluator::compileFrom*()` methods.
+- **Evaluation return types changed**:
+  `RuleEvaluator::evaluateFrom*()` now returns `RuleEvaluatorReport`
+  instead of `bool`.
+- **Execution return types changed**:
+  `Rule::execute()` now returns `RuleExecutionResult`, and
+  `RuleSet::executeRules()` / `executeForwardChaining()` now return
+  `RuleSetExecutionReport`.
+- **Explicit rule IDs are required**:
+  `RuleBuilder::create(...)` and DSL `parse(...)` APIs now require a rule ID;
+  `RuleSet` enforces non-empty unique IDs.
+- **Reference semantics changed for rule definitions**:
+  string values are literals by default; context references must use explicit
+  `@path.to.value` syntax.
+- **Runtime requirement changed**:
+  minimum PHP version is now `8.5`.
+
 ### Changed
 
 - `Rule::execute()` now returns a `RuleExecutionResult` object that includes
@@ -116,5 +140,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom operator support
 - Comprehensive test suite
 
+[3.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...3.0.0
 [2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
 [1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0
