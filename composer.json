@@ -56,6 +56,7 @@
   },
   "scripts": {
     "lint": "ecs check --fix",
+    "benchmark:evaluator": "php tools/benchmark/rule-evaluator-benchmark.php",
     "refactor": "rector",
     "test": [
       "@test:lint",
