@@ -599,6 +599,18 @@ YAML;
             expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
         });
 
+        test('returns structured compile failure for json depth overflow', function (): void {
+            $json = '['.str_repeat('[', 700).str_repeat(']', 700).']';
+
+            $result = RuleEvaluator::compileFromJson($json);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
+            expect($result->getError()?->getDetails()['reason'] ?? null)->toBeString();
+        });
+
         test('returns structured compile failure when json decodes to scalar', function (): void {
             $result = RuleEvaluator::compileFromJson('true');
 
@@ -608,9 +620,16 @@ YAML;
             expect($result->getError()?->getDetails())->toBe(['format' => 'json']);
         });
 
-        test('throws when json rule file cannot be read', function (): void {
-            expect(static fn (): RuleEvaluatorCompilationResult => RuleEvaluator::compileFromJsonFile('/tmp/ruler-file-does-not-exist.json'))
-                ->toThrow(\ErrorException::class);
+        test('returns structured compile failure when json rule file cannot be read', function (): void {
+            $path = '/tmp/ruler-file-does-not-exist.json';
+            $result = RuleEvaluator::compileFromJsonFile($path);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
+            expect($result->getError()?->getDetails()['file'] ?? null)->toBe($path);
+            expect($result->getError()?->getDetails()['reason'] ?? null)->toBeString();
         });
 
         test('returns structured compile failure for invalid yaml payload', function (): void {
@@ -631,9 +650,16 @@ YAML;
             expect($result->getError()?->getDetails())->toBe(['format' => 'yaml']);
         });
 
-        test('throws when yaml rule file cannot be read', function (): void {
-            expect(static fn (): RuleEvaluatorCompilationResult => RuleEvaluator::compileFromYamlFile('/tmp/ruler-file-does-not-exist.yaml'))
-                ->toThrow(\ErrorException::class);
+        test('returns structured compile failure when yaml rule file cannot be read', function (): void {
+            $path = '/tmp/ruler-file-does-not-exist.yaml';
+            $result = RuleEvaluator::compileFromYamlFile($path);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails()['format'] ?? null)->toBe('yaml');
+            expect($result->getError()?->getDetails()['file'] ?? null)->toBe($path);
+            expect($result->getError()?->getDetails()['reason'] ?? null)->toBeString();
         });
 
         test('returns structured compile error payload for invalid combinator', function (): void {
@@ -747,6 +773,79 @@ YAML;
 
             // Assert
             expect($result->getResult())->toBeFalse();
+        });
+
+        test('throws structured runtime failure when json values are invalid', function (): void {
+            $evaluator = evaluatorFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+
+            try {
+                $evaluator->evaluateFromJson('{invalid');
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $exception) {
+                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($exception->getPhase())->toBe(RuleErrorPhase::Runtime);
+                expect($exception->getPath())->toBe(['values']);
+                expect($exception->getDetails()['format'] ?? null)->toBe('json');
+                expect($exception->getDetails()['reason'] ?? null)->toBeString();
+            }
+        });
+
+        test('throws structured runtime failure when json values decode to scalar', function (): void {
+            $evaluator = evaluatorFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+
+            try {
+                $evaluator->evaluateFromJson('true');
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $exception) {
+                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($exception->getPath())->toBe(['values']);
+                expect($exception->getDetails())->toBe(['format' => 'json']);
+            }
+        });
+
+        test('throws structured runtime failure when json values file cannot be read', function (): void {
+            $evaluator = evaluatorFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+            $path = '/tmp/ruler-values-does-not-exist.json';
+
+            try {
+                $evaluator->evaluateFromJsonFile($path);
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $exception) {
+                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($exception->getPath())->toBe(['values']);
+                expect($exception->getDetails()['format'] ?? null)->toBe('json');
+                expect($exception->getDetails()['file'] ?? null)->toBe($path);
+                expect($exception->getDetails()['reason'] ?? null)->toBeString();
+            }
+        });
+
+        test('throws structured runtime failure when yaml values decode to scalar', function (): void {
+            $evaluator = evaluatorFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+
+            try {
+                $evaluator->evaluateFromYaml('true');
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $exception) {
+                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($exception->getPath())->toBe(['values']);
+                expect($exception->getDetails())->toBe(['format' => 'yaml']);
+            }
         });
 
         test('returns false when yaml evaluation fails validation', function (): void {

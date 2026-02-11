@@ -27,7 +27,6 @@ use const JSON_THROW_ON_ERROR;
 
 use function array_map;
 use function array_reduce;
-use function assert;
 use function explode;
 use function file_get_contents;
 use function is_array;
@@ -166,7 +165,21 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): RuleEvaluatorCompilationResult {
-        $contents = file_get_contents($rules);
+        try {
+            $contents = file_get_contents($rules);
+        } catch (Throwable $throwable) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Unable to read JSON rule file',
+                    ['rules'],
+                    [
+                        'format' => 'json',
+                        'file' => $rules,
+                        'reason' => $throwable->getMessage(),
+                    ],
+                ),
+            );
+        }
 
         if (!is_string($contents)) {
             return RuleEvaluatorCompilationResult::failure(
@@ -242,7 +255,21 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): RuleEvaluatorCompilationResult {
-        $contents = file_get_contents($rules);
+        try {
+            $contents = file_get_contents($rules);
+        } catch (Throwable $throwable) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Unable to read YAML rule file',
+                    ['rules'],
+                    [
+                        'format' => 'yaml',
+                        'file' => $rules,
+                        'reason' => $throwable->getMessage(),
+                    ],
+                ),
+            );
+        }
 
         if (!is_string($contents)) {
             return RuleEvaluatorCompilationResult::failure(
@@ -312,10 +339,28 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromJson(string $values): RuleEvaluatorReport
     {
-        $decoded = json_decode($values, true, 512, JSON_THROW_ON_ERROR);
-        assert(is_array($decoded));
+        try {
+            $decoded = json_decode($values, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $throwable) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Invalid JSON values payload',
+                ['values'],
+                [
+                    'format' => 'json',
+                    'reason' => $throwable->getMessage(),
+                ],
+                $throwable,
+            );
+        }
 
-        /** @var array<string, mixed> $decoded */
+        if (!is_array($decoded)) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'JSON values must decode to an object',
+                ['values'],
+                ['format' => 'json'],
+            );
+        }
+
         return $this->evaluateFromArray($decoded);
     }
 
@@ -331,8 +376,31 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromJsonFile(string $values): RuleEvaluatorReport
     {
-        $contents = file_get_contents($values);
-        assert(is_string($contents));
+        try {
+            $contents = file_get_contents($values);
+        } catch (Throwable $throwable) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Unable to read JSON values file',
+                ['values'],
+                [
+                    'format' => 'json',
+                    'file' => $values,
+                    'reason' => $throwable->getMessage(),
+                ],
+                $throwable,
+            );
+        }
+
+        if (!is_string($contents)) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Unable to read JSON values file',
+                ['values'],
+                [
+                    'format' => 'json',
+                    'file' => $values,
+                ],
+            );
+        }
 
         return $this->evaluateFromJson($contents);
     }
@@ -349,10 +417,28 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromYaml(string $values): RuleEvaluatorReport
     {
-        $parsed = Yaml::parse($values);
-        assert(is_array($parsed));
+        try {
+            $parsed = Yaml::parse($values);
+        } catch (Throwable $throwable) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Invalid YAML values payload',
+                ['values'],
+                [
+                    'format' => 'yaml',
+                    'reason' => $throwable->getMessage(),
+                ],
+                $throwable,
+            );
+        }
 
-        /** @var array<string, mixed> $parsed */
+        if (!is_array($parsed)) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'YAML values must decode to an object',
+                ['values'],
+                ['format' => 'yaml'],
+            );
+        }
+
         return $this->evaluateFromArray($parsed);
     }
 
@@ -368,8 +454,31 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromYamlFile(string $values): RuleEvaluatorReport
     {
-        $contents = file_get_contents($values);
-        assert(is_string($contents));
+        try {
+            $contents = file_get_contents($values);
+        } catch (Throwable $throwable) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Unable to read YAML values file',
+                ['values'],
+                [
+                    'format' => 'yaml',
+                    'file' => $values,
+                    'reason' => $throwable->getMessage(),
+                ],
+                $throwable,
+            );
+        }
+
+        if (!is_string($contents)) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Unable to read YAML values file',
+                ['values'],
+                [
+                    'format' => 'yaml',
+                    'file' => $values,
+                ],
+            );
+        }
 
         return $this->evaluateFromYaml($contents);
     }
