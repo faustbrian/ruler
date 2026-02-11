@@ -226,6 +226,25 @@ describe('RuleSet', function (): void {
             expect($context['counter'])->toBe(1);
         });
 
+        test('forward chaining in repeated mode does not loop on match-only rules', function (): void {
+            $context = new Context(['ready' => true]);
+            $rb = new RuleBuilder();
+
+            $rule = new Rule(
+                $rb['ready']->sameAs(true),
+                null,
+                'match-only',
+                'Match Only',
+            );
+
+            $ruleset = new RuleSet([$rule]);
+            $report = $ruleset->executeForwardChaining($context, 10, true);
+
+            expect($report->getMatchedCount())->toBe(1);
+            expect($report->getActionExecutionCount())->toBe(0);
+            expect($report->getCycleCount())->toBe(1);
+        });
+
         test('executeRules returns matched and action counts', function (): void {
             $context = new Context(['flag' => true, 'disabledFlag' => true]);
             $rb = new RuleBuilder();

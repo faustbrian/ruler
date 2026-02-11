@@ -306,7 +306,7 @@ final class RuleSet
                 $result = $rule->execute($context);
                 $results[] = $result;
 
-                if (!$result->actionExecuted && !$result->matched) {
+                if (!$result->actionExecuted) {
                     continue;
                 }
 
