@@ -233,7 +233,6 @@ final class SqlParser
         if ($this->check(Token::OPERATOR)) {
             $token = $this->advance();
 
-            /** @var string $operator */
             $operator = is_string($token->value) ? $token->value : throw OperatorMustBeStringException::create();
             $right = $this->parsePrimary();
 
@@ -296,7 +295,6 @@ final class SqlParser
         if ($this->check(Token::IDENTIFIER)) {
             $token = $this->advance();
 
-            /** @var string $fieldName */
             $fieldName = is_string($token->value) ? $token->value : throw FieldNameMustBeStringException::create();
 
             return new FieldNode($fieldName);

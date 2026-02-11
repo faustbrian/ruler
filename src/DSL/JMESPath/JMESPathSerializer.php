@@ -67,7 +67,6 @@ final readonly class JMESPathSerializer
         $reflection = new ReflectionClass($rule);
         $conditionProperty = $reflection->getProperty('condition');
 
-        /** @var mixed $condition */
         $condition = $conditionProperty->getValue($rule);
 
         throw_unless($condition instanceof JMESPathProposition, MustContainJMESPathPropositionException::create());
