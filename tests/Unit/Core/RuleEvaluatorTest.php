@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\CompiledRuleCache;
+use Cline\Ruler\Core\CompiledRuleKeyGenerator;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleEvaluator;
 use Cline\Ruler\Core\RuleEvaluatorReport;
@@ -412,6 +413,53 @@ YAML;
             expect($cache->writes)->toBe(1);
             expect($cache->misses)->toBe(1);
             expect($cache->hits)->toBe(3);
+        });
+
+        test('supports custom compiled-rule key generators', function (): void {
+            $cache = new class() implements CompiledRuleCache
+            {
+                /** @var array<string> */
+                public array $seenKeys = [];
+
+                /** @var array<string, Rule> */
+                private array $rules = [];
+
+                public function get(string $key): ?Rule
+                {
+                    $this->seenKeys[] = $key;
+
+                    return $this->rules[$key] ?? null;
+                }
+
+                public function put(string $key, Rule $rule): void
+                {
+                    $this->seenKeys[] = $key;
+                    $this->rules[$key] = $rule;
+                }
+            };
+
+            $keyGenerator = new class() implements CompiledRuleKeyGenerator
+            {
+                public function generate(array $rules): string
+                {
+                    return 'fixed-key';
+                }
+            };
+
+            $evaluator = RuleEvaluator::createFromArray(
+                [
+                    'field' => 'status',
+                    'operator' => 'sameAs',
+                    'value' => 'active',
+                ],
+                $cache,
+                $keyGenerator,
+            );
+
+            $result = $evaluator->evaluateFromArray(['status' => 'active']);
+
+            expect($result->getResult())->toBeTrue();
+            expect($cache->seenKeys)->each->toBe('fixed-key');
         });
     });
 

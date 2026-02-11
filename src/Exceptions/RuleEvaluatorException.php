@@ -10,6 +10,7 @@
 namespace Cline\Ruler\Exceptions;
 
 use Exception;
+use Throwable;
 
 use function sprintf;
 
@@ -63,5 +64,13 @@ final class RuleEvaluatorException extends Exception
     public static function invalidNotRule(): self
     {
         return new self('Logical NOT must have exactly one argument');
+    }
+
+    /**
+     * Create exception for cache key generation failures.
+     */
+    public static function invalidRuleCacheKey(string $reason, ?Throwable $previous = null): self
+    {
+        return new self(sprintf('Unable to generate rule cache key: %s', $reason), 0, $previous);
     }
 }

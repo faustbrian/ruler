@@ -40,6 +40,15 @@ describe('RuleEvaluatorException', function (): void {
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid combinator: xor');
         });
+
+        test('invalidRuleCacheKey creates exception with previous context', function (): void {
+            $previous = new RuntimeException('json encode failed');
+            $exception = RuleEvaluatorException::invalidRuleCacheKey('json encode failed', $previous);
+
+            expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
+            expect($exception->getMessage())->toBe('Unable to generate rule cache key: json encode failed');
+            expect($exception->getPrevious())->toBe($previous);
+        });
     });
 
     describe('Edge Cases', function (): void {
