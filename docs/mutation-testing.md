@@ -8,8 +8,6 @@ authoritative mutation gate.
 ## Why
 
 - It integrates directly with the existing Pest-based test suite.
-- It avoids namespace/JUnit mapping issues observed with Infection + Pest in
-  this codebase.
 - It keeps mutation execution and local developer setup simple.
 
 ## Scope
@@ -24,10 +22,10 @@ contract code:
 
 ## Revisit Criteria
 
-Reevaluate Infection if all of the following are true:
+Reevaluate the mutation setup if any of the following are true:
 
-- Pest/coverage/JUnit mapping interoperability is stable in CI.
-- Infection can run with equivalent target scope and deterministic results.
-- Migration provides clear value over the current Pest-native workflow.
+- Mutation runs become unstable or non-deterministic in CI.
+- We need broader mutation scope than the current targeted gate.
+- Reporting requirements outgrow the current Pest-native workflow.
 
-Until then, Pest mutation testing remains the default and supported path.
+Pest mutation testing remains the default and supported path.
