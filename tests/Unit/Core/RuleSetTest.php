@@ -24,17 +24,17 @@ describe('RuleSet', function (): void {
             $executedActionA = false;
             $ruleA = new Rule($true, function ($context) use (&$executedActionA): void {
                 $executedActionA = true;
-            });
+            }, 'rule-a');
 
             $executedActionB = false;
             $ruleB = new Rule($true, function ($context) use (&$executedActionB): void {
                 $executedActionB = true;
-            });
+            }, 'rule-b');
 
             $executedActionC = false;
             $ruleC = new Rule($true, function ($context) use (&$executedActionC): void {
                 $executedActionC = true;
-            });
+            }, 'rule-c');
 
             $ruleset = new RuleSet([$ruleA]);
 
@@ -366,6 +366,27 @@ describe('RuleSet', function (): void {
     });
 
     describe('Sad Paths', function (): void {
+        test('throws when adding rule without id', function (): void {
+            $this->expectException(RuntimeException::class);
+
+            $rule = new Rule(
+                new TrueProposition(),
+                static function ($context): void {},
+            );
+
+            new RuleSet([$rule]);
+        });
+
+        test('throws when duplicate rule ids are added', function (): void {
+            $this->expectException(RuntimeException::class);
+
+            $true = new TrueProposition();
+            $first = new Rule($true, static function ($context): void {}, 'dupe');
+            $second = new Rule($true, static function ($context): void {}, 'dupe');
+
+            new RuleSet([$first, $second]);
+        });
+
         test('forward chaining throws when max cycles is exceeded', function (): void {
             $context = new Context();
             $true = new TrueProposition();

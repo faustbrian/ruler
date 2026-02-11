@@ -14,6 +14,7 @@ use RuntimeException;
 
 use function array_filter;
 use function array_values;
+use function sprintf;
 use function spl_object_hash;
 use function throw_if;
 use function throw_unless;
@@ -57,6 +58,13 @@ final class RuleSet
     private array $disabledRules = [];
 
     /**
+     * Rule identifiers mapped to object hashes for uniqueness checks.
+     *
+     * @var array<string, string>
+     */
+    private array $ruleIds = [];
+
+    /**
      * Create a new RuleSet with optional initial rules.
      *
      * @param array<int, Rule> $rules Optional array of Rule instances to add to the set
@@ -87,7 +95,16 @@ final class RuleSet
     public function addRule(Rule $rule): void
     {
         $hash = spl_object_hash($rule);
+        $id = $rule->getId();
+
+        throw_unless($id !== null && $id !== '', RuntimeException::class, 'Rule id is required when adding to RuleSet.');
+
+        if (isset($this->ruleIds[$id]) && $this->ruleIds[$id] !== $hash) {
+            throw new RuntimeException(sprintf('Duplicate rule id "%s" in RuleSet.', $id));
+        }
+
         $this->rules[$hash] = $rule;
+        $this->ruleIds[$id] = $hash;
 
         if (isset($this->ruleOrder[$hash])) {
             return;
@@ -102,8 +119,13 @@ final class RuleSet
     public function removeRule(Rule $rule): void
     {
         $hash = spl_object_hash($rule);
+        $id = $rule->getId();
 
         unset($this->rules[$hash], $this->ruleOrder[$hash], $this->disabledRules[$hash]);
+
+        if ($id !== null && isset($this->ruleIds[$id]) && $this->ruleIds[$id] === $hash) {
+            unset($this->ruleIds[$id]);
+        }
     }
 
     /**
@@ -116,6 +138,14 @@ final class RuleSet
         $existingHash = spl_object_hash($existing);
         throw_unless(isset($this->rules[$existingHash]), RuntimeException::class, 'Cannot replace a rule that does not exist in this RuleSet.');
 
+        $replacementId = $replacement->getId();
+        throw_unless($replacementId !== null && $replacementId !== '', RuntimeException::class, 'Replacement rule id is required in RuleSet.');
+
+        if (isset($this->ruleIds[$replacementId]) && $this->ruleIds[$replacementId] !== $existingHash) {
+            throw new RuntimeException(sprintf('Duplicate rule id "%s" in RuleSet.', $replacementId));
+        }
+
+        $existingId = $existing->getId();
         $order = $this->ruleOrder[$existingHash];
         $wasDisabled = isset($this->disabledRules[$existingHash]);
 
@@ -124,6 +154,11 @@ final class RuleSet
         $replacementHash = spl_object_hash($replacement);
         $this->rules[$replacementHash] = $replacement;
         $this->ruleOrder[$replacementHash] = $order;
+        $this->ruleIds[$replacementId] = $replacementHash;
+
+        if ($existingId !== null && $existingId !== $replacementId) {
+            unset($this->ruleIds[$existingId]);
+        }
 
         if (!$wasDisabled) {
             return;
@@ -140,6 +175,7 @@ final class RuleSet
         $this->rules = [];
         $this->ruleOrder = [];
         $this->disabledRules = [];
+        $this->ruleIds = [];
         $this->nextOrder = 0;
     }
 
@@ -338,12 +374,6 @@ final class RuleSet
             return isset($this->rules[$hash]) ? $hash : null;
         }
 
-        foreach ($this->rules as $hash => $candidate) {
-            if ($candidate->getId() === $rule) {
-                return $hash;
-            }
-        }
-
-        return null;
+        return $this->ruleIds[$rule] ?? null;
     }
 }
