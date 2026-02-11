@@ -27,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 
 use function array_map;
 use function array_reduce;
+use function assert;
 use function explode;
 use function file_get_contents;
 use function is_array;

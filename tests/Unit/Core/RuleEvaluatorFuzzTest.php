@@ -33,6 +33,7 @@ function randomValidRuleDefinition(int $depth = 0): array
     $operandCount = $combinator === 'not' ? 1 : mt_rand(1, 3);
 
     $operands = [];
+
     for ($index = 0; $index < $operandCount; ++$index) {
         $operands[] = randomValidRuleDefinition($depth + 1);
     }
@@ -91,7 +92,7 @@ function randomMalformedRuleDefinition(): array
 
 describe('RuleEvaluator Fuzz', function (): void {
     test('compiles and evaluates generated valid rule trees', function (): void {
-        mt_srand(1337);
+        mt_srand(1_337);
 
         for ($iteration = 0; $iteration < 100; ++$iteration) {
             $rule = randomValidRuleDefinition();
@@ -106,7 +107,7 @@ describe('RuleEvaluator Fuzz', function (): void {
     });
 
     test('returns structured failure for malformed generated payloads', function (): void {
-        mt_srand(7331);
+        mt_srand(7_331);
 
         for ($iteration = 0; $iteration < 100; ++$iteration) {
             $malformed = randomMalformedRuleDefinition();

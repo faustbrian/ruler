@@ -17,6 +17,8 @@ use function str_starts_with;
 
 /**
  * Migration helpers for persisted rule-definition payloads.
+ * @author Brian Faust <brian@cline.sh>
+ * @psalm-immutable
  */
 final readonly class RuleDefinitionMigrator
 {
@@ -32,7 +34,7 @@ final readonly class RuleDefinitionMigrator
      */
     public static function migrateLegacyStringReferences(array $ruleDefinition): array
     {
-        if (isset($ruleDefinition['combinator']) && isset($ruleDefinition['value']) && is_array($ruleDefinition['value'])) {
+        if (isset($ruleDefinition['combinator'], $ruleDefinition['value']) && is_array($ruleDefinition['value'])) {
             /** @var array<int, array<string, mixed>> $operands */
             $operands = $ruleDefinition['value'];
 
