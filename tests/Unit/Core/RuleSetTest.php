@@ -154,5 +154,84 @@ describe('RuleSet', function (): void {
                 ->toBe(ConflictResolutionStrategy::PriorityLowFirst);
             expect($executionOrder)->toBe(['low', 'high']);
         });
+
+        test('forward chaining activates downstream rules in later cycles', function (): void {
+            $context = new Context([
+                'seeded' => false,
+                'eligible' => false,
+                'approved' => false,
+            ]);
+
+            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+            $executionOrder = [];
+
+            $approve = new Rule(
+                $rb['eligible']->sameAs(true),
+                function () use ($context, &$executionOrder): void {
+                    $executionOrder[] = 'approve';
+                    $context['approved'] = true;
+                },
+                'approve',
+                'Approval Rule',
+                20,
+            );
+
+            $seed = new Rule(
+                $rb['seeded']->sameAs(false),
+                function () use ($context, &$executionOrder): void {
+                    $executionOrder[] = 'seed';
+                    $context['seeded'] = true;
+                    $context['eligible'] = true;
+                },
+                'seed',
+                'Seed Rule',
+                10,
+            );
+
+            // Approval is evaluated first and fails in cycle 1.
+            $ruleset = new RuleSet([$approve, $seed]);
+
+            expect($ruleset->executeForwardChaining($context))->toBe(2);
+            expect($context['approved'])->toBeTrue();
+            expect($executionOrder)->toBe(['seed', 'approve']);
+        });
+
+        test('forward chaining does not re-fire rules by default', function (): void {
+            $context = new Context(['counter' => 0]);
+            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+
+            $rule = new Rule(
+                $rb['counter']->greaterThanOrEqualTo(0),
+                function () use ($context): void {
+                    $context['counter'] = $context['counter'] + 1;
+                },
+                'counter',
+                'Counter Rule',
+            );
+
+            $ruleset = new RuleSet([$rule]);
+
+            expect($ruleset->executeForwardChaining($context))->toBe(1);
+            expect($context['counter'])->toBe(1);
+        });
+    });
+
+    describe('Sad Paths', function (): void {
+        test('forward chaining throws when max cycles is exceeded', function (): void {
+            $context = new Context();
+            $true = new TrueProposition();
+
+            $rule = new Rule(
+                $true,
+                static function (): void {},
+                'loop',
+                'Loop Rule',
+            );
+
+            $ruleset = new RuleSet([$rule]);
+
+            expect(fn (): int => $ruleset->executeForwardChaining($context, 2, true))
+                ->toThrow(RuntimeException::class);
+        });
     });
 });

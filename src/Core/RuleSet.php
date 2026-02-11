@@ -10,6 +10,7 @@
 namespace Cline\Ruler\Core;
 
 use Cline\Ruler\Enums\ConflictResolutionStrategy;
+use RuntimeException;
 
 use function array_values;
 use function uasort;
@@ -121,6 +122,60 @@ final class RuleSet
         foreach ($this->getOrderedRules() as $rule) {
             $rule->execute($context);
         }
+    }
+
+    /**
+     * Execute rules using forward chaining until no more rules fire.
+     *
+     * Re-evaluates the ordered rule set across multiple cycles. This allows
+     * actions that mutate Context facts to activate additional rules in later
+     * cycles.
+     *
+     * @param  Context $context             Evaluation context (may be mutated by actions)
+     * @param  int     $maxCycles           Hard upper bound to prevent infinite loops
+     * @param  bool    $allowRepeatedFiring When false, each rule may fire at most once
+     *
+     * @throws RuntimeException When the cycle limit is reached while rules still fire
+     *
+     * @return int Number of fired rules across all cycles
+     */
+    public function executeForwardChaining(
+        Context $context,
+        int $maxCycles = 100,
+        bool $allowRepeatedFiring = false,
+    ): int {
+        $firedRules = [];
+        $totalFired = 0;
+        $cycle = 0;
+
+        do {
+            $firedThisCycle = 0;
+
+            foreach ($this->getOrderedRules() as $rule) {
+                $hash = spl_object_hash($rule);
+
+                if (!$allowRepeatedFiring && isset($firedRules[$hash])) {
+                    continue;
+                }
+
+                if (!$rule->evaluate($context)) {
+                    continue;
+                }
+
+                $rule->execute($context);
+                $firedRules[$hash] = true;
+                ++$firedThisCycle;
+                ++$totalFired;
+            }
+
+            ++$cycle;
+        } while ($firedThisCycle > 0 && $cycle < $maxCycles);
+
+        if ($firedThisCycle > 0) {
+            throw new RuntimeException('Forward chaining exceeded max cycles. Potential rule loop detected.');
+        }
+
+        return $totalFired;
     }
 
     /**
