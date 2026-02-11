@@ -39,7 +39,7 @@ describe('RuleEvaluator', function (): void {
             ]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('returns structured evaluation report', function (): void {
@@ -59,7 +59,7 @@ describe('RuleEvaluator', function (): void {
                 ],
             ]);
 
-            $report = $evaluator->evaluateFromArrayWithReport([
+            $report = $evaluator->evaluateFromArray([
                 'age' => 21,
                 'status' => 'active',
             ]);
@@ -87,7 +87,7 @@ describe('RuleEvaluator', function (): void {
             $result = $evaluator->evaluateFromArray(['status' => 'active']);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('creates evaluator from json file', function (): void {
@@ -105,7 +105,7 @@ describe('RuleEvaluator', function (): void {
             $result = $evaluator->evaluateFromArray(['age' => 25]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
 
             // Cleanup
             unlink($tempFile);
@@ -124,7 +124,7 @@ YAML;
             $result = $evaluator->evaluateFromArray(['status' => 'active']);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('creates evaluator from yaml file', function (): void {
@@ -142,7 +142,7 @@ YAML;
             $result = $evaluator->evaluateFromArray(['price' => 50]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
 
             // Cleanup
             unlink($tempFile);
@@ -161,7 +161,7 @@ YAML;
             $result = $evaluator->evaluateFromJson($jsonValues);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('evaluates rules from json file', function (): void {
@@ -178,7 +178,7 @@ YAML;
             $result = $evaluator->evaluateFromJsonFile($tempFile);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
 
             // Cleanup
             unlink($tempFile);
@@ -199,7 +199,7 @@ YAML;
             $result = $evaluator->evaluateFromYaml($yamlValues);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('evaluates rules from yaml file', function (): void {
@@ -219,7 +219,7 @@ YAML;
             $result = $evaluator->evaluateFromYamlFile($tempFile);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
 
             // Cleanup
             unlink($tempFile);
@@ -238,7 +238,7 @@ YAML;
             $result = $evaluator->evaluateFromRequest($request);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('handles not combinator with exactly one operand', function (): void {
@@ -258,7 +258,7 @@ YAML;
             $result = $evaluator->evaluateFromArray(['status' => 'active']);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('evaluates complex nested rules with yaml', function (): void {
@@ -282,7 +282,7 @@ YAML;
             ]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('reuses compiled rules across evaluations with dynamic refs', function (): void {
@@ -302,8 +302,8 @@ YAML;
                 'threshold' => 20,
             ]);
 
-            expect($first)->toBeTrue();
-            expect($second)->toBeFalse();
+            expect($first->getResult())->toBeTrue();
+            expect($second->getResult())->toBeFalse();
         });
 
         test('resolves dot-notated value references at runtime', function (): void {
@@ -323,8 +323,8 @@ YAML;
                 'limits' => ['minScore' => 80],
             ]);
 
-            expect($first)->toBeTrue();
-            expect($second)->toBeFalse();
+            expect($first->getResult())->toBeTrue();
+            expect($second->getResult())->toBeFalse();
         });
     });
 
@@ -343,7 +343,7 @@ YAML;
             ]);
 
             // Assert
-            expect($result)->toBeFalse();
+            expect($result->getResult())->toBeFalse();
         });
 
         test('throws exception when not combinator has multiple operands', function (): void {
@@ -365,7 +365,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn (): bool => $evaluator->evaluateFromArray(['status' => 'active', 'enabled' => true]))
+            expect(fn () => $evaluator->evaluateFromArray(['status' => 'active', 'enabled' => true]))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
@@ -377,7 +377,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn (): bool => $evaluator->evaluateFromArray([]))
+            expect(fn () => $evaluator->evaluateFromArray([]))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
@@ -390,7 +390,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn (): bool => $evaluator->evaluateFromArray(['status' => 'active']))
+            expect(fn () => $evaluator->evaluateFromArray(['status' => 'active']))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
@@ -407,7 +407,7 @@ YAML;
             $result = $evaluator->evaluateFromJson($jsonValues);
 
             // Assert
-            expect($result)->toBeFalse();
+            expect($result->getResult())->toBeFalse();
         });
 
         test('returns false when yaml evaluation fails validation', function (): void {
@@ -425,7 +425,7 @@ YAML;
             $result = $evaluator->evaluateFromYaml($yamlValues);
 
             // Assert
-            expect($result)->toBeFalse();
+            expect($result->getResult())->toBeFalse();
         });
 
         test('returns false when request evaluation fails validation', function (): void {
@@ -441,7 +441,7 @@ YAML;
             $result = $evaluator->evaluateFromRequest($request);
 
             // Assert
-            expect($result)->toBeFalse();
+            expect($result->getResult())->toBeFalse();
         });
     });
 
@@ -459,7 +459,7 @@ YAML;
             $result = $evaluator->evaluateFromRequest($request);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('handles json with nested arrays', function (): void {
@@ -488,7 +488,7 @@ YAML;
             ]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('handles yaml with special characters', function (): void {
@@ -506,7 +506,7 @@ YAML;
             ]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('handles deeply nested dot notation in json file', function (): void {
@@ -532,7 +532,7 @@ YAML;
             ]);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
 
             // Cleanup
             unlink($tempFile);
@@ -554,7 +554,7 @@ YAML;
             $result = $evaluator->evaluateFromYaml($yamlValues);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
 
         test('handles request with query parameters and body data', function (): void {
@@ -584,7 +584,7 @@ YAML;
             $result = $evaluator->evaluateFromRequest($request);
 
             // Assert
-            expect($result)->toBeTrue();
+            expect($result->getResult())->toBeTrue();
         });
     });
 });

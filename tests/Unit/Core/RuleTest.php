@@ -102,7 +102,7 @@ describe('Rule', function (): void {
             expect($rule->evaluate(new Context()))->toBeFalse();
         });
 
-        test('executeWithResult returns structured execution details', function (): void {
+        test('execute returns structured execution details', function (): void {
             $context = new Context();
             $actionExecuted = false;
 
@@ -116,7 +116,7 @@ describe('Rule', function (): void {
                 25,
             );
 
-            $result = $rule->executeWithResult($context);
+            $result = $rule->execute($context);
 
             expect($result)->toBeInstanceOf(RuleExecutionResult::class);
             expect($result->ruleId)->toBe('r-100');
@@ -138,7 +138,7 @@ describe('Rule', function (): void {
                 },
             );
 
-            $result = $rule->executeWithResult($context);
+            $result = $rule->execute($context);
 
             expect($result->matched)->toBeTrue();
             expect($result->actionExecuted)->toBeTrue();

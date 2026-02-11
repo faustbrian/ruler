@@ -152,24 +152,13 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromArray(array $values): bool
-    {
-        return $this->evaluateFromArrayWithReport($values)->getResult();
-    }
-
-    /**
-     * Evaluates rules against an array and returns a structured report.
-     *
-     * @param  array<string, mixed> $values Data values to evaluate against the configured rule tree
-     * @return RuleEvaluatorReport   Structured report including boolean outcome and rule execution details
-     */
-    public function evaluateFromArrayWithReport(array $values): RuleEvaluatorReport
+    public function evaluateFromArray(array $values): RuleEvaluatorReport
     {
         $context = new Context($values);
         $ruleResult = $this->getCompiledRule()
-            ->executeWithResult($context);
+            ->execute($context);
 
         return new RuleEvaluatorReport(
             $ruleResult->matched,
@@ -186,9 +175,9 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromJson(string $values): bool
+    public function evaluateFromJson(string $values): RuleEvaluatorReport
     {
         $decoded = json_decode($values, true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($decoded));
@@ -205,9 +194,9 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromJsonFile(string $values): bool
+    public function evaluateFromJsonFile(string $values): RuleEvaluatorReport
     {
         $contents = file_get_contents($values);
         assert(is_string($contents));
@@ -223,9 +212,9 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromYaml(string $values): bool
+    public function evaluateFromYaml(string $values): RuleEvaluatorReport
     {
         $parsed = Yaml::parse($values);
         assert(is_array($parsed));
@@ -242,9 +231,9 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromYamlFile(string $values): bool
+    public function evaluateFromYamlFile(string $values): RuleEvaluatorReport
     {
         $contents = file_get_contents($values);
         assert(is_string($contents));
@@ -264,9 +253,9 @@ final readonly class RuleEvaluator
      * @throws RuleEvaluatorException When the rule structure is invalid or contains
      *                                unsupported combinators or operators
      *
-     * @return bool Returns true if the rule evaluation passes, false otherwise
+     * @return RuleEvaluatorReport Structured report of rule evaluation and execution details
      */
-    public function evaluateFromRequest(Request $request): bool
+    public function evaluateFromRequest(Request $request): RuleEvaluatorReport
     {
         /** @var array<string, mixed> $requestData */
         $requestData = $request->all();
@@ -282,8 +271,6 @@ final readonly class RuleEvaluator
      * corresponding proposition tree. Handles nested rules by recursively building
      * sub-propositions for complex logical expressions.
      *
-     * @param array<string, mixed> $values      Data values used to resolve variable references
-     *                                          in the rule definition during construction
      * @param array<string, mixed> $rule        Rule definition containing either a combinator
      *                                          with nested rules or an operator with field and value
      * @param RuleBuilder          $ruleBuilder Builder instance used to construct propositions

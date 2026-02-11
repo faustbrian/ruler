@@ -42,8 +42,8 @@ final readonly class Rule implements Proposition
      *                                 this rule is satisfied. The condition is evaluated
      *                                 against a Context to produce a boolean result.
      * @param null|callable $action    Optional callback to execute when the condition
-     *                                 evaluates to true. The callback receives no arguments
-     *                                 and its return value is ignored.
+     *                                 evaluates to true. The callback may declare a
+     *                                 Context argument, and its return value is ignored.
      */
     public function __construct(
         private Proposition $condition,
@@ -92,16 +92,10 @@ final readonly class Rule implements Proposition
      *                         used to evaluate the rule
      *
      * @throws LogicException when the action is defined but not callable
+     *
+     * @return RuleExecutionResult Structured execution details for this rule
      */
-    public function execute(Context $context): void
-    {
-        $this->executeWithResult($context);
-    }
-
-    /**
-     * Execute the rule and return a structured result.
-     */
-    public function executeWithResult(Context $context): RuleExecutionResult
+    public function execute(Context $context): RuleExecutionResult
     {
         $matched = $this->evaluate($context);
         $actionExecuted = false;

@@ -216,7 +216,7 @@ describe('RuleSet', function (): void {
             expect($context['counter'])->toBe(1);
         });
 
-        test('executeRulesWithReport returns matched and action counts', function (): void {
+        test('executeRules returns matched and action counts', function (): void {
             $context = new Context(['flag' => true, 'disabledFlag' => true]);
             $rb = new \Cline\Ruler\Builder\RuleBuilder();
             $executed = [];
@@ -253,7 +253,7 @@ describe('RuleSet', function (): void {
             );
 
             $report = (new RuleSet([$ruleA, $ruleB, $ruleDisabled]))
-                ->executeRulesWithReport($context);
+                ->executeRules($context);
 
             expect($report)->toBeInstanceOf(RuleSetExecutionReport::class);
             expect($report->getMatchedCount())->toBe(1);

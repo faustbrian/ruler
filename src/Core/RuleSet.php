@@ -212,25 +212,16 @@ final class RuleSet
      * context. Each rule evaluates its condition and executes its action if the
      * condition is satisfied.
      *
-     * @param Context $context the context containing variable values and facts
-     *                         used to evaluate and execute each rule
+     * @param  Context $context the context containing variable values and facts
+     *                          used to evaluate and execute each rule
+     * @return RuleSetExecutionReport Structured per-rule execution report for the pass
      */
-    public function executeRules(Context $context): void
-    {
-        foreach ($this->getOrderedRules() as $rule) {
-            $rule->execute($context);
-        }
-    }
-
-    /**
-     * Execute rules and return a structured single-pass report.
-     */
-    public function executeRulesWithReport(Context $context): RuleSetExecutionReport
+    public function executeRules(Context $context): RuleSetExecutionReport
     {
         $results = [];
 
         foreach ($this->getOrderedRules() as $rule) {
-            $results[] = $rule->executeWithResult($context);
+            $results[] = $rule->execute($context);
         }
 
         return new RuleSetExecutionReport($results);
@@ -270,14 +261,13 @@ final class RuleSet
                     continue;
                 }
 
-                if (!$rule->evaluate($context)) {
-                    continue;
-                }
+                $result = $rule->execute($context);
 
-                $rule->execute($context);
-                $firedRules[$hash] = true;
-                ++$firedThisCycle;
-                ++$totalFired;
+                if ($result->actionExecuted || $result->matched) {
+                    $firedRules[$hash] = true;
+                    ++$firedThisCycle;
+                    ++$totalFired;
+                }
             }
 
             ++$cycle;
