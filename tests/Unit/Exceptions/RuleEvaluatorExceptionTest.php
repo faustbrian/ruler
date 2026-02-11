@@ -18,6 +18,9 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid rule structure');
+            expect($exception->getErrorCode())->toBe('compile.invalid_rule_structure');
+            expect($exception->getPhase())->toBe('compile');
+            expect($exception->getPath())->toBe([]);
         });
 
         test('invalidNotRule creates exception with correct message', function (): void {
@@ -27,6 +30,8 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Logical NOT must have exactly one argument');
+            expect($exception->getErrorCode())->toBe('compile.invalid_not_arity');
+            expect($exception->getPath())->toBe(['value']);
         });
 
         test('invalidCombinator creates exception with correct message', function (): void {
@@ -39,6 +44,8 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid combinator: xor');
+            expect($exception->getErrorCode())->toBe('compile.invalid_combinator');
+            expect($exception->getPath())->toBe(['combinator']);
         });
 
         test('invalidRuleCacheKey creates exception with previous context', function (): void {
@@ -48,6 +55,8 @@ describe('RuleEvaluatorException', function (): void {
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Unable to generate rule cache key: json encode failed');
             expect($exception->getPrevious())->toBe($previous);
+            expect($exception->getErrorCode())->toBe('compile.cache_key_generation_failed');
+            expect($exception->getPath())->toBe(['rules']);
         });
     });
 
@@ -74,6 +83,22 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid combinator: &&||');
+        });
+
+        test('toArray returns machine-readable payload', function (): void {
+            $exception = RuleEvaluatorException::invalidRuleStructure(
+                'Operator must be a string',
+                ['value', 0, 'operator'],
+                ['receivedType' => 'int'],
+            );
+
+            expect($exception->toArray())->toBe([
+                'message' => 'Operator must be a string',
+                'errorCode' => 'compile.invalid_rule_structure',
+                'phase' => 'compile',
+                'path' => ['value', 0, 'operator'],
+                'details' => ['receivedType' => 'int'],
+            ]);
         });
     });
 });

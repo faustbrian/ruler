@@ -21,6 +21,7 @@ use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Cline\Ruler\Variables\ContextValueReference;
 use Illuminate\Http\Request;
 use Symfony\Component\Yaml\Yaml;
+use Throwable;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -199,9 +200,20 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromArray(array $values): RuleEvaluatorReport
     {
-        $context = new Context($values);
-        $ruleResult = $this->getCompiledRule()
-            ->execute($context);
+        try {
+            $context = new Context($values);
+            $ruleResult = $this->getCompiledRule()
+                ->execute($context);
+        } catch (RuleEvaluatorException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Rule evaluation failed',
+                [],
+                ['values' => $values],
+                $exception,
+            );
+        }
 
         return new RuleEvaluatorReport(
             $ruleResult->matched,
@@ -369,7 +381,17 @@ final readonly class RuleEvaluator
                 )
                 : $ruleBuilder[$fieldString];
 
-            $result = $builder->{$definition->operator}($value);
+            try {
+                $result = $builder->{$definition->operator}($value);
+            } catch (Throwable $exception) {
+                throw RuleEvaluatorException::unknownOperator(
+                    $definition->operator,
+                    $definition->field,
+                    ['operator'],
+                    $exception,
+                );
+            }
+
             assert($result instanceof Proposition);
 
             return $result;

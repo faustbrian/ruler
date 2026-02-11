@@ -492,6 +492,46 @@ YAML;
             ]))->toThrow(RuleEvaluatorException::class);
         });
 
+        test('returns structured compile error payload for invalid combinator', function (): void {
+            try {
+                RuleEvaluator::createFromArray([
+                    'combinator' => 'nandd',
+                    'value' => [
+                        [
+                            'field' => 'status',
+                            'operator' => 'sameAs',
+                            'value' => 'active',
+                        ],
+                    ],
+                ]);
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_combinator');
+                expect($ruleEvaluatorException->getPhase())->toBe('compile');
+                expect($ruleEvaluatorException->getPath())->toBe(['combinator']);
+                expect($ruleEvaluatorException->getDetails())->toBe(['combinator' => 'nandd']);
+            }
+        });
+
+        test('returns structured compile error payload for unknown operator', function (): void {
+            try {
+                RuleEvaluator::createFromArray([
+                    'field' => 'status',
+                    'operator' => 'unknownOperator',
+                    'value' => 'active',
+                ]);
+                test()->fail('Expected RuleEvaluatorException was not thrown.');
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe('compile.unknown_operator');
+                expect($ruleEvaluatorException->getPhase())->toBe('compile');
+                expect($ruleEvaluatorException->getPath())->toBe(['operator']);
+                expect($ruleEvaluatorException->getDetails())->toBe([
+                    'operator' => 'unknownOperator',
+                    'field' => 'status',
+                ]);
+            }
+        });
+
         test('returns false when propositions fail', function (): void {
             // Arrange
             $evaluator = RuleEvaluator::createFromArray([

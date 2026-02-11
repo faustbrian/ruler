@@ -45,6 +45,38 @@ describe('RuleDefinitionParser', function (): void {
         expect($definition->operands[0])->toBeInstanceOf(ComparisonRuleDefinition::class);
     });
 
+    test('rejects invalid combinators with structured error payload', function (): void {
+        try {
+            RuleDefinitionParser::fromArray([
+                'combinator' => 'invalid',
+                'value' => [],
+            ]);
+            test()->fail('Expected RuleEvaluatorException was not thrown.');
+        } catch (RuleEvaluatorException $ruleEvaluatorException) {
+            expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_combinator');
+            expect($ruleEvaluatorException->getPhase())->toBe('compile');
+            expect($ruleEvaluatorException->getPath())->toBe(['combinator']);
+            expect($ruleEvaluatorException->getDetails())->toBe(['combinator' => 'invalid']);
+        }
+    });
+
+    test('tracks nested paths for invalid operand payloads', function (): void {
+        try {
+            RuleDefinitionParser::fromArray([
+                'combinator' => 'and',
+                'value' => [
+                    ['field' => 'status', 'operator' => 'sameAs', 'value' => 'active'],
+                    'invalid',
+                ],
+            ]);
+            test()->fail('Expected RuleEvaluatorException was not thrown.');
+        } catch (RuleEvaluatorException $ruleEvaluatorException) {
+            expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_rule_structure');
+            expect($ruleEvaluatorException->getPath())->toBe(['value', 1]);
+            expect($ruleEvaluatorException->getMessage())->toBe('Combinator operands must be rule objects');
+        }
+    });
+
     test('rejects invalid combinators', function (): void {
         expect(fn (): CombinatorRuleDefinition => RuleDefinitionParser::fromArray([
             'combinator' => 'invalid',

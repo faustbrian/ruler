@@ -37,25 +37,41 @@ final class RuleDefinitionParser
     }
 
     /**
-     * @param array<string, mixed> $rule
+     * @param array<string, mixed>   $rule
+     * @param array<int, int|string> $path
      */
-    private static function parse(array $rule): RuleDefinition
+    private static function parse(array $rule, array $path = []): RuleDefinition
     {
         if (array_key_exists('combinator', $rule)) {
-            throw_unless(is_string($rule['combinator']), RuleEvaluatorException::invalidRuleStructure('Combinator must be a string'));
-            throw_unless(is_array($rule['value'] ?? null), RuleEvaluatorException::invalidRuleStructure('Combinator value must be an array'));
+            throw_unless(
+                is_string($rule['combinator']),
+                RuleEvaluatorException::invalidRuleStructure('Combinator must be a string', [...$path, 'combinator']),
+            );
+            throw_unless(
+                is_array($rule['value'] ?? null),
+                RuleEvaluatorException::invalidRuleStructure('Combinator value must be an array', [...$path, 'value']),
+            );
 
             $combinator = RuleCombinator::tryFrom($rule['combinator']);
-            throw_if($combinator === null, RuleEvaluatorException::invalidCombinator($rule['combinator']));
+            throw_if(
+                $combinator === null,
+                RuleEvaluatorException::invalidCombinator($rule['combinator'], [...$path, 'combinator']),
+            );
 
             $operands = [];
 
             /** @var mixed $operand */
-            foreach ($rule['value'] as $operand) {
-                throw_unless(is_array($operand), RuleEvaluatorException::invalidRuleStructure('Combinator operands must be rule objects'));
+            foreach ($rule['value'] as $operandIndex => $operand) {
+                throw_unless(
+                    is_array($operand),
+                    RuleEvaluatorException::invalidRuleStructure(
+                        'Combinator operands must be rule objects',
+                        [...$path, 'value', $operandIndex],
+                    ),
+                );
 
                 /** @var array<string, mixed> $operand */
-                $operands[] = self::parse($operand);
+                $operands[] = self::parse($operand, [...$path, 'value', $operandIndex]);
             }
 
             return new CombinatorRuleDefinition($combinator, $operands);
@@ -64,10 +80,19 @@ final class RuleDefinitionParser
         if (array_key_exists('operator', $rule)) {
             throw_unless(
                 is_string($rule['field'] ?? null) || is_int($rule['field'] ?? null),
-                RuleEvaluatorException::invalidRuleStructure('Operator rule field must be a string or integer'),
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Operator rule field must be a string or integer',
+                    [...$path, 'field'],
+                ),
             );
-            throw_unless(is_string($rule['operator']), RuleEvaluatorException::invalidRuleStructure('Operator must be a string'));
-            throw_unless(array_key_exists('value', $rule), RuleEvaluatorException::invalidRuleStructure('Operator rule must include value'));
+            throw_unless(
+                is_string($rule['operator']),
+                RuleEvaluatorException::invalidRuleStructure('Operator must be a string', [...$path, 'operator']),
+            );
+            throw_unless(
+                array_key_exists('value', $rule),
+                RuleEvaluatorException::invalidRuleStructure('Operator rule must include value', [...$path, 'value']),
+            );
 
             $field = is_string($rule['field']) ? $rule['field'] : sprintf('%d', $rule['field']);
 
@@ -78,6 +103,6 @@ final class RuleDefinitionParser
             );
         }
 
-        throw RuleEvaluatorException::invalidRuleStructure();
+        throw RuleEvaluatorException::invalidRuleStructure('Invalid rule structure', $path);
     }
 }
