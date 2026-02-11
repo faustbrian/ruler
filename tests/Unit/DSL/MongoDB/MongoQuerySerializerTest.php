@@ -13,8 +13,6 @@ use Cline\Ruler\DSL\MongoDB\MongoQuerySerializer;
 use Cline\Ruler\Operators\Type\IsEmpty;
 use Cline\Ruler\Operators\Type\IsNull;
 
-use const JSON_THROW_ON_ERROR;
-
 describe('MongoQuerySerializer', function (): void {
     describe('Happy Paths', function (): void {
         test('serialize simple comparison', function (): void {
@@ -59,7 +57,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$and')
                 ->and($decoded['$and'])->toBeArray()
@@ -76,7 +74,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$and')
                 ->and($decoded['$and'])->toBeArray();
@@ -94,7 +92,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$or')
                 ->and($decoded['$or'])->toBeArray()
@@ -110,7 +108,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$not');
         });
@@ -142,7 +140,7 @@ describe('MongoQuerySerializer', function (): void {
             $rule = $parser->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('phone')
                 ->and($decoded['phone'])->toHaveKey('$regex');
@@ -155,7 +153,7 @@ describe('MongoQuerySerializer', function (): void {
             $rule = $parser->parse(['name' => ['$regex' => '^john', '$options' => 'i']], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('name')
                 ->and($decoded['name'])->toHaveKey('$regex')
@@ -170,7 +168,7 @@ describe('MongoQuerySerializer', function (): void {
             $rule = $parser->parse(['email' => ['$exists' => true]], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('email')
                 ->and($decoded['email'])->toHaveKey('$exists');
@@ -422,7 +420,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$nor')
                 ->and($decoded['$nor'])->toBeArray()
@@ -441,7 +439,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$xor')
                 ->and($decoded['$xor'])->toBeArray()
@@ -460,7 +458,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('$nand')
                 ->and($decoded['$nand'])->toBeArray()
@@ -476,7 +474,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('created_at')
                 ->and($decoded['created_at'])->toHaveKey('$betweenDates')
@@ -644,7 +642,7 @@ describe('MongoQuerySerializer', function (): void {
             ], 'test-rule');
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('email')
                 ->and($decoded['email'])->toHaveKey('$exists')
@@ -663,7 +661,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $result = $serializer->serialize($rule);
 
-            $decoded = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
 
             expect($decoded)->toHaveKey('deleted_at')
                 ->and($decoded['deleted_at'])->toHaveKey('$exists')

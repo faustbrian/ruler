@@ -8,7 +8,6 @@
  */
 
 use Cline\Ruler\Core\RuleExecutionResult;
-use TypeError;
 
 describe('RuleExecutionResult', function (): void {
     describe('Happy Paths', function (): void {
