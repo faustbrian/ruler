@@ -59,6 +59,45 @@ describe('RuleEvaluatorException', function (): void {
             expect($exception->getPrevious())->toBe($previous);
             expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileCacheKeyGenerationFailed);
             expect($exception->getPath())->toBe(['rules']);
+            expect($exception->getDetails())->toBe(['reason' => 'json encode failed']);
+        });
+
+        test('unknownOperator creates exception with field and operator details', function (): void {
+            $previous = new InvalidArgumentException('unknown operator');
+            $exception = RuleEvaluatorException::unknownOperator(
+                'doesNotExist',
+                'status',
+                ['operator'],
+                $previous,
+            );
+
+            expect($exception->getMessage())->toBe('Unknown operator: "doesNotExist"');
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileUnknownOperator);
+            expect($exception->getPhase())->toBe(RuleErrorPhase::Compile);
+            expect($exception->getPath())->toBe(['operator']);
+            expect($exception->getDetails())->toBe([
+                'operator' => 'doesNotExist',
+                'field' => 'status',
+            ]);
+            expect($exception->getPrevious())->toBe($previous);
+        });
+
+        test('runtimeEvaluationFailed creates runtime payload', function (): void {
+            $previous = new RuntimeException('evaluation exploded');
+            $exception = RuleEvaluatorException::runtimeEvaluationFailed(
+                'Rule evaluation failed',
+                ['rules', 0],
+                ['values' => ['status' => 'active']],
+                $previous,
+            );
+
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+            expect($exception->getPhase())->toBe(RuleErrorPhase::Runtime);
+            expect($exception->getPath())->toBe(['rules', 0]);
+            expect($exception->getDetails())->toBe([
+                'values' => ['status' => 'active'],
+            ]);
+            expect($exception->getPrevious())->toBe($previous);
         });
     });
 

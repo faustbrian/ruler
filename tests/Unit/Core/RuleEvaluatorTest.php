@@ -599,6 +599,43 @@ YAML;
             expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
         });
 
+        test('returns structured compile failure when json decodes to scalar', function (): void {
+            $result = RuleEvaluator::compileFromJson('true');
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails())->toBe(['format' => 'json']);
+        });
+
+        test('throws when json rule file cannot be read', function (): void {
+            expect(static fn (): RuleEvaluatorCompilationResult => RuleEvaluator::compileFromJsonFile('/tmp/ruler-file-does-not-exist.json'))
+                ->toThrow(\ErrorException::class);
+        });
+
+        test('returns structured compile failure for invalid yaml payload', function (): void {
+            $result = RuleEvaluator::compileFromYaml(":\n\t");
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails())->toBe(['format' => 'yaml']);
+        });
+
+        test('returns structured compile failure when yaml decodes to scalar', function (): void {
+            $result = RuleEvaluator::compileFromYaml('true');
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails())->toBe(['format' => 'yaml']);
+        });
+
+        test('throws when yaml rule file cannot be read', function (): void {
+            expect(static fn (): RuleEvaluatorCompilationResult => RuleEvaluator::compileFromYamlFile('/tmp/ruler-file-does-not-exist.yaml'))
+                ->toThrow(\ErrorException::class);
+        });
+
         test('returns structured compile error payload for invalid combinator', function (): void {
             $result = RuleEvaluator::compileFromArray([
                 'combinator' => 'nandd',
