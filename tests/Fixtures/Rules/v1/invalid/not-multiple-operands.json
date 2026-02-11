@@ -1,0 +1,15 @@
+{
+  "combinator": "not",
+  "value": [
+    {
+      "field": "status",
+      "operator": "sameAs",
+      "value": "active"
+    },
+    {
+      "field": "enabled",
+      "operator": "sameAs",
+      "value": true
+    }
+  ]
+}
