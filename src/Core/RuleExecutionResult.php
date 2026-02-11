@@ -21,7 +21,7 @@ final readonly class RuleExecutionResult
      * Create a new rule execution result.
      */
     public function __construct(
-        public ?string $ruleId,
+        public string $ruleId,
         public ?string $ruleName,
         public int $priority,
         public bool $enabled,
