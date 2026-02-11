@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\MongoDB;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use InvalidArgumentException;
 use JsonException;
 
@@ -109,14 +110,14 @@ final readonly class MongoQueryParser
      * context as its argument.
      *
      * @param array<string, mixed> $query  The MongoDB query document to parse
-     * @param callable             $action Callback to execute when rule evaluates to true.
+     * @param Closure              $action Callback to execute when rule evaluates to true.
      *                                     Receives the context array as parameter.
      *
      * @throws InvalidArgumentException When query structure is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(array $query, callable $action): Rule
+    public function parseWithAction(array $query, Closure $action): Rule
     {
         return $this->builder->parseWithAction($query, $action);
     }
@@ -127,15 +128,15 @@ final readonly class MongoQueryParser
      * Creates a Rule from JSON that executes the provided callback when the
      * parsed condition evaluates to true.
      *
-     * @param string   $json   JSON-encoded MongoDB query document
-     * @param callable $action Callback to execute when rule evaluates to true.
-     *                         Receives the context array as parameter.
+     * @param string  $json   JSON-encoded MongoDB query document
+     * @param Closure $action Callback to execute when rule evaluates to true.
+     *                        Receives the context array as parameter.
      *
      * @throws JsonException If JSON string is malformed or cannot be decoded
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseJsonWithAction(string $json, callable $action): Rule
+    public function parseJsonWithAction(string $json, Closure $action): Rule
     {
         return $this->builder->parseJsonWithAction($json, $action);
     }

@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\Wirefilter;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use LogicException;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 
@@ -96,16 +97,16 @@ final readonly class StringRuleBuilder
      * condition evaluates to true. The callback receives the evaluation
      * context as its argument.
      *
-     * @param string   $expression The DSL expression to parse
-     * @param callable $action     Callback to execute when rule evaluates to true.
-     *                             Receives the context array as parameter.
+     * @param string  $expression The DSL expression to parse
+     * @param Closure $action     Callback to execute when rule evaluates to true.
+     *                            Receives the context array as parameter.
      *
      * @throws LogicException When compilation fails
      * @throws SyntaxError    When expression syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, callable $action): Rule
+    public function parseWithAction(string $expression, Closure $action): Rule
     {
         $parsedExpression = $this->parser->parse($expression);
         $proposition = $this->compiler->compile($parsedExpression);

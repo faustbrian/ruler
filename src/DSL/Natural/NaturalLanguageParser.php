@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\Natural;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use InvalidArgumentException;
 
 /**
@@ -89,15 +90,15 @@ final readonly class NaturalLanguageParser
      * condition evaluates to true. The callback receives the evaluation
      * context as its argument.
      *
-     * @param string   $expression The Natural Language DSL expression to parse
-     * @param callable $action     Callback to execute when rule evaluates to true.
-     *                             Receives the context array as parameter.
+     * @param string  $expression The Natural Language DSL expression to parse
+     * @param Closure $action     Callback to execute when rule evaluates to true.
+     *                            Receives the context array as parameter.
      *
      * @throws InvalidArgumentException When expression cannot be parsed
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, callable $action): Rule
+    public function parseWithAction(string $expression, Closure $action): Rule
     {
         return $this->builder->parseWithAction($expression, $action);
     }

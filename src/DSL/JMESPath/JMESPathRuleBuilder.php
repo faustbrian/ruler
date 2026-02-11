@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\JMESPath;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use Exception;
 
 /**
@@ -73,11 +74,11 @@ final readonly class JMESPathRuleBuilder
      * and attaches the provided action callback to execute when the rule
      * evaluates to true.
      *
-     * @param  string   $expression JMESPath query expression to parse
-     * @param  callable $action     Callback to execute when rule evaluates to true
-     * @return Rule     The compiled Rule with attached action callback
+     * @param  string  $expression JMESPath query expression to parse
+     * @param  Closure $action     Callback to execute when rule evaluates to true
+     * @return Rule    The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, callable $action): Rule
+    public function parseWithAction(string $expression, Closure $action): Rule
     {
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 

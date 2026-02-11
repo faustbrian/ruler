@@ -12,6 +12,7 @@ namespace Cline\Ruler\DSL\GraphQL;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Closure;
 
 /**
  * Builds executable rules from GraphQL filter syntax.
@@ -97,11 +98,11 @@ final readonly class GraphQLFilterRuleBuilder
      * evaluates to true. The callback receives the evaluation context as its argument.
      *
      * @param  array<string, mixed>|string $filter GraphQL filter query as JSON string or PHP array
-     * @param  callable                    $action Callback to execute when rule evaluates to true.
+     * @param  Closure                     $action Callback to execute when rule evaluates to true.
      *                                             Receives the context array as parameter.
      * @return Rule                        compiled rule with attached action callback
      */
-    public function parseWithAction(string|array $filter, callable $action): Rule
+    public function parseWithAction(string|array $filter, Closure $action): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);

@@ -12,6 +12,7 @@ namespace Cline\Ruler\DSL\LDAP;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Closure;
 use Exception;
 
 /**
@@ -82,12 +83,12 @@ final readonly class LDAPFilterRuleBuilder
      * Creates a Rule with an associated action that will be executed when the
      * Rule evaluates to true.
      *
-     * @param  string   $filter LDAP filter expression following RFC 4515 syntax
-     * @param  callable $action Callback to execute when the rule evaluates to true.
-     *                          Receives the Context as its parameter.
-     * @return Rule     The compiled Rule with attached action
+     * @param  string  $filter LDAP filter expression following RFC 4515 syntax
+     * @param  Closure $action Callback to execute when the rule evaluates to true.
+     *                         Receives the Context as its parameter.
+     * @return Rule    The compiled Rule with attached action
      */
-    public function parseWithAction(string $filter, callable $action): Rule
+    public function parseWithAction(string $filter, Closure $action): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);

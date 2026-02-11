@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\Natural;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use InvalidArgumentException;
 
 /**
@@ -78,14 +79,14 @@ final readonly class NaturalLanguageRuleBuilder
      * Converts a human-readable rule expression into an executable Rule object
      * with an attached action that executes when the rule evaluates to true.
      *
-     * @param string   $text   Natural language rule expression to parse
-     * @param callable $action Callback to execute when rule evaluates to true
+     * @param string  $text   Natural language rule expression to parse
+     * @param Closure $action Callback to execute when rule evaluates to true
      *
      * @throws InvalidArgumentException If expression cannot be parsed
      *
      * @return Rule Compiled rule with action callback
      */
-    public function parseWithAction(string $text, callable $action): Rule
+    public function parseWithAction(string $text, Closure $action): Rule
     {
         $ast = $this->parser->parse($text);
         $proposition = $this->compiler->compile($ast);

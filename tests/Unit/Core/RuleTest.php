@@ -149,14 +149,13 @@ describe('Rule', function (): void {
     });
 
     describe('Sad Paths', function (): void {
-        test('non callable actions will throw an exception', function (): void {
-            $this->expectException(LogicException::class);
-            $context = new Context();
-            $rule = new Rule(
+        test('non-closure actions are rejected at construction time', function (): void {
+            $this->expectException(TypeError::class);
+
+            new Rule(
                 new TrueProposition(),
                 'this is not callable',
             );
-            $rule->execute($context);
         });
     });
 });

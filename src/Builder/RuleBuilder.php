@@ -17,6 +17,7 @@ use Cline\Ruler\Operators\Logical\LogicalAnd;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Cline\Ruler\Operators\Logical\LogicalOr;
 use Cline\Ruler\Operators\Logical\LogicalXor;
+use Closure;
 use InvalidArgumentException;
 use LogicException;
 
@@ -64,14 +65,13 @@ final class RuleBuilder implements ArrayAccess
     /**
      * Create a new Rule with the given condition and optional action.
      *
-     * @param  Proposition   $condition the propositional condition that determines when
-     *                                  the rule is satisfied and the action should execute
-     * @param  null|callable $action    Optional callback to execute when the condition
-     *                                  evaluates to true. Receives no arguments and its
-     *                                  return value is ignored.
-     * @return Rule          the constructed Rule instance
+     * @param  Proposition  $condition the propositional condition that determines when
+     *                                 the rule is satisfied and the action should execute
+     * @param  null|Closure $action    Optional callback to execute when the condition
+     *                                 evaluates to true. Receives Context and returns void.
+     * @return Rule         the constructed Rule instance
      */
-    public function create(Proposition $condition, mixed $action = null): Rule
+    public function create(Proposition $condition, ?Closure $action = null): Rule
     {
         return new Rule($condition, $action);
     }

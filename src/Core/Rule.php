@@ -9,10 +9,7 @@
 
 namespace Cline\Ruler\Core;
 
-use LogicException;
-
-use function is_callable;
-use function throw_unless;
+use Closure;
 
 /**
  * Represents a conditional rule with an optional action.
@@ -31,21 +28,21 @@ final readonly class Rule implements Proposition
     /**
      * Create a new Rule instance.
      *
-     * @param Proposition   $condition The propositional condition that determines whether
-     *                                 this rule is satisfied. The condition is evaluated
-     *                                 against a Context to produce a boolean result.
-     * @param null|callable $action    Optional callback to execute when the condition
-     *                                 evaluates to true. The callback must accept the
-     *                                 current Context as its first argument.
+     * @param Proposition  $condition The propositional condition that determines whether
+     *                                this rule is satisfied. The condition is evaluated
+     *                                against a Context to produce a boolean result.
+     * @param null|Closure $action    Optional callback to execute when the condition
+     *                                evaluates to true. The callback must accept the
+     *                                current Context as its first argument.
      */
     public function __construct(
         private Proposition $condition,
         /**
          * The optional action to execute when the rule condition is satisfied.
          *
-         * @var null|callable
+         * @var null|Closure
          */
-        private mixed $action = null,
+        private ?Closure $action = null,
         private ?string $id = null,
         private ?string $name = null,
         private int $priority = 0,
@@ -79,12 +76,10 @@ final readonly class Rule implements Proposition
      *
      * The rule's condition is first evaluated against the provided context. If the
      * condition evaluates to true and an action callback is defined, the action
-     * is executed. The action must be callable, otherwise an exception is thrown.
+     * is executed. The action must accept Context and return void.
      *
      * @param Context $context the context containing variable values and facts
      *                         used to evaluate the rule
-     *
-     * @throws LogicException when the action is defined but not callable
      *
      * @return RuleExecutionResult Structured execution details for this rule
      */
@@ -93,9 +88,7 @@ final readonly class Rule implements Proposition
         $matched = $this->evaluate($context);
         $actionExecuted = false;
 
-        if ($matched && $this->action !== null) {
-            throw_unless(is_callable($this->action), LogicException::class, 'Rule actions must be callable.');
-
+        if ($matched && $this->action instanceof Closure) {
             ($this->action)($context);
             $actionExecuted = true;
         }

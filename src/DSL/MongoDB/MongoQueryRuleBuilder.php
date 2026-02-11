@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\MongoDB;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Closure;
 use InvalidArgumentException;
 use JsonException;
 
@@ -96,10 +97,10 @@ final readonly class MongoQueryRuleBuilder
      * condition evaluates to true.
      *
      * @param  array<string, mixed> $query  MongoDB-style query document with fields and operators
-     * @param  callable             $action Callback to execute when rule evaluates to true
+     * @param  Closure              $action Callback to execute when rule evaluates to true
      * @return Rule                 Compiled rule with attached action callback
      */
-    public function parseWithAction(array $query, callable $action): Rule
+    public function parseWithAction(array $query, Closure $action): Rule
     {
         $proposition = $this->compiler->compile($query);
 
@@ -112,14 +113,14 @@ final readonly class MongoQueryRuleBuilder
      * Creates a Rule from JSON that executes the provided callback when the
      * parsed condition evaluates to true.
      *
-     * @param string   $json   JSON-encoded MongoDB query document
-     * @param callable $action Callback to execute when rule evaluates to true
+     * @param string  $json   JSON-encoded MongoDB query document
+     * @param Closure $action Callback to execute when rule evaluates to true
      *
      * @throws JsonException If JSON string is malformed or cannot be decoded
      *
      * @return Rule Compiled rule with attached action callback
      */
-    public function parseJsonWithAction(string $json, callable $action): Rule
+    public function parseJsonWithAction(string $json, Closure $action): Rule
     {
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 

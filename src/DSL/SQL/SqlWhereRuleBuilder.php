@@ -12,6 +12,7 @@ namespace Cline\Ruler\DSL\SQL;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Closure;
 use Exception;
 use InvalidArgumentException;
 
@@ -93,14 +94,14 @@ final readonly class SqlWhereRuleBuilder
      * Creates a Rule that executes the provided callback when the parsed
      * condition evaluates to true. Useful for defining rule-based workflows.
      *
-     * @param string   $sql    The SQL WHERE clause expression to parse
-     * @param callable $action Callback to execute when rule evaluates to true
+     * @param string  $sql    The SQL WHERE clause expression to parse
+     * @param Closure $action Callback to execute when rule evaluates to true
      *
      * @throws InvalidArgumentException When SQL syntax is invalid
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $sql, callable $action): Rule
+    public function parseWithAction(string $sql, Closure $action): Rule
     {
         $ast = $this->parser->parse($sql);
         $proposition = $this->compiler->compile($ast);
