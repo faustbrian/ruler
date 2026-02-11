@@ -315,7 +315,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $rule = new Rule($proposition, null, RuleIds::fromString('rule-missing-field-name'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'Expected variable with name for field reference');
+                ->toThrow(LogicException::class, 'Expected Variable operand for field reference');
         });
 
         test('throws exception for unsupported value type', function (): void {
@@ -345,7 +345,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $rule = new Rule($proposition, null, RuleIds::fromString('rule-list-membership-type'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'Expected variable with array value for list membership');
+                ->toThrow(LogicException::class, 'Expected Variable operand for list membership');
         });
 
         test('handles operator without operands property', function (): void {

@@ -9,13 +9,19 @@
 
 use Cline\Ruler\Enums\RuleErrorCode;
 use Cline\Ruler\Enums\RuleErrorPhase;
+use Cline\Ruler\Exceptions\InvalidCombinatorException;
+use Cline\Ruler\Exceptions\InvalidNotRuleException;
+use Cline\Ruler\Exceptions\InvalidRuleCacheKeyException;
+use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Exceptions\RuntimeEvaluationFailedException;
+use Cline\Ruler\Exceptions\UnknownRuleOperatorException;
 
 describe('RuleEvaluatorException', function (): void {
     describe('Happy Paths', function (): void {
         test('invalidRuleStructure creates exception with correct message', function (): void {
             // Act
-            $exception = RuleEvaluatorException::invalidRuleStructure();
+            $exception = InvalidRuleStructureException::forReason();
 
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
@@ -27,7 +33,7 @@ describe('RuleEvaluatorException', function (): void {
 
         test('invalidNotRule creates exception with correct message', function (): void {
             // Act
-            $exception = RuleEvaluatorException::invalidNotRule();
+            $exception = InvalidNotRuleException::create();
 
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
@@ -41,7 +47,7 @@ describe('RuleEvaluatorException', function (): void {
             $invalidCombinator = 'xor';
 
             // Act
-            $exception = RuleEvaluatorException::invalidCombinator($invalidCombinator);
+            $exception = InvalidCombinatorException::forCombinator($invalidCombinator);
 
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
@@ -52,7 +58,7 @@ describe('RuleEvaluatorException', function (): void {
 
         test('invalidRuleCacheKey creates exception with previous context', function (): void {
             $previous = new RuntimeException('json encode failed');
-            $exception = RuleEvaluatorException::invalidRuleCacheKey('json encode failed', $previous);
+            $exception = InvalidRuleCacheKeyException::forReason('json encode failed', $previous);
 
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Unable to generate rule cache key: json encode failed');
@@ -64,7 +70,7 @@ describe('RuleEvaluatorException', function (): void {
 
         test('unknownOperator creates exception with field and operator details', function (): void {
             $previous = new InvalidArgumentException('unknown operator');
-            $exception = RuleEvaluatorException::unknownOperator(
+            $exception = UnknownRuleOperatorException::forOperator(
                 'doesNotExist',
                 'status',
                 ['operator'],
@@ -84,7 +90,7 @@ describe('RuleEvaluatorException', function (): void {
 
         test('runtimeEvaluationFailed creates runtime payload', function (): void {
             $previous = new RuntimeException('evaluation exploded');
-            $exception = RuleEvaluatorException::runtimeEvaluationFailed(
+            $exception = RuntimeEvaluationFailedException::forReason(
                 'Rule evaluation failed',
                 ['rules', 0],
                 ['values' => ['status' => 'active']],
@@ -107,7 +113,7 @@ describe('RuleEvaluatorException', function (): void {
             $emptyCombinator = '';
 
             // Act
-            $exception = RuleEvaluatorException::invalidCombinator($emptyCombinator);
+            $exception = InvalidCombinatorException::forCombinator($emptyCombinator);
 
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
@@ -119,7 +125,7 @@ describe('RuleEvaluatorException', function (): void {
             $specialCombinator = '&&||';
 
             // Act
-            $exception = RuleEvaluatorException::invalidCombinator($specialCombinator);
+            $exception = InvalidCombinatorException::forCombinator($specialCombinator);
 
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
@@ -127,7 +133,7 @@ describe('RuleEvaluatorException', function (): void {
         });
 
         test('toArray returns machine-readable payload', function (): void {
-            $exception = RuleEvaluatorException::invalidRuleStructure(
+            $exception = InvalidRuleStructureException::forReason(
                 'Operator must be a string',
                 ['value', 0, 'operator'],
                 ['receivedType' => 'int'],

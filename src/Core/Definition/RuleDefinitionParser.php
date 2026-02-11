@@ -104,6 +104,6 @@ final class RuleDefinitionParser
             );
         }
 
-        throw RuleEvaluatorException::invalidRuleStructure('Invalid rule structure', $path);
+        throw InvalidRuleStructureException::forReason('Invalid rule structure', $path);
     }
 }

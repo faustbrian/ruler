@@ -9,7 +9,8 @@
 
 namespace Cline\Ruler\Core\Definition;
 
-use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Exceptions\InvalidNotRuleException;
+use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 
 use function count;
 use function sprintf;
@@ -33,7 +34,7 @@ final readonly class CombinatorRuleDefinition implements RuleDefinition
         public array $operands,
     ) {
         if ($this->combinator === RuleCombinator::Not) {
-            throw_if(count($this->operands) !== 1, RuleEvaluatorException::invalidNotRule());
+            throw_if(count($this->operands) !== 1, InvalidNotRuleException::create());
         }
 
         if ($this->combinator === RuleCombinator::Not) {
@@ -42,7 +43,7 @@ final readonly class CombinatorRuleDefinition implements RuleDefinition
 
         throw_if(
             count($this->operands) < 1,
-            RuleEvaluatorException::invalidRuleStructure(sprintf('Combinator "%s" requires at least one operand', $this->combinator->value)),
+            InvalidRuleStructureException::forReason(sprintf('Combinator "%s" requires at least one operand', $this->combinator->value)),
         );
     }
 }

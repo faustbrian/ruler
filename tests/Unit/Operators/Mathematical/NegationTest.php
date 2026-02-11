@@ -8,6 +8,8 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\Mathematical\Negation;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
@@ -32,7 +34,7 @@ describe('Negation', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid data', function (): void {
-            $this->expectException(RuntimeException::class);
+            $this->expectException(ValuesNotNumericException::class);
             $this->expectExceptionMessage('Arithmetic: values must be numeric');
             $varA = new Variable('a', 'string');
             $context = new Context();
@@ -42,8 +44,8 @@ describe('Negation', function (): void {
         });
 
         test('throws exception when adding second operand to unary operator', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Negation can only have 1 operand');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Negation expects unary (1) operands, got 2');
 
             $varA = new Variable('a', 1);
             $op = new Negation($varA);

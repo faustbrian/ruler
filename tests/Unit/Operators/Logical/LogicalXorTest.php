@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Operators\Logical\LogicalXor;
 use Tests\Fixtures\FalseProposition;
 use Tests\Fixtures\TrueProposition;
@@ -55,7 +56,7 @@ describe('LogicalXor', function (): void {
 
     describe('Sad Paths', function (): void {
         test('executing alogical xor without propositions throws an exception', function (): void {
-            $this->expectException(LogicException::class);
+            $this->expectException(InvalidOperandCardinalityException::class);
             $op = new LogicalXor();
             $op->evaluate(
                 new Context(),

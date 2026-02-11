@@ -238,7 +238,7 @@ test('parse multiple operators on same field', function (): void {
 test('throws exception for unsupported operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
 
-    expect(fn (): Rule => $mongo->parse(['age' => ['$invalidOp' => 18]], RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $mongo->parse(['age' => ['$invalidOp' => 18]], RuleIds::fromString('test-rule')))->toThrow(LogicException::class);
 });
 
 test('parse $not with string field check', function (): void {
@@ -370,13 +370,13 @@ test('parse $strLength with $lt operator', function (): void {
 test('throws exception for invalid $strLength operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
 
-    expect(fn (): Rule => $mongo->parse(['name' => ['$strLength' => ['$invalid' => 5]]], RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $mongo->parse(['name' => ['$strLength' => ['$invalid' => 5]]], RuleIds::fromString('test-rule')))->toThrow(LogicException::class);
 });
 
 test('throws exception for invalid $strLength value type', function (): void {
     $mongo = new MongoQueryRuleBuilder();
 
-    expect(fn (): Rule => $mongo->parse(['name' => ['$strLength' => 'invalid']], RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $mongo->parse(['name' => ['$strLength' => 'invalid']], RuleIds::fromString('test-rule')))->toThrow(LogicException::class);
 });
 
 test('parse $size with comparison operators', function (): void {
@@ -454,11 +454,11 @@ test('parse $size with $lt operator', function (): void {
 test('throws exception for invalid $size operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
 
-    expect(fn (): Rule => $mongo->parse(['tags' => ['$size' => ['$invalid' => 3]]], RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $mongo->parse(['tags' => ['$size' => ['$invalid' => 3]]], RuleIds::fromString('test-rule')))->toThrow(LogicException::class);
 });
 
 test('throws exception for invalid $size value type', function (): void {
     $mongo = new MongoQueryRuleBuilder();
 
-    expect(fn (): Rule => $mongo->parse(['tags' => ['$size' => 'invalid']], RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $mongo->parse(['tags' => ['$size' => 'invalid']], RuleIds::fromString('test-rule')))->toThrow(LogicException::class);
 });

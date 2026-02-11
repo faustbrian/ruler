@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Tests\Fixtures\FalseProposition;
 use Tests\Fixtures\TrueProposition;
@@ -43,7 +44,7 @@ describe('LogicalNot', function (): void {
 
     describe('Sad Paths', function (): void {
         test('executing alogical not without propositions throws an exception', function (): void {
-            $this->expectException(LogicException::class);
+            $this->expectException(InvalidOperandCardinalityException::class);
             $op = new LogicalNot();
             $op->evaluate(
                 new Context(),
@@ -51,12 +52,12 @@ describe('LogicalNot', function (): void {
         });
 
         test('instantiating alogical not with too many arguments throws an exception', function (): void {
-            $this->expectException(LogicException::class);
+            $this->expectException(InvalidOperandCardinalityException::class);
             $op = new LogicalNot([new TrueProposition(), new FalseProposition()]);
         });
 
         test('adding asecond proposition to logical not throws an exception', function (): void {
-            $this->expectException(LogicException::class);
+            $this->expectException(InvalidOperandCardinalityException::class);
             $op = new LogicalNot();
             $op->addProposition(
                 new TrueProposition(),

@@ -449,7 +449,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($equalTo, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'Binary operator = requires exactly 2 operands');
+                ->toThrow(LogicException::class, '= requires exactly 2 operands, got 1');
         });
 
         test('serialize NOT operator with wrong operand count throws exception', function (): void {
@@ -468,7 +468,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($not, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'NOT operator requires exactly 1 operand');
+                ->toThrow(LogicException::class, 'NOT requires exactly 1 operands, got 0');
         });
 
         test('serialize IN operator with wrong operand count throws exception', function (): void {
@@ -486,7 +486,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($in, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'IN operator requires exactly 2 operands');
+                ->toThrow(LogicException::class, 'IN requires exactly 2 operands, got 1');
         });
 
         test('serialize IN operator with non-array value throws exception', function (): void {
@@ -500,7 +500,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($in, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'IN operator requires array of values');
+                ->toThrow(LogicException::class, 'Expected array, got string');
         });
 
         test('serialize BETWEEN operator with wrong operand count throws exception', function (): void {
@@ -519,7 +519,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($between, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'BETWEEN operator requires exactly 3 operands');
+                ->toThrow(LogicException::class, 'BETWEEN requires exactly 3 operands, got 2');
         });
 
         test('serialize LIKE operator with wrong operand count throws exception', function (): void {
@@ -537,7 +537,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($matches, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'LIKE operator requires exactly 2 operands');
+                ->toThrow(LogicException::class, 'LIKE requires exactly 2 operands, got 1');
         });
 
         test('serialize LIKE operator with non-string pattern throws exception', function (): void {
@@ -551,7 +551,7 @@ describe('SQLWhereSerializer', function (): void {
             $rule = $builder->create($matches, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'LIKE pattern must be a string');
+                ->toThrow(LogicException::class, 'Expected string, got int');
         });
 
         test('serialize value with unsupported type throws exception', function (): void {

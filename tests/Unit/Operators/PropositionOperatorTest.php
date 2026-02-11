@@ -10,6 +10,7 @@
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Operators\PropositionOperator;
 
 describe('PropositionOperator', function (): void {
@@ -102,8 +103,8 @@ describe('PropositionOperator', function (): void {
 
     describe('Sad Paths', function (): void {
         test('throws exception when adding second proposition to unary operator', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessageMatches('/can only have 1 operand/');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessageMatches('/expects unary.*operands/');
 
             $operand1 = $this->createMock(Proposition::class);
             $operand2 = $this->createMock(Proposition::class);

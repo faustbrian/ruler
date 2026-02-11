@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Operators\Logical\LogicalOr;
 use Tests\Fixtures\FalseProposition;
 use Tests\Fixtures\TrueProposition;
@@ -52,7 +53,7 @@ describe('LogicalOr', function (): void {
 
     describe('Sad Paths', function (): void {
         test('executing alogical or without propositions throws an exception', function (): void {
-            $this->expectException(LogicException::class);
+            $this->expectException(InvalidOperandCardinalityException::class);
             $op = new LogicalOr();
             $op->evaluate(
                 new Context(),

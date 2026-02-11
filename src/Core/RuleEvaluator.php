@@ -17,7 +17,10 @@ use Cline\Ruler\Core\Definition\ComparisonRuleDefinition;
 use Cline\Ruler\Core\Definition\RuleCombinator;
 use Cline\Ruler\Core\Definition\RuleDefinition;
 use Cline\Ruler\Core\Definition\RuleDefinitionParser;
+use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Exceptions\RuntimeEvaluationFailedException;
+use Cline\Ruler\Exceptions\UnknownRuleOperatorException;
 use Cline\Ruler\Variables\ContextValueReference;
 use Illuminate\Http\Request;
 use Symfony\Component\Yaml\Yaml;
@@ -100,7 +103,7 @@ final readonly class RuleEvaluator
             return RuleEvaluatorCompilationResult::failure($exception);
         } catch (Throwable $exception) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Rule compilation failed',
                     ['rules'],
                     ['reason' => $exception->getMessage()],
@@ -129,7 +132,7 @@ final readonly class RuleEvaluator
 
             if (!is_array($decoded)) {
                 return RuleEvaluatorCompilationResult::failure(
-                    RuleEvaluatorException::invalidRuleStructure(
+                    InvalidRuleStructureException::forReason(
                         'JSON rules must decode to an object',
                         ['rules'],
                         ['format' => 'json'],
@@ -141,7 +144,7 @@ final readonly class RuleEvaluator
             return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Invalid JSON rule payload',
                     ['rules'],
                     [
@@ -171,7 +174,7 @@ final readonly class RuleEvaluator
             $contents = file_get_contents($rules);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Unable to read JSON rule file',
                     ['rules'],
                     [
@@ -185,7 +188,7 @@ final readonly class RuleEvaluator
 
         if (!is_string($contents)) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Unable to read JSON rule file',
                     ['rules'],
                     [
@@ -219,7 +222,7 @@ final readonly class RuleEvaluator
 
             if (!is_array($parsed)) {
                 return RuleEvaluatorCompilationResult::failure(
-                    RuleEvaluatorException::invalidRuleStructure(
+                    InvalidRuleStructureException::forReason(
                         'YAML rules must decode to an object',
                         ['rules'],
                         ['format' => 'yaml'],
@@ -231,7 +234,7 @@ final readonly class RuleEvaluator
             return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Invalid YAML rule payload',
                     ['rules'],
                     [
@@ -261,7 +264,7 @@ final readonly class RuleEvaluator
             $contents = file_get_contents($rules);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Unable to read YAML rule file',
                     ['rules'],
                     [
@@ -275,7 +278,7 @@ final readonly class RuleEvaluator
 
         if (!is_string($contents)) {
             return RuleEvaluatorCompilationResult::failure(
-                RuleEvaluatorException::invalidRuleStructure(
+                InvalidRuleStructureException::forReason(
                     'Unable to read YAML rule file',
                     ['rules'],
                     [
@@ -314,7 +317,7 @@ final readonly class RuleEvaluator
         } catch (RuleEvaluatorException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Rule evaluation failed',
                 [],
                 ['values' => $values],
@@ -344,7 +347,7 @@ final readonly class RuleEvaluator
         try {
             $decoded = json_decode($values, true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $throwable) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Invalid JSON values payload',
                 ['values'],
                 [
@@ -356,7 +359,7 @@ final readonly class RuleEvaluator
         }
 
         if (!is_array($decoded)) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'JSON values must decode to an object',
                 ['values'],
                 ['format' => 'json'],
@@ -381,7 +384,7 @@ final readonly class RuleEvaluator
         try {
             $contents = file_get_contents($values);
         } catch (Throwable $throwable) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Unable to read JSON values file',
                 ['values'],
                 [
@@ -394,7 +397,7 @@ final readonly class RuleEvaluator
         }
 
         if (!is_string($contents)) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Unable to read JSON values file',
                 ['values'],
                 [
@@ -422,7 +425,7 @@ final readonly class RuleEvaluator
         try {
             $parsed = Yaml::parse($values);
         } catch (Throwable $throwable) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Invalid YAML values payload',
                 ['values'],
                 [
@@ -434,7 +437,7 @@ final readonly class RuleEvaluator
         }
 
         if (!is_array($parsed)) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'YAML values must decode to an object',
                 ['values'],
                 ['format' => 'yaml'],
@@ -459,7 +462,7 @@ final readonly class RuleEvaluator
         try {
             $contents = file_get_contents($values);
         } catch (Throwable $throwable) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Unable to read YAML values file',
                 ['values'],
                 [
@@ -472,7 +475,7 @@ final readonly class RuleEvaluator
         }
 
         if (!is_string($contents)) {
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Unable to read YAML values file',
                 ['values'],
                 [
@@ -573,7 +576,7 @@ final readonly class RuleEvaluator
             try {
                 $result = $builder->{$definition->operator}($value);
             } catch (Throwable $exception) {
-                throw RuleEvaluatorException::unknownOperator(
+                throw UnknownRuleOperatorException::forOperator(
                     $definition->operator,
                     $definition->field,
                     ['operator'],
@@ -586,7 +589,7 @@ final readonly class RuleEvaluator
             return $result;
         }
 
-        throw RuleEvaluatorException::invalidRuleStructure();
+        throw InvalidRuleStructureException::forReason();
     }
 
     /**
@@ -601,7 +604,7 @@ final readonly class RuleEvaluator
                 continue;
             }
 
-            throw RuleEvaluatorException::runtimeEvaluationFailed(
+            throw RuntimeEvaluationFailedException::forReason(
                 'Values payload must decode to an object with string keys',
                 ['values'],
                 ['format' => $format],

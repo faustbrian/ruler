@@ -8,6 +8,9 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Exceptions\FrozenFactException;
+use Cline\Ruler\Exceptions\NotCallableException;
+use Cline\Ruler\Exceptions\UndefinedFactException;
 use Cline\Ruler\Tests\Exceptions\UnknownFactDefinitionException;
 use Tests\Fixtures\Fact;
 use Tests\Fixtures\Invokable;
@@ -186,35 +189,35 @@ describe('Context', function (): void {
 
     describe('Sad Paths', function (): void {
         test('throws exception when accessing undefined key', function (): void {
-            $this->expectException(InvalidArgumentException::class);
+            $this->expectException(UndefinedFactException::class);
             $this->expectExceptionMessage('Fact "foo" is not defined.');
             $context = new Context();
             echo $context['foo'];
         });
 
         test('throws exception when raw accesses undefined key', function (): void {
-            $this->expectException(InvalidArgumentException::class);
+            $this->expectException(UndefinedFactException::class);
             $this->expectExceptionMessage('Fact "foo" is not defined.');
             $context = new Context();
             $context->raw('foo');
         });
 
         test('throws exception when share receives invalid fact definition', function ($fact): void {
-            $this->expectException(InvalidArgumentException::class);
+            $this->expectException(NotCallableException::class);
             $this->expectExceptionMessage('Value is not a Closure or invokable object.');
             $context = new Context();
             $context->share($fact);
         })->with('badFactDefinitionProvider');
 
         test('throws exception when protect receives invalid fact definition', function ($fact): void {
-            $this->expectException(InvalidArgumentException::class);
+            $this->expectException(NotCallableException::class);
             $this->expectExceptionMessage('Callable is not a Closure or invokable object.');
             $context = new Context();
             $context->protect($fact);
         })->with('badFactDefinitionProvider');
 
         test('throws exception when attempting to override frozen fact', function (): void {
-            $this->expectException(RuntimeException::class);
+            $this->expectException(FrozenFactException::class);
             $this->expectExceptionMessage('Cannot override frozen fact "shared_fact".');
 
             $context = new Context();

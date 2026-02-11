@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\ValueNotStringException;
 use Cline\Ruler\Operators\String\DoesNotMatch;
 use Cline\Ruler\Variables\Variable;
 

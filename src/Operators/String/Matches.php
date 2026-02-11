@@ -58,7 +58,7 @@ final class Matches extends VariableOperator implements Proposition
 
         throw_unless(is_string($value), ValueNotStringException::forOperation('Matches'));
 
-        throw_unless(is_string($pattern), ValueNotStringException::forOperation('Matches pattern'));
+        throw_unless(is_string($pattern), ValueNotStringException::forOperation('Matches'));
 
         return (bool) preg_match($pattern, $value);
     }

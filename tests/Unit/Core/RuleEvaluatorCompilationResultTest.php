@@ -9,7 +9,7 @@
 
 use Cline\Ruler\Core\RuleEvaluator;
 use Cline\Ruler\Core\RuleEvaluatorCompilationResult;
-use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 
 describe('RuleEvaluatorCompilationResult', function (): void {
     test('returns evaluator on success', function (): void {
@@ -27,7 +27,7 @@ describe('RuleEvaluatorCompilationResult', function (): void {
     });
 
     test('returns error on failure', function (): void {
-        $error = RuleEvaluatorException::invalidRuleStructure('Broken rule');
+        $error = InvalidRuleStructureException::forReason('Broken rule');
 
         $result = RuleEvaluatorCompilationResult::failure($error);
 
@@ -36,7 +36,7 @@ describe('RuleEvaluatorCompilationResult', function (): void {
     });
 
     test('throws when reading evaluator from failure result', function (): void {
-        $error = RuleEvaluatorException::invalidRuleStructure('Broken rule');
+        $error = InvalidRuleStructureException::forReason('Broken rule');
         $result = RuleEvaluatorCompilationResult::failure($error);
 
         expect(fn (): RuleEvaluator => $result->getEvaluator())

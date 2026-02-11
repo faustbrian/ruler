@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\ValueNotStringException;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable;
 
@@ -41,7 +42,7 @@ describe('Matches', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid value type', function (): void {
-            $this->expectException(RuntimeException::class);
+            $this->expectException(ValueNotStringException::class);
             $this->expectExceptionMessage('Matches: value must be a string');
 
             $varA = new Variable('a', 123);
@@ -53,8 +54,8 @@ describe('Matches', function (): void {
         });
 
         test('invalid pattern type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('Matches: pattern must be a string');
+            $this->expectException(ValueNotStringException::class);
+            $this->expectExceptionMessage('Matches: value must be a string');
 
             $varA = new Variable('a', 'test');
             $varB = new Variable('b', 123);

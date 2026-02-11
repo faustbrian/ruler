@@ -8,6 +8,8 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\Mathematical\Addition;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
@@ -34,7 +36,7 @@ describe('Addition', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid data', function (): void {
-            $this->expectException(RuntimeException::class);
+            $this->expectException(ValuesNotNumericException::class);
             $this->expectExceptionMessage('Arithmetic: values must be numeric');
             $varA = new Variable('a', 'string');
             $varB = new Variable('b', 'blah');
@@ -45,8 +47,8 @@ describe('Addition', function (): void {
         });
 
         test('throws exception when instantiated with only one operand', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition takes 2 operands');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects binary (2) operands, got 1');
 
             $varA = new Variable('a', 1);
             $op = new Addition($varA);
@@ -55,8 +57,8 @@ describe('Addition', function (): void {
         });
 
         test('throws exception when instantiated with more than two operands', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition takes 2 operands');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects binary (2) operands, got 3');
 
             $varA = new Variable('a', 1);
             $varB = new Variable('b', 2);

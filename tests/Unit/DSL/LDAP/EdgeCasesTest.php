@@ -357,7 +357,7 @@ test('parse false boolean value', function (): void {
 test('parse empty filter throws exception', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
 
-    expect(fn (): Rule => $ldap->parse('()', RuleIds::fromString('test-rule')))->toThrow(RuntimeException::class);
+    expect(fn (): Rule => $ldap->parse('()', RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
 });
 
 test('parse filter with parentheses in value', function (): void {

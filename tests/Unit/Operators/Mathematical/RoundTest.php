@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\Mathematical\Round;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
@@ -53,8 +54,8 @@ describe('Round', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid value type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('Round: value must be numeric');
+            $this->expectException(ValuesNotNumericException::class);
+            $this->expectExceptionMessage('Round: values must be numeric');
 
             $value = new Variable('value', 'string');
             $context = new Context();
@@ -64,8 +65,8 @@ describe('Round', function (): void {
         });
 
         test('invalid precision type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('Round: precision must be numeric');
+            $this->expectException(ValuesNotNumericException::class);
+            $this->expectExceptionMessage('Round precision: values must be numeric');
 
             $value = new Variable('value', 5.5);
             $precision = new Variable('precision', 'string');

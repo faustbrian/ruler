@@ -488,7 +488,7 @@ describe('WirefilterSerializer', function (): void {
             $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'Binary operator == requires exactly 2 operands');
+                ->toThrow(LogicException::class, '== requires exactly 2 operands, got 1');
         });
 
         test('throw exception for not operator with wrong operand count', function (): void {
@@ -509,7 +509,7 @@ describe('WirefilterSerializer', function (): void {
             $rule = $builder->create($notOperator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
-                ->toThrow(LogicException::class, 'NOT operator requires exactly 1 operand');
+                ->toThrow(LogicException::class, 'NOT requires exactly 1 operands, got 2');
         });
     });
 

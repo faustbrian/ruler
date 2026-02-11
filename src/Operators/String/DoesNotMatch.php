@@ -58,7 +58,7 @@ final class DoesNotMatch extends VariableOperator implements Proposition
 
         throw_unless(is_string($value), ValueNotStringException::forOperation('DoesNotMatch'));
 
-        throw_unless(is_string($pattern), ValueNotStringException::forOperation('DoesNotMatch pattern'));
+        throw_unless(is_string($pattern), ValueNotStringException::forOperation('DoesNotMatch'));
 
         return !(bool) preg_match($pattern, $value);
     }

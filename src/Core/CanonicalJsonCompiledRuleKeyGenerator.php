@@ -9,7 +9,7 @@
 
 namespace Cline\Ruler\Core;
 
-use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Exceptions\InvalidRuleCacheKeyException;
 use JsonException;
 
 use const JSON_THROW_ON_ERROR;
@@ -40,7 +40,7 @@ final readonly class CanonicalJsonCompiledRuleKeyGenerator implements CompiledRu
 
             return hash('sha256', $payload);
         } catch (JsonException $jsonException) {
-            throw RuleEvaluatorException::invalidRuleCacheKey($jsonException->getMessage(), $jsonException);
+            throw InvalidRuleCacheKeyException::forReason($jsonException->getMessage(), $jsonException);
         }
     }
 

@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Variables\VariableOperand;
 
@@ -102,8 +103,8 @@ describe('VariableOperator', function (): void {
 
     describe('Sad Paths', function (): void {
         test('throws exception when adding second operand to unary operator', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessageMatches('/can only have 1 operand/');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessageMatches('/expects unary.*operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
             $operand2 = $this->createMock(VariableOperand::class);

@@ -149,7 +149,7 @@ describe('MongoQueryValidator', function (): void {
             $errors = $result->getErrors();
             expect($errors)->toHaveCount(1)
                 ->and($errors[0])->toHaveKey('message')
-                ->and($errors[0]['message'])->toContain('Unsupported operator');
+                ->and($errors[0]['message'])->toContain('Unsupported comparison operator');
         });
 
         test('validateWithErrors getErrorMessages returns array of messages', function (): void {

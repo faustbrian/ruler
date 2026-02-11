@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Variables\VariableOperand;
 
 describe('Operator', function (): void {
@@ -54,8 +55,8 @@ describe('Operator', function (): void {
 
     describe('Sad Paths', function (): void {
         test('throws exception for unary operator with wrong operand count', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessageMatches('/takes only 1 operand/');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessageMatches('/expects unary.*operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
             $operand2 = $this->createMock(VariableOperand::class);
@@ -77,8 +78,8 @@ describe('Operator', function (): void {
         });
 
         test('throws exception for binary operator with wrong operand count', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessageMatches('/takes 2 operands/');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessageMatches('/expects binary.*operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
 
@@ -99,8 +100,8 @@ describe('Operator', function (): void {
         });
 
         test('throws exception for multiple operator with no operands', function (): void {
-            $this->expectException(LogicException::class);
-            $this->expectExceptionMessageMatches('/takes at least 1 operand/');
+            $this->expectException(InvalidOperandCardinalityException::class);
+            $this->expectExceptionMessageMatches('/expects at least 1.*operands/');
 
             $operator = new class() extends Operator
             {

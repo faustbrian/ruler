@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\Mathematical\Abs;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
@@ -41,8 +42,8 @@ describe('Abs', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid value type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('Abs: value must be numeric');
+            $this->expectException(ValuesNotNumericException::class);
+            $this->expectExceptionMessage('Abs: values must be numeric');
 
             $var = new Variable('a', 'string');
             $context = new Context();
