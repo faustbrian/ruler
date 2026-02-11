@@ -308,6 +308,33 @@ YAML;
             expect($second->getResult())->toBeFalse();
         });
 
+        test('uses isolated default cache per evaluator instance', function (): void {
+            $definition = [
+                'field' => 'amount',
+                'operator' => 'greaterThan',
+                'value' => 'threshold',
+            ];
+
+            $firstEvaluator = RuleEvaluator::createFromArray($definition);
+            $secondEvaluator = RuleEvaluator::createFromArray($definition);
+
+            $firstRun = $firstEvaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 5,
+            ]);
+            $secondRun = $firstEvaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 5,
+            ]);
+            $thirdRun = $secondEvaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 5,
+            ]);
+
+            expect($firstRun->getRuleResult()->ruleId)->toBe($secondRun->getRuleResult()->ruleId);
+            expect($firstRun->getRuleResult()->ruleId)->not->toBe($thirdRun->getRuleResult()->ruleId);
+        });
+
         test('resolves dot-notated value references at runtime', function (): void {
             $evaluator = RuleEvaluator::createFromArray([
                 'field' => 'score',

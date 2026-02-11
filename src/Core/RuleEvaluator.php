@@ -69,10 +69,13 @@ final readonly class RuleEvaluator
     /**
      * Creates an evaluator from a rule definition array.
      *
-     * @param  array<string, mixed> $rules Rule definition array containing combinators,
-     *                                     operators, fields, and values that define the
-     *                                     propositional logic to evaluate
-     * @return self                 New RuleEvaluator instance initialized with the provided rules
+     * @param  array<string, mixed>   $rules             Rule definition array containing combinators,
+     *                                                   operators, fields, and values that define the
+     *                                                   propositional logic to evaluate
+     * @param  null|CompiledRuleCache $compiledRuleCache Optional shared compiled-rule cache.
+     *                                                   When omitted, this evaluator owns an isolated
+     *                                                   in-memory cache for its lifetime.
+     * @return self                   New RuleEvaluator instance initialized with the provided rules
      */
     public static function createFromArray(
         array $rules,
@@ -84,9 +87,12 @@ final readonly class RuleEvaluator
     /**
      * Creates an evaluator from a JSON rule definition string.
      *
-     * @param  string $rules JSON-encoded rule definition containing the propositional
-     *                       logic structure to evaluate
-     * @return self   New RuleEvaluator instance initialized with the parsed rules
+     * @param  string                 $rules             JSON-encoded rule definition containing the propositional
+     *                                                   logic structure to evaluate
+     * @param  null|CompiledRuleCache $compiledRuleCache Optional shared compiled-rule cache.
+     *                                                   Use the same instance across evaluators to share
+     *                                                   compiled rule graphs.
+     * @return self                   New RuleEvaluator instance initialized with the parsed rules
      */
     public static function createFromJson(
         string $rules,
@@ -102,8 +108,9 @@ final readonly class RuleEvaluator
     /**
      * Creates an evaluator from a JSON file containing rule definitions.
      *
-     * @param  string $rules File path to a JSON file containing the rule definition
-     * @return self   New RuleEvaluator instance initialized with the parsed rules
+     * @param  string                 $rules             File path to a JSON file containing the rule definition
+     * @param  null|CompiledRuleCache $compiledRuleCache Optional shared compiled-rule cache.
+     * @return self                   New RuleEvaluator instance initialized with the parsed rules
      */
     public static function createFromJsonFile(
         string $rules,
@@ -118,9 +125,10 @@ final readonly class RuleEvaluator
     /**
      * Creates an evaluator from a YAML rule definition string.
      *
-     * @param  string $rules YAML-formatted rule definition containing the propositional
-     *                       logic structure to evaluate
-     * @return self   New RuleEvaluator instance initialized with the parsed rules
+     * @param  string                 $rules             YAML-formatted rule definition containing the propositional
+     *                                                   logic structure to evaluate
+     * @param  null|CompiledRuleCache $compiledRuleCache Optional shared compiled-rule cache.
+     * @return self                   New RuleEvaluator instance initialized with the parsed rules
      */
     public static function createFromYaml(
         string $rules,
@@ -136,8 +144,9 @@ final readonly class RuleEvaluator
     /**
      * Creates an evaluator from a YAML file containing rule definitions.
      *
-     * @param  string $rules File path to a YAML file containing the rule definition
-     * @return self   New RuleEvaluator instance initialized with the parsed rules
+     * @param  string                 $rules             File path to a YAML file containing the rule definition
+     * @param  null|CompiledRuleCache $compiledRuleCache Optional shared compiled-rule cache.
+     * @return self                   New RuleEvaluator instance initialized with the parsed rules
      */
     public static function createFromYamlFile(
         string $rules,

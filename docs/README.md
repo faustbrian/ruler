@@ -153,3 +153,6 @@ Ruler focuses exclusively on rule evaluation logic. Rule storage and retrieval a
 - Action callbacks must accept `Context`, for example
   `fn (Context $context): void => ...`.
 - Rules managed by `RuleSet` must have non-empty unique IDs.
+- `RuleEvaluator::createFrom*()` uses an isolated in-memory compiled-rule cache
+  per evaluator by default. Pass the same `CompiledRuleCache` instance to share
+  compiled rule graphs across evaluators.
