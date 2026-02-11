@@ -9,6 +9,10 @@
 
 namespace Cline\Ruler\Core;
 
+use Cline\Ruler\Enums\ConflictResolutionStrategy;
+
+use function array_values;
+use function uasort;
 use function spl_object_hash;
 
 /**
@@ -30,14 +34,36 @@ final class RuleSet
     private array $rules = [];
 
     /**
+     * Insertion order index for stable conflict resolution tie-breaking.
+     *
+     * @var array<string, int>
+     */
+    private array $ruleOrder = [];
+
+    /**
+     * Next insertion order value.
+     */
+    private int $nextOrder = 0;
+
+    /**
+     * Conflict resolution strategy used for execution ordering.
+     */
+    private ConflictResolutionStrategy $conflictResolutionStrategy;
+
+    /**
      * Create a new RuleSet with optional initial rules.
      *
      * @param array<int, Rule> $rules Optional array of Rule instances to add to the set
      *                                during construction. Duplicate rules are automatically
      *                                deduplicated using object hash.
      */
-    public function __construct(array $rules = [])
+    public function __construct(
+        array $rules = [],
+        ConflictResolutionStrategy $conflictResolutionStrategy = ConflictResolutionStrategy::InsertionOrder,
+    )
     {
+        $this->conflictResolutionStrategy = $conflictResolutionStrategy;
+
         foreach ($rules as $rule) {
             $this->addRule($rule);
         }
@@ -54,7 +80,30 @@ final class RuleSet
      */
     public function addRule(Rule $rule): void
     {
-        $this->rules[spl_object_hash($rule)] = $rule;
+        $hash = spl_object_hash($rule);
+        $this->rules[$hash] = $rule;
+
+        if (!isset($this->ruleOrder[$hash])) {
+            $this->ruleOrder[$hash] = $this->nextOrder++;
+        }
+    }
+
+    /**
+     * Set conflict resolution strategy for subsequent executions.
+     */
+    public function setConflictResolutionStrategy(ConflictResolutionStrategy $strategy): self
+    {
+        $this->conflictResolutionStrategy = $strategy;
+
+        return $this;
+    }
+
+    /**
+     * Get current conflict resolution strategy.
+     */
+    public function getConflictResolutionStrategy(): ConflictResolutionStrategy
+    {
+        return $this->conflictResolutionStrategy;
     }
 
     /**
@@ -69,8 +118,43 @@ final class RuleSet
      */
     public function executeRules(Context $context): void
     {
-        foreach ($this->rules as $rule) {
+        foreach ($this->getOrderedRules() as $rule) {
             $rule->execute($context);
         }
+    }
+
+    /**
+     * Return rules in execution order after conflict resolution.
+     *
+     * @return array<int, Rule>
+     */
+    private function getOrderedRules(): array
+    {
+        if ($this->conflictResolutionStrategy === ConflictResolutionStrategy::InsertionOrder) {
+            return array_values($this->rules);
+        }
+
+        $rules = $this->rules;
+
+        uasort($rules, function (Rule $left, Rule $right): int {
+            $leftHash = spl_object_hash($left);
+            $rightHash = spl_object_hash($right);
+            $leftOrder = $this->ruleOrder[$leftHash];
+            $rightOrder = $this->ruleOrder[$rightHash];
+
+            $priorityComparison = match ($this->conflictResolutionStrategy) {
+                ConflictResolutionStrategy::PriorityHighFirst => $right->getPriority() <=> $left->getPriority(),
+                ConflictResolutionStrategy::PriorityLowFirst => $left->getPriority() <=> $right->getPriority(),
+                default => 0,
+            };
+
+            if ($priorityComparison !== 0) {
+                return $priorityComparison;
+            }
+
+            return $leftOrder <=> $rightOrder;
+        });
+
+        return array_values($rules);
     }
 }

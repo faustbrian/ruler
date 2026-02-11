@@ -67,6 +67,39 @@ describe('Rule', function (): void {
             $ruleTwo->execute($context);
             expect($actionExecuted)->toBeTrue();
         });
+
+        test('exposes rule metadata and salience fields', function (): void {
+            $rule = new Rule(
+                new TrueProposition(),
+                null,
+                'rule-1',
+                'Adult Access',
+                50,
+                true,
+                ['domain' => 'auth', 'tier' => 'gold'],
+            );
+
+            expect($rule->getId())->toBe('rule-1');
+            expect($rule->getName())->toBe('Adult Access');
+            expect($rule->getPriority())->toBe(50);
+            expect($rule->isEnabled())->toBeTrue();
+            expect($rule->getMetadata())->toBe(['domain' => 'auth', 'tier' => 'gold']);
+            expect($rule->getMetadataValue('domain'))->toBe('auth');
+            expect($rule->getMetadataValue('unknown'))->toBeNull();
+        });
+
+        test('disabled rule does not evaluate true', function (): void {
+            $rule = new Rule(
+                new TrueProposition(),
+                null,
+                'rule-disabled',
+                'Disabled Rule',
+                1,
+                false,
+            );
+
+            expect($rule->evaluate(new Context()))->toBeFalse();
+        });
     });
 
     describe('Sad Paths', function (): void {

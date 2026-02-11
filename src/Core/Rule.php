@@ -11,6 +11,7 @@ namespace Cline\Ruler\Core;
 
 use LogicException;
 
+use function array_key_exists;
 use function is_callable;
 use function throw_unless;
 
@@ -46,6 +47,16 @@ final readonly class Rule implements Proposition
          * @var null|callable
          */
         private mixed $action = null,
+        private ?string $id = null,
+        private ?string $name = null,
+        private int $priority = 0,
+        private bool $enabled = true,
+        /**
+         * User-defined metadata for rule governance and observability.
+         *
+         * @var array<string, mixed>
+         */
+        private array $metadata = [],
     ) {}
 
     /**
@@ -57,6 +68,10 @@ final readonly class Rule implements Proposition
      */
     public function evaluate(Context $context): bool
     {
+        if (!$this->enabled) {
+            return false;
+        }
+
         return $this->condition->evaluate($context);
     }
 
@@ -81,5 +96,57 @@ final readonly class Rule implements Proposition
         throw_unless(is_callable($this->action), LogicException::class, 'Rule actions must be callable.');
 
         ($this->action)();
+    }
+
+    /**
+     * Get the unique rule identifier.
+     */
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the human-readable rule name.
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get the rule salience/priority used by conflict resolution.
+     */
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    /**
+     * Check whether this rule is enabled for evaluation.
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Get metadata attached to this rule.
+     *
+     * @return array<string, mixed>
+     */
+    public function getMetadata(): array
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * Get a specific metadata value when present.
+     */
+    public function getMetadataValue(string $key): mixed
+    {
+        return array_key_exists($key, $this->metadata)
+            ? $this->metadata[$key]
+            : null;
     }
 }
