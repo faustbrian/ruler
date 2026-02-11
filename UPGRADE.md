@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-This document covers upgrading from `v2.x` to `v3.x`.
+This document covers upgrading from `v2.x` to `v4.x`.
 
 ## Summary Of Breaking Changes
 
@@ -25,7 +25,7 @@ This document covers upgrading from `v2.x` to `v3.x`.
 $rule->execute($context);
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $result = $rule->execute($context);
@@ -47,7 +47,7 @@ if ($result->actionExecuted) {
 $executed = $ruleSet->executeRules($context); // int
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $report = $ruleSet->executeRules($context);
@@ -72,7 +72,7 @@ $cycles = $report->getCycleCount();
 $passed = $evaluator->evaluateFromArray($values); // bool
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $report = $evaluator->evaluateFromArray($values);
@@ -88,7 +88,7 @@ $ruleResult = $report->getRuleResult();
 $evaluator = RuleEvaluator::createFromArray($rules);
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $compiled = RuleEvaluator::compileFromArray($rules);
@@ -112,7 +112,7 @@ The same pattern applies to JSON/YAML/file variants (`compileFromJson`,
 $rule = $rb->create($rb['age']->greaterThan(18));
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $rule = $rb->create(
@@ -136,7 +136,7 @@ $rule = $rb->create(
 );
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 use Cline\Ruler\Core\Context;
@@ -162,7 +162,7 @@ Values are now treated as literals unless prefixed with `@`.
 }
 ```
 
-### After (v3)
+### After (v4)
 
 ```json
 {
@@ -188,7 +188,7 @@ $migrated = RuleDefinitionMigrator::migrateLegacyStringReferences($legacy);
 $rule = $builder->parse('age >= 18');
 ```
 
-### After (v3)
+### After (v4)
 
 ```php
 $rule = $builder->parse('age >= 18', 'age-gate');
@@ -216,4 +216,4 @@ try {
 
 ## 10) PHP Requirement
 
-Update runtime to PHP `8.5` or newer before upgrading to `v3`.
+Update runtime to PHP `8.5` or newer before upgrading to `v4`.

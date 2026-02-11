@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-02-11
+## [4.0.0] - 2026-02-11
 
 ### Breaking Changes (Consumer Impact)
 
@@ -140,6 +140,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom operator support
 - Comprehensive test suite
 
-[3.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...3.0.0
+[4.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...4.0.0
 [2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
 [1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0
