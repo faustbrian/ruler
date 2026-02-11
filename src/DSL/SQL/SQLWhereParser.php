@@ -74,9 +74,9 @@ final readonly class SQLWhereParser
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(string $expression): Rule
+    public function parse(string $expression, string $ruleId): Rule
     {
-        return $this->builder->parse($expression);
+        return $this->builder->parse($expression, $ruleId);
     }
 
     /**
@@ -94,8 +94,8 @@ final readonly class SQLWhereParser
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, Closure $action): Rule
+    public function parseWithAction(string $expression, Closure $action, string $ruleId): Rule
     {
-        return $this->builder->parseWithAction($expression, $action);
+        return $this->builder->parseWithAction($expression, $action, $ruleId);
     }
 }

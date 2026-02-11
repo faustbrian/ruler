@@ -20,7 +20,7 @@ test('parse deeply nested object property access', function (): void {
                 ],
             ],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext = new Context([
         'user' => [
@@ -49,7 +49,7 @@ test('parse deeply nested object property access', function (): void {
 test('parse JSON string query', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
     $json = '{"age": {"gte": 18}, "country": "US"}';
-    $rule = $gql->parseJson($json);
+    $rule = $gql->parseJson($json, 'test-rule');
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext = new Context(['age' => 15, 'country' => 'US']);
@@ -60,7 +60,7 @@ test('parse JSON string query', function (): void {
 
 test('parse containsInsensitive operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['email' => ['containsInsensitive' => '@EXAMPLE.COM']]);
+    $rule = $gql->parse(['email' => ['containsInsensitive' => '@EXAMPLE.COM']], 'test-rule');
 
     $trueContext1 = new Context(['email' => 'user@example.com']);
     $trueContext2 = new Context(['email' => 'admin@EXAMPLE.COM']);
@@ -73,7 +73,7 @@ test('parse containsInsensitive operator', function (): void {
 
 test('parse notContains operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['description' => ['notContains' => 'spam']]);
+    $rule = $gql->parse(['description' => ['notContains' => 'spam']], 'test-rule');
 
     $trueContext = new Context(['description' => 'This is a clean message']);
     $falseContext = new Context(['description' => 'This is spam']);
@@ -84,7 +84,7 @@ test('parse notContains operator', function (): void {
 
 test('parse notContainsInsensitive operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['description' => ['notContainsInsensitive' => 'SPAM']]);
+    $rule = $gql->parse(['description' => ['notContainsInsensitive' => 'SPAM']], 'test-rule');
 
     $trueContext = new Context(['description' => 'This is a clean message']);
     $falseContext1 = new Context(['description' => 'This is spam']);
@@ -97,7 +97,7 @@ test('parse notContainsInsensitive operator', function (): void {
 
 test('parse isNull operator - should be null', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['deletedAt' => ['isNull' => true]]);
+    $rule = $gql->parse(['deletedAt' => ['isNull' => true]], 'test-rule');
 
     $trueContext = new Context(['deletedAt' => null]);
     $falseContext = new Context(['deletedAt' => '2024-01-01']);
@@ -108,7 +108,7 @@ test('parse isNull operator - should be null', function (): void {
 
 test('parse isNull operator - should not be null', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['email' => ['isNull' => false]]);
+    $rule = $gql->parse(['email' => ['isNull' => false]], 'test-rule');
 
     $trueContext = new Context(['email' => 'user@example.com']);
     $falseContext = new Context(['email' => null]);
@@ -119,7 +119,7 @@ test('parse isNull operator - should not be null', function (): void {
 
 test('parse isType operator with string', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['name' => ['isType' => 'string']]);
+    $rule = $gql->parse(['name' => ['isType' => 'string']], 'test-rule');
 
     $trueContext = new Context(['name' => 'John']);
     $falseContext = new Context(['name' => 123]);
@@ -130,7 +130,7 @@ test('parse isType operator with string', function (): void {
 
 test('parse isType operator with number', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['count' => ['isType' => 'number']]);
+    $rule = $gql->parse(['count' => ['isType' => 'number']], 'test-rule');
 
     $trueContext1 = new Context(['count' => 42]);
     $trueContext2 = new Context(['count' => 3.14]);
@@ -145,7 +145,7 @@ test('parse isType operator with number', function (): void {
 
 test('parse isType operator with boolean', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['flag' => ['isType' => 'bool']]);
+    $rule = $gql->parse(['flag' => ['isType' => 'bool']], 'test-rule');
 
     $trueContext = new Context(['flag' => true]);
     $falseContext = new Context(['flag' => 1]);
@@ -156,7 +156,7 @@ test('parse isType operator with boolean', function (): void {
 
 test('parse isType operator with array', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['tags' => ['isType' => 'array']]);
+    $rule = $gql->parse(['tags' => ['isType' => 'array']], 'test-rule');
 
     $trueContext = new Context(['tags' => [1, 2, 3]]);
     $falseContext = new Context(['tags' => 'not array']);
@@ -167,7 +167,7 @@ test('parse isType operator with array', function (): void {
 
 test('parse isType operator with null', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['value' => ['isType' => 'null']]);
+    $rule = $gql->parse(['value' => ['isType' => 'null']], 'test-rule');
 
     $trueContext = new Context(['value' => null]);
     $falseContext = new Context(['value' => '']);
@@ -191,7 +191,7 @@ test('parse complex e-commerce product filter', function (): void {
             ],
             ['NOT' => ['status' => 'clearance']],
         ],
-    ]);
+    ], 'test-rule');
 
     $validProduct = new Context([
         'price' => 299,
@@ -223,7 +223,7 @@ test('parse nested object with operators', function (): void {
                 'age' => ['gte' => 18],
             ],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext = new Context([
         'user' => [
@@ -256,7 +256,7 @@ test('parse triple nested OR conditions', function (): void {
             ],
             ['vip' => true],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext1 = new Context(['status' => 'active', 'vip' => false]);
     $trueContext2 = new Context(['status' => 'pending', 'vip' => false]);
@@ -271,7 +271,7 @@ test('parse triple nested OR conditions', function (): void {
 
 test('parse mixed type values in array', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['value' => ['in' => [1, 'two', true, null]]]);
+    $rule = $gql->parse(['value' => ['in' => [1, 'two', true, null]]], 'test-rule');
 
     $trueContext1 = new Context(['value' => 1]);
     $trueContext2 = new Context(['value' => 'two']);

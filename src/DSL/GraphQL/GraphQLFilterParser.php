@@ -79,9 +79,9 @@ final readonly class GraphQLFilterParser
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(array|string $filter): Rule
+    public function parse(array|string $filter, string $ruleId): Rule
     {
-        return $this->builder->parse($filter);
+        return $this->builder->parse($filter, $ruleId);
     }
 
     /**
@@ -100,8 +100,8 @@ final readonly class GraphQLFilterParser
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(array|string $filter, Closure $action): Rule
+    public function parseWithAction(array|string $filter, Closure $action, string $ruleId): Rule
     {
-        return $this->builder->parseWithAction($filter, $action);
+        return $this->builder->parseWithAction($filter, $action, $ruleId);
     }
 }

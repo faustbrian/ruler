@@ -92,7 +92,7 @@ final readonly class SQLWhereValidator
     public function validateWithErrors(string $expression): ValidationResult
     {
         try {
-            $this->builder->parse($expression);
+            $this->builder->parse($expression, 'validation-rule');
 
             return ValidationResult::success();
         } catch (Throwable $throwable) {

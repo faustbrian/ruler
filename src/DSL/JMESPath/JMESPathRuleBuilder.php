@@ -14,8 +14,6 @@ use Cline\Ruler\Core\Rule;
 use Closure;
 use Exception;
 
-use function sha1;
-
 /**
  * Builder for creating Rules from JMESPath expressions.
  *
@@ -60,13 +58,13 @@ final readonly class JMESPathRuleBuilder
      * @param  string $expression JMESPath query expression to parse
      * @return Rule   The compiled Rule containing the JMESPath proposition
      */
-    public function parse(string $expression): Rule
+    public function parse(string $expression, string $ruleId): Rule
     {
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
         return $rb->create(
             new JMESPathProposition($expression, $this->adapter),
-            'jmespath:'.sha1($expression),
+            $ruleId,
         );
     }
 
@@ -81,13 +79,13 @@ final readonly class JMESPathRuleBuilder
      * @param  Closure $action     Callback to execute when rule evaluates to true
      * @return Rule    The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, Closure $action): Rule
+    public function parseWithAction(string $expression, Closure $action, string $ruleId): Rule
     {
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
         return $rb->create(
             new JMESPathProposition($expression, $this->adapter),
-            'jmespath-action:'.sha1($expression),
+            $ruleId,
             $action,
         );
     }

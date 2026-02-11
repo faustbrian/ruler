@@ -13,7 +13,7 @@ use Cline\Ruler\DSL\Wirefilter\StringRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('age > 18');
+    $rule = $srb->parse('age > 18', 'test-rule');
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +23,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('age > 18');
+    $rule = $srb->parse('age > 18', 'test-rule');
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +32,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('status == "active"');
+    $rule = $srb->parse('status == "active"', 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +43,7 @@ test('parse equality operator', function (): void {
 
 test('parse logical and expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('age >= 18 and country == "US"');
+    $rule = $srb->parse('age >= 18 and country == "US"', 'test-rule');
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -56,7 +56,7 @@ test('parse logical and expression', function (): void {
 
 test('parse logical or expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('age >= 21 or country == "US"');
+    $rule = $srb->parse('age >= 21 or country == "US"', 'test-rule');
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -69,7 +69,7 @@ test('parse logical or expression', function (): void {
 
 test('parse expression with parentheses', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('(age >= 18 and country == "US") or age >= 21');
+    $rule = $srb->parse('(age >= 18 and country == "US") or age >= 21', 'test-rule');
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -82,7 +82,7 @@ test('parse expression with parentheses', function (): void {
 
 test('parse mathematical expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('price + shipping > 100');
+    $rule = $srb->parse('price + shipping > 100', 'test-rule');
 
     $trueContext = new Context(['price' => 80, 'shipping' => 25]);
     $falseContext = new Context(['price' => 50, 'shipping' => 10]);
@@ -93,7 +93,7 @@ test('parse mathematical expression', function (): void {
 
 test('parse not expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('not (age < 18)');
+    $rule = $srb->parse('not (age < 18)', 'test-rule');
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -107,7 +107,7 @@ test('parseWithAction executes callback when true', function (): void {
     $executed = false;
     $rule = $srb->parseWithAction('age >= 18', function ($context) use (&$executed): void {
         $executed = true;
-    });
+    }, 'test-rule');
 
     $context = new Context(['age' => 25]);
     $rule->execute($context);
@@ -120,7 +120,7 @@ test('parseWithAction does not execute callback when false', function (): void {
     $executed = false;
     $rule = $srb->parseWithAction('age >= 18', function ($context) use (&$executed): void {
         $executed = true;
-    });
+    }, 'test-rule');
 
     $context = new Context(['age' => 15]);
     $rule->execute($context);
@@ -130,7 +130,7 @@ test('parseWithAction does not execute callback when false', function (): void {
 
 test('parse in operator with array', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('country in ["US", "CA", "UK"]');
+    $rule = $srb->parse('country in ["US", "CA", "UK"]', 'test-rule');
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -141,7 +141,7 @@ test('parse in operator with array', function (): void {
 
 test('parse matches operator with regex', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"');
+    $rule = $srb->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"', 'test-rule');
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '12-34567']);
@@ -152,7 +152,7 @@ test('parse matches operator with regex', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('age <= 65');
+    $rule = $srb->parse('age <= 65', 'test-rule');
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -163,7 +163,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('status != "inactive"');
+    $rule = $srb->parse('status != "inactive"', 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -174,7 +174,7 @@ test('parse inequality operator', function (): void {
 
 test('parse notIn operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('role not in ["banned", "suspended"]');
+    $rule = $srb->parse('role not in ["banned", "suspended"]', 'test-rule');
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -185,7 +185,7 @@ test('parse notIn operator', function (): void {
 
 test('parse modulo operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('value % 2 == 0');
+    $rule = $srb->parse('value % 2 == 0', 'test-rule');
 
     $trueContext = new Context(['value' => 10]);
     $falseContext = new Context(['value' => 11]);
@@ -196,7 +196,7 @@ test('parse modulo operator', function (): void {
 
 test('parse exponentiate operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('base ** power > 100');
+    $rule = $srb->parse('base ** power > 100', 'test-rule');
 
     $trueContext = new Context(['base' => 5, 'power' => 3]);
     $falseContext = new Context(['base' => 2, 'power' => 3]);
@@ -207,7 +207,7 @@ test('parse exponentiate operator', function (): void {
 
 test('parse negate operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('-value < 0');
+    $rule = $srb->parse('-value < 0', 'test-rule');
 
     $trueContext = new Context(['value' => 10]);
     $falseContext = new Context(['value' => -10]);
@@ -218,7 +218,7 @@ test('parse negate operator', function (): void {
 
 test('parse division operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('total / count == 10');
+    $rule = $srb->parse('total / count == 10', 'test-rule');
 
     $trueContext = new Context(['total' => 100, 'count' => 10]);
     $falseContext = new Context(['total' => 100, 'count' => 5]);
@@ -229,7 +229,7 @@ test('parse division operator', function (): void {
 
 test('parse multiplication operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('quantity * price > 1000');
+    $rule = $srb->parse('quantity * price > 1000', 'test-rule');
 
     $trueContext = new Context(['quantity' => 20, 'price' => 60]);
     $falseContext = new Context(['quantity' => 10, 'price' => 50]);
@@ -240,7 +240,7 @@ test('parse multiplication operator', function (): void {
 
 test('parse subtraction operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('total - discount < 100');
+    $rule = $srb->parse('total - discount < 100', 'test-rule');
 
     $trueContext = new Context(['total' => 120, 'discount' => 30]);
     $falseContext = new Context(['total' => 200, 'discount' => 50]);

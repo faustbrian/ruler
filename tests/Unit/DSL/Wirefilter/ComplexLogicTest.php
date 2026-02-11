@@ -14,6 +14,7 @@ test('complex nested AND OR with multiple levels', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '((age >= 18 and age < 65) and (country == "US" or country == "CA")) and not (status == "banned")',
+        'test-rule',
     );
 
     $validContext = new Context(['age' => 30, 'country' => 'US', 'status' => 'active']);
@@ -31,7 +32,7 @@ test('complex XOR logic', function (): void {
     $srb = new StringRuleBuilder();
 
     // XOR requires exactly one condition to be true
-    $rule = $srb->parse('(isPremium == true) xor (credits > 100)');
+    $rule = $srb->parse('(isPremium == true) xor (credits > 100)', 'test-rule');
 
     $premiumWithCredits = new Context(['isPremium' => true, 'credits' => 150]);
     $premiumNoCredits = new Context(['isPremium' => true, 'credits' => 50]);
@@ -48,6 +49,7 @@ test('deeply nested parentheses with mixed operators', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '(((a == 1 or b == 2) and (c == 3 or d == 4)) or ((e == 5 and f == 6) or (g == 7 and h == 8)))',
+        'test-rule',
     );
 
     // First group true: a=1, c=3
@@ -69,6 +71,7 @@ test('NOT with deeply nested conditions', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         'not ((age < 18 or age > 65) or (status == "banned" or status == "suspended"))',
+        'test-rule',
     );
 
     $validContext = new Context(['age' => 30, 'status' => 'active']);
@@ -88,6 +91,7 @@ test('complex mathematical expressions in conditionals', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '((price * quantity) - discount > 1000) and ((price + shipping) < 5000)',
+        'test-rule',
     );
 
     $validContext = new Context(['price' => 100, 'quantity' => 15, 'discount' => 200, 'shipping' => 50]);
@@ -103,6 +107,7 @@ test('mixed AND OR NOT with mathematical operators', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '(price + shipping > 100 or discount > 50) and not (quantity < 1)',
+        'test-rule',
     );
 
     $highPriceContext = new Context(['price' => 80, 'shipping' => 30, 'discount' => 10, 'quantity' => 5]);
@@ -119,7 +124,7 @@ test('mixed AND OR NOT with mathematical operators', function (): void {
 test('complex precedence without parentheses', function (): void {
     $srb = new StringRuleBuilder();
     // AND has higher precedence than OR
-    $rule = $srb->parse('a == 1 or b == 2 and c == 3');
+    $rule = $srb->parse('a == 1 or b == 2 and c == 3', 'test-rule');
 
     // Should evaluate as: a == 1 OR (b == 2 AND c == 3)
     $aTrue = new Context(['a' => 1, 'b' => 0, 'c' => 0]);
@@ -135,7 +140,7 @@ test('complex precedence without parentheses', function (): void {
 
 test('multiple NOT operators chained', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('not (not (age >= 18))');
+    $rule = $srb->parse('not (not (age >= 18))', 'test-rule');
 
     // Double negation should equal original condition
     $adultContext = new Context(['age' => 25]);
@@ -151,6 +156,7 @@ test('complex real-world eligibility check', function (): void {
         '((age >= 18 and age <= 65) and (country == "US" or country == "CA")) and '.
         '((income > 50000 and creditScore >= 700) or (hasGuarantor == true and guarantorCreditScore >= 750)) and '.
         'not (hasBankruptcy == true or hasForeclosure == true)',
+        'test-rule',
     );
 
     $qualifiedContext = new Context([
@@ -210,6 +216,7 @@ test('stress test with very deep nesting', function (): void {
         '((e == 5 and f == 6) or (g == 7 and h == 8))) or '.
         '(((i == 9 and j == 10) or (k == 11 and l == 12)) and '.
         '((m == 13 and n == 14) or (o == 15 and p == 16))))',
+        'test-rule',
     );
 
     $matchFirstPath = new Context([
@@ -242,6 +249,7 @@ test('extreme depth with 12 levels of nesting', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '((((((((((((a == 1) and (b == 2)) or (c == 3)) and (d == 4)) or (e == 5)) and (f == 6)) or (g == 7)) and (h == 8)) or (i == 9)) and (j == 10)) or (k == 11)) and (l == 12))',
+        'test-rule',
     );
 
     // Match all conditions
@@ -275,6 +283,7 @@ test('deeply nested mathematical expressions with conditionals', function (): vo
     $rule = $srb->parse(
         '(((((a + b) * (c - d)) / (e + f)) > ((g * h) - (i / j))) and '.
         '(((k + l) * (m - n)) <= ((o * p) + (q / r))))',
+        'test-rule',
     );
 
     $validContext = new Context([
@@ -303,6 +312,7 @@ test('extreme nesting with all logical operators combined', function (): void {
         '((((a == 1 and b == 2) or (c == 3 xor d == 4)) and '.
         'not ((e == 5 or f == 6) and (g == 7 xor h == 8))) or '.
         '((not (i == 9 and j == 10)) xor ((k == 11 or l == 12) and (m == 13 and n == 14))))',
+        'test-rule',
     );
 
     // First complex branch true: (a and b) or (c xor d) = true, and not(...) = true
@@ -348,6 +358,7 @@ test('deeply nested access control with complex business rules', function (): vo
         '(((currentTime > resource.publishedAt and currentTime < resource.expiresAt) or '.
         'resource.neverExpires == true) and '.
         '(resource.region in ["US", "EU", "APAC"] and resource.status == "published"))',
+        'test-rule',
     );
 
     $adminWithAccessContext = new Context([
@@ -460,6 +471,7 @@ test('maximum depth stress test with 15 nested levels', function (): void {
     $srb = new StringRuleBuilder();
     $rule = $srb->parse(
         '(((((((((((((((a == 1) or (b == 2)) and (c == 3)) or (d == 4)) and (e == 5)) or (f == 6)) and (g == 7)) or (h == 8)) and (i == 9)) or (j == 10)) and (k == 11)) or (l == 12)) and (m == 13)) or (n == 14)) and (o == 15))',
+        'test-rule',
     );
 
     // For alternating OR/AND to stay true, AND conditions must match

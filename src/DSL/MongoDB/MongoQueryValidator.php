@@ -89,7 +89,7 @@ final readonly class MongoQueryValidator
     public function validate(array $query): bool
     {
         try {
-            $this->parser->parse($query);
+            $this->parser->parse($query, 'validation-rule');
 
             return true;
         } catch (Throwable) {
@@ -109,7 +109,7 @@ final readonly class MongoQueryValidator
     public function validateJson(string $json): bool
     {
         try {
-            $this->parser->parseJson($json);
+            $this->parser->parseJson($json, 'validation-rule');
 
             return true;
         } catch (Throwable) {
@@ -130,7 +130,7 @@ final readonly class MongoQueryValidator
     public function validateWithErrors(array $query): ValidationResult
     {
         try {
-            $this->parser->parse($query);
+            $this->parser->parse($query, 'validation-rule');
 
             return ValidationResult::success();
         } catch (Throwable $throwable) {

@@ -15,7 +15,7 @@ describe('NaturalLanguageParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is greater than 18');
+            $rule = $parser->parse('age is greater than 18', 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +25,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse comparison that fails', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is greater than 18');
+            $rule = $parser->parse('age is greater than 18', 'test-rule');
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +34,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse equality operator', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('status equals active');
+            $rule = $parser->parse('status equals active', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +45,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is operator', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('status is active');
+            $rule = $parser->parse('status is active', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -56,7 +56,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is not operator', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('status is not inactive');
+            $rule = $parser->parse('status is not inactive', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -69,7 +69,7 @@ describe('NaturalLanguageParser', function (): void {
             $parser = new NaturalLanguageParser();
             // Note: "is at least" is preferred over "is greater than or equal to"
             // to avoid confusion with logical "or" operator
-            $rule = $parser->parse('age is at least 18');
+            $rule = $parser->parse('age is at least 18', 'test-rule');
 
             $trueContext1 = new Context(['age' => 18]);
             $trueContext2 = new Context(['age' => 25]);
@@ -82,7 +82,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is at least', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is at least 18');
+            $rule = $parser->parse('age is at least 18', 'test-rule');
 
             $trueContext = new Context(['age' => 18]);
             $falseContext = new Context(['age' => 17]);
@@ -93,7 +93,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse less than', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is less than 18');
+            $rule = $parser->parse('age is less than 18', 'test-rule');
 
             $trueContext = new Context(['age' => 15]);
             $falseContext = new Context(['age' => 25]);
@@ -106,7 +106,7 @@ describe('NaturalLanguageParser', function (): void {
             $parser = new NaturalLanguageParser();
             // Note: "is at most" is preferred over "is less than or equal to"
             // to avoid confusion with logical "or" operator
-            $rule = $parser->parse('age is at most 18');
+            $rule = $parser->parse('age is at most 18', 'test-rule');
 
             $trueContext1 = new Context(['age' => 18]);
             $trueContext2 = new Context(['age' => 15]);
@@ -119,7 +119,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse logical and expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is at least 18 and country equals US');
+            $rule = $parser->parse('age is at least 18 and country equals US', 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -132,7 +132,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse logical or expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is at least 21 or country equals US');
+            $rule = $parser->parse('age is at least 21 or country equals US', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -145,7 +145,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse between range expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('age is between 18 and 65');
+            $rule = $parser->parse('age is between 18 and 65', 'test-rule');
 
             $trueContext1 = new Context(['age' => 18]);
             $trueContext2 = new Context(['age' => 30]);
@@ -162,7 +162,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is one of expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('country is one of US, CA, UK');
+            $rule = $parser->parse('country is one of US, CA, UK', 'test-rule');
 
             $trueContext1 = new Context(['country' => 'US']);
             $trueContext2 = new Context(['country' => 'CA']);
@@ -175,7 +175,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is either or expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('status is either active or pending');
+            $rule = $parser->parse('status is either active or pending', 'test-rule');
 
             $trueContext1 = new Context(['status' => 'active']);
             $trueContext2 = new Context(['status' => 'pending']);
@@ -188,7 +188,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse is not one of expression', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('country is not one of US, CA');
+            $rule = $parser->parse('country is not one of US, CA', 'test-rule');
 
             $trueContext = new Context(['country' => 'FR']);
             $falseContext = new Context(['country' => 'US']);
@@ -199,7 +199,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse contains string operation', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('name contains John');
+            $rule = $parser->parse('name contains John', 'test-rule');
 
             $trueContext = new Context(['name' => 'John Doe']);
             $falseContext = new Context(['name' => 'Jane Doe']);
@@ -210,7 +210,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse starts with string operation', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('email starts with admin');
+            $rule = $parser->parse('email starts with admin', 'test-rule');
 
             $trueContext = new Context(['email' => 'admin@example.com']);
             $falseContext = new Context(['email' => 'user@example.com']);
@@ -221,7 +221,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse ends with string operation', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('filename ends with .pdf');
+            $rule = $parser->parse('filename ends with .pdf', 'test-rule');
 
             $trueContext = new Context(['filename' => 'document.pdf']);
             $falseContext = new Context(['filename' => 'document.txt']);
@@ -232,7 +232,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse expression with parentheses', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('(age is at least 18 and country equals US) or age is at least 21');
+            $rule = $parser->parse('(age is at least 18 and country equals US) or age is at least 21', 'test-rule');
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -248,7 +248,7 @@ describe('NaturalLanguageParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age is at least 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -261,7 +261,7 @@ describe('NaturalLanguageParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age is at least 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -271,7 +271,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse boolean values', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('active is true');
+            $rule = $parser->parse('active is true', 'test-rule');
 
             $trueContext = new Context(['active' => true]);
             $falseContext = new Context(['active' => false]);
@@ -282,7 +282,7 @@ describe('NaturalLanguageParser', function (): void {
 
         test('parse numeric values', function (): void {
             $parser = new NaturalLanguageParser();
-            $rule = $parser->parse('score is 100');
+            $rule = $parser->parse('score is 100', 'test-rule');
 
             $trueContext = new Context(['score' => 100]);
             $falseContext = new Context(['score' => 50]);
@@ -296,14 +296,14 @@ describe('NaturalLanguageParser', function (): void {
         test('throws exception for invalid expression', function (): void {
             $parser = new NaturalLanguageParser();
 
-            expect(fn (): Rule => $parser->parse('age invalid operator 18'))
+            expect(fn (): Rule => $parser->parse('age invalid operator 18', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for empty expression', function (): void {
             $parser = new NaturalLanguageParser();
 
-            expect(fn (): Rule => $parser->parse(''))
+            expect(fn (): Rule => $parser->parse('', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
     });

@@ -14,7 +14,7 @@ use Cline\Ruler\DSL\JMESPath\JMESPathRuleBuilder;
 
 test('basic comparison works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('age >= `18`');
+    $rule = $jmes->parse('age >= `18`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['age' => 20]),
@@ -26,7 +26,7 @@ test('basic comparison works', function (): void {
 
 test('equality comparison works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("country == 'US'");
+    $rule = $jmes->parse("country == 'US'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['country' => 'US']),
@@ -38,7 +38,7 @@ test('equality comparison works', function (): void {
 
 test('logical AND works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("age >= `18` && country == 'US'");
+    $rule = $jmes->parse("age >= `18` && country == 'US'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['age' => 20, 'country' => 'US']),
@@ -53,7 +53,7 @@ test('logical AND works', function (): void {
 
 test('logical OR works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("status == 'active' || status == 'pending'");
+    $rule = $jmes->parse("status == 'active' || status == 'pending'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => 'active']),
@@ -68,7 +68,7 @@ test('logical OR works', function (): void {
 
 test('logical NOT works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("!(status == 'banned')");
+    $rule = $jmes->parse("!(status == 'banned')", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => 'active']),
@@ -80,7 +80,7 @@ test('logical NOT works', function (): void {
 
 test('contains function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("contains(tags, 'premium')");
+    $rule = $jmes->parse("contains(tags, 'premium')", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['tags' => ['premium', 'verified']]),
@@ -92,7 +92,7 @@ test('contains function works', function (): void {
 
 test('starts_with function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("starts_with(email, 'admin')");
+    $rule = $jmes->parse("starts_with(email, 'admin')", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'admin@example.com']),
@@ -104,7 +104,7 @@ test('starts_with function works', function (): void {
 
 test('ends_with function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("ends_with(email, '@example.com')");
+    $rule = $jmes->parse("ends_with(email, '@example.com')", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'john@example.com']),
@@ -116,7 +116,7 @@ test('ends_with function works', function (): void {
 
 test('array length works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('length(tags) > `3`');
+    $rule = $jmes->parse('length(tags) > `3`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['tags' => ['a', 'b', 'c', 'd']]),
@@ -128,7 +128,7 @@ test('array length works', function (): void {
 
 test('nested field access works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('user.profile.age >= `18`');
+    $rule = $jmes->parse('user.profile.age >= `18`', 'test-rule');
 
     $context = new Context([
         'user' => ['profile' => ['age' => 25]],
@@ -143,7 +143,7 @@ test('nested field access works', function (): void {
 
 test('array filtering works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('length(orders[?total > `100`]) > `0`');
+    $rule = $jmes->parse('length(orders[?total > `100`]) > `0`', 'test-rule');
 
     $context = new Context([
         'orders' => [
@@ -165,7 +165,7 @@ test('array filtering works', function (): void {
 
 test('max function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('max(scores) > `90`');
+    $rule = $jmes->parse('max(scores) > `90`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['scores' => [75, 88, 95, 82]]),
@@ -177,7 +177,7 @@ test('max function works', function (): void {
 
 test('min function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('min(prices) >= `10`');
+    $rule = $jmes->parse('min(prices) >= `10`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['prices' => [10, 20, 30]]),
@@ -189,7 +189,7 @@ test('min function works', function (): void {
 
 test('type checking works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("type(age) == 'number'");
+    $rule = $jmes->parse("type(age) == 'number'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['age' => 25]),
@@ -201,7 +201,7 @@ test('type checking works', function (): void {
 
 test('not_null function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('not_null(email)');
+    $rule = $jmes->parse('not_null(email)', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'test@example.com']),
@@ -215,6 +215,7 @@ test('complex nested expression works', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         "age >= `18` && age < `65` && contains(['US', 'CA', 'UK'], country) && emailVerified == `true`",
+        'test-rule',
     );
 
     $valid = new Context([
@@ -234,7 +235,7 @@ test('complex nested expression works', function (): void {
 
 test('parentheses for grouping work', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('(age >= `18` && age < `65`) || vip == `true`');
+    $rule = $jmes->parse('(age >= `18` && age < `65`) || vip == `true`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['age' => 30, 'vip' => false]),
@@ -249,7 +250,7 @@ test('parentheses for grouping work', function (): void {
 
 test('boolean literals work', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('verified == `true`');
+    $rule = $jmes->parse('verified == `true`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['verified' => true]),
@@ -261,7 +262,7 @@ test('boolean literals work', function (): void {
 
 test('null comparison works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('deletedAt == `null`');
+    $rule = $jmes->parse('deletedAt == `null`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['deletedAt' => null]),
@@ -273,7 +274,7 @@ test('null comparison works', function (): void {
 
 test('array indexing works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("tags[0] == 'premium'");
+    $rule = $jmes->parse("tags[0] == 'premium'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['tags' => ['premium', 'verified']]),
@@ -285,7 +286,7 @@ test('array indexing works', function (): void {
 
 test('sum function works', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('sum(values) > `100`');
+    $rule = $jmes->parse('sum(values) > `100`', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['values' => [30, 40, 50]]),
@@ -297,7 +298,7 @@ test('sum function works', function (): void {
 
 test('truthy conversion works for arrays', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('tags');
+    $rule = $jmes->parse('tags', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['tags' => ['a', 'b']]),
@@ -309,7 +310,7 @@ test('truthy conversion works for arrays', function (): void {
 
 test('truthy conversion works for strings', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('name');
+    $rule = $jmes->parse('name', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => 'John']),
@@ -321,7 +322,7 @@ test('truthy conversion works for strings', function (): void {
 
 test('truthy conversion works for numbers', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('count');
+    $rule = $jmes->parse('count', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['count' => 5]),

@@ -15,7 +15,7 @@ describe('LDAPFilterParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple equality expression', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(country=US)');
+            $rule = $parser->parse('(country=US)', 'test-rule');
 
             $context = new Context(['country' => 'US']);
 
@@ -25,7 +25,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse simple equality that fails', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(country=US)');
+            $rule = $parser->parse('(country=US)', 'test-rule');
 
             $context = new Context(['country' => 'CA']);
 
@@ -34,7 +34,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse greater than or equal operator', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(age>=18)');
+            $rule = $parser->parse('(age>=18)', 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $equalContext = new Context(['age' => 18]);
@@ -47,7 +47,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse less than or equal operator', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(price<=100)');
+            $rule = $parser->parse('(price<=100)', 'test-rule');
 
             $trueContext = new Context(['price' => 75]);
             $equalContext = new Context(['price' => 100]);
@@ -60,7 +60,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse AND logical operator', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(&(age>=18)(country=US))');
+            $rule = $parser->parse('(&(age>=18)(country=US))', 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -73,7 +73,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse OR logical operator', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(|(age>=21)(country=US))');
+            $rule = $parser->parse('(|(age>=21)(country=US))', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -86,7 +86,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse NOT logical operator', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(!(age<18))');
+            $rule = $parser->parse('(!(age<18))', 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 15]);
@@ -97,7 +97,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse nested logical operators', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(&(|(age>=21)(country=US))(status=active))');
+            $rule = $parser->parse('(&(|(age>=21)(country=US))(status=active))', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA', 'status' => 'active']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US', 'status' => 'active']);
@@ -112,7 +112,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse presence check', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(email=*)');
+            $rule = $parser->parse('(email=*)', 'test-rule');
 
             $trueContext = new Context(['email' => 'user@example.com']);
             $falseContext = new Context(['email' => null]);
@@ -123,7 +123,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse wildcard prefix match', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(name=John*)');
+            $rule = $parser->parse('(name=John*)', 'test-rule');
 
             $trueContext1 = new Context(['name' => 'John']);
             $trueContext2 = new Context(['name' => 'Johnson']);
@@ -136,7 +136,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse wildcard suffix match', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(email=*@example.com)');
+            $rule = $parser->parse('(email=*@example.com)', 'test-rule');
 
             $trueContext1 = new Context(['email' => 'user@example.com']);
             $trueContext2 = new Context(['email' => 'admin@example.com']);
@@ -149,7 +149,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse wildcard contains match', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(description=*important*)');
+            $rule = $parser->parse('(description=*important*)', 'test-rule');
 
             $trueContext1 = new Context(['description' => 'This is important']);
             $trueContext2 = new Context(['description' => 'important note']);
@@ -162,7 +162,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse approximate match', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(name~=john)');
+            $rule = $parser->parse('(name~=john)', 'test-rule');
 
             $trueContext1 = new Context(['name' => 'john']);
             $trueContext2 = new Context(['name' => 'John']);
@@ -179,7 +179,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse numeric values', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(age=25)');
+            $rule = $parser->parse('(age=25)', 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 30]);
@@ -190,7 +190,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse boolean true value', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(verified=true)');
+            $rule = $parser->parse('(verified=true)', 'test-rule');
 
             $trueContext = new Context(['verified' => true]);
             $falseContext = new Context(['verified' => false]);
@@ -201,7 +201,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse boolean false value', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(active=false)');
+            $rule = $parser->parse('(active=false)', 'test-rule');
 
             $trueContext = new Context(['active' => false]);
             $falseContext = new Context(['active' => true]);
@@ -215,7 +215,7 @@ describe('LDAPFilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -228,7 +228,7 @@ describe('LDAPFilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -238,7 +238,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse complex multi-condition filter', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(&(age>=18)(|(country=US)(country=CA))(status=active))');
+            $rule = $parser->parse('(&(age>=18)(|(country=US)(country=CA))(status=active))', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'US', 'status' => 'active']);
             $trueContext2 = new Context(['age' => 20, 'country' => 'CA', 'status' => 'active']);
@@ -257,7 +257,7 @@ describe('LDAPFilterParser', function (): void {
     describe('Edge Cases', function (): void {
         test('parse filter with spaces in value', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(name=John Doe)');
+            $rule = $parser->parse('(name=John Doe)', 'test-rule');
 
             $trueContext = new Context(['name' => 'John Doe']);
             $falseContext = new Context(['name' => 'John']);
@@ -268,7 +268,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse filter with multiple wildcards', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(name=*o*n*)');
+            $rule = $parser->parse('(name=*o*n*)', 'test-rule');
 
             $trueContext1 = new Context(['name' => 'Johnson']);
             $trueContext2 = new Context(['name' => 'John']);
@@ -281,7 +281,7 @@ describe('LDAPFilterParser', function (): void {
 
         test('parse float value', function (): void {
             $parser = new LDAPFilterParser();
-            $rule = $parser->parse('(price>=99.99)');
+            $rule = $parser->parse('(price>=99.99)', 'test-rule');
 
             $trueContext = new Context(['price' => 100.50]);
             $falseContext = new Context(['price' => 50.00]);

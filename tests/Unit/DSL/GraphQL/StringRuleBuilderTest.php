@@ -13,7 +13,7 @@ use Cline\Ruler\DSL\GraphQL\GraphQLFilterRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['age' => ['gt' => 18]]);
+    $rule = $gql->parse(['age' => ['gt' => 18]], 'test-rule');
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +23,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['age' => ['gt' => 18]]);
+    $rule = $gql->parse(['age' => ['gt' => 18]], 'test-rule');
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +32,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['status' => ['eq' => 'active']]);
+    $rule = $gql->parse(['status' => ['eq' => 'active']], 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +43,7 @@ test('parse equality operator', function (): void {
 
 test('parse implicit equality', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['status' => 'active']);
+    $rule = $gql->parse(['status' => 'active'], 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -59,7 +59,7 @@ test('parse logical and expression', function (): void {
             ['age' => ['gte' => 18]],
             ['country' => 'US'],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -75,7 +75,7 @@ test('parse implicit and with multiple fields', function (): void {
     $rule = $gql->parse([
         'age' => ['gte' => 18],
         'country' => 'US',
-    ]);
+    ], 'test-rule');
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -93,7 +93,7 @@ test('parse logical or expression', function (): void {
             ['age' => ['gte' => 21]],
             ['country' => 'US'],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -116,7 +116,7 @@ test('parse expression with nested logic', function (): void {
             ],
             ['age' => ['gte' => 21]],
         ],
-    ]);
+    ], 'test-rule');
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -129,7 +129,7 @@ test('parse expression with nested logic', function (): void {
 
 test('parse not expression', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['NOT' => ['age' => ['lt' => 18]]]);
+    $rule = $gql->parse(['NOT' => ['age' => ['lt' => 18]]], 'test-rule');
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -140,7 +140,7 @@ test('parse not expression', function (): void {
 
 test('parse in operator with array', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['country' => ['in' => ['US', 'CA', 'UK']]]);
+    $rule = $gql->parse(['country' => ['in' => ['US', 'CA', 'UK']]], 'test-rule');
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -151,7 +151,7 @@ test('parse in operator with array', function (): void {
 
 test('parse matches operator with regex', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']]);
+    $rule = $gql->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']], 'test-rule');
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '12-34567']);
@@ -162,7 +162,7 @@ test('parse matches operator with regex', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['age' => ['lte' => 65]]);
+    $rule = $gql->parse(['age' => ['lte' => 65]], 'test-rule');
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -173,7 +173,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['status' => ['ne' => 'inactive']]);
+    $rule = $gql->parse(['status' => ['ne' => 'inactive']], 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -184,7 +184,7 @@ test('parse inequality operator', function (): void {
 
 test('parse notIn operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['role' => ['notIn' => ['banned', 'suspended']]]);
+    $rule = $gql->parse(['role' => ['notIn' => ['banned', 'suspended']]], 'test-rule');
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -195,7 +195,7 @@ test('parse notIn operator', function (): void {
 
 test('parse contains operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['email' => ['contains' => '@example.com']]);
+    $rule = $gql->parse(['email' => ['contains' => '@example.com']], 'test-rule');
 
     $trueContext = new Context(['email' => 'user@example.com']);
     $falseContext = new Context(['email' => 'user@test.com']);
@@ -206,7 +206,7 @@ test('parse contains operator', function (): void {
 
 test('parse startsWith operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['name' => ['startsWith' => 'John']]);
+    $rule = $gql->parse(['name' => ['startsWith' => 'John']], 'test-rule');
 
     $trueContext = new Context(['name' => 'John Doe']);
     $falseContext = new Context(['name' => 'Jane Smith']);
@@ -217,7 +217,7 @@ test('parse startsWith operator', function (): void {
 
 test('parse endsWith operator', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['filename' => ['endsWith' => '.pdf']]);
+    $rule = $gql->parse(['filename' => ['endsWith' => '.pdf']], 'test-rule');
 
     $trueContext = new Context(['filename' => 'document.pdf']);
     $falseContext = new Context(['filename' => 'document.docx']);
@@ -228,7 +228,7 @@ test('parse endsWith operator', function (): void {
 
 test('parse range query with multiple operators', function (): void {
     $gql = new GraphQLFilterRuleBuilder();
-    $rule = $gql->parse(['age' => ['gte' => 18, 'lte' => 65]]);
+    $rule = $gql->parse(['age' => ['gte' => 18, 'lte' => 65]], 'test-rule');
 
     $trueContext = new Context(['age' => 30]);
     $falseContext1 = new Context(['age' => 15]);

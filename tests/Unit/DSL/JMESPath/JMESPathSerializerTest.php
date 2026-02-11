@@ -16,7 +16,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age > `18`');
+            $rule = $parser->parse('age > `18`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age > `18`');
@@ -26,7 +26,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('status == `"active"`');
+            $rule = $parser->parse('status == `"active"`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status == `"active"`');
@@ -36,7 +36,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age >= `18` && country == `"US"`');
+            $rule = $parser->parse('age >= `18` && country == `"US"`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= `18` && country == `"US"`');
@@ -46,7 +46,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age >= `21` || country == `"US"`');
+            $rule = $parser->parse('age >= `21` || country == `"US"`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= `21` || country == `"US"`');
@@ -56,7 +56,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('user.age >= `18`');
+            $rule = $parser->parse('user.age >= `18`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('user.age >= `18`');
@@ -66,7 +66,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('status != `"inactive"`');
+            $rule = $parser->parse('status != `"inactive"`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status != `"inactive"`');
@@ -76,7 +76,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age < `18`');
+            $rule = $parser->parse('age < `18`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age < `18`');
@@ -86,7 +86,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age <= `18`');
+            $rule = $parser->parse('age <= `18`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age <= `18`');
@@ -96,7 +96,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('age >= `18`');
+            $rule = $parser->parse('age >= `18`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= `18`');
@@ -106,7 +106,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('contains(tags, `"php"`)');
+            $rule = $parser->parse('contains(tags, `"php"`)', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('contains(tags, `"php"`)');
@@ -116,7 +116,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('starts_with(email, `"admin"`)');
+            $rule = $parser->parse('starts_with(email, `"admin"`)', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('starts_with(email, `"admin"`)');
@@ -126,7 +126,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('(age >= `18` && country == `"US"`) || age >= `21`');
+            $rule = $parser->parse('(age >= `18` && country == `"US"`) || age >= `21`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(age >= `18` && country == `"US"`) || age >= `21`');
@@ -136,7 +136,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('users[?age > `18`]');
+            $rule = $parser->parse('users[?age > `18`]', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('users[?age > `18`]');
@@ -146,7 +146,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('users[*].age');
+            $rule = $parser->parse('users[*].age', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('users[*].age');
@@ -156,7 +156,7 @@ describe('JMESPathSerializer', function (): void {
             $parser = new JMESPathParser();
             $serializer = new JMESPathSerializer();
 
-            $rule = $parser->parse('users | length(@) > `5`');
+            $rule = $parser->parse('users | length(@) > `5`', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('users | length(@) > `5`');
@@ -169,9 +169,9 @@ describe('JMESPathSerializer', function (): void {
             $serializer = new JMESPathSerializer();
 
             $original = 'age > `18`';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
-            $reparsed = $parser->parse($serialized);
+            $reparsed = $parser->parse($serialized, 'test-rule');
 
             expect($serialized)->toBe($original);
         });
@@ -181,7 +181,7 @@ describe('JMESPathSerializer', function (): void {
             $serializer = new JMESPathSerializer();
 
             $original = 'age >= `18` && country == `"US"`';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -192,7 +192,7 @@ describe('JMESPathSerializer', function (): void {
             $serializer = new JMESPathSerializer();
 
             $original = 'user.profile.age >= `18`';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -203,7 +203,7 @@ describe('JMESPathSerializer', function (): void {
             $serializer = new JMESPathSerializer();
 
             $original = 'contains(tags, `"php"`)';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);

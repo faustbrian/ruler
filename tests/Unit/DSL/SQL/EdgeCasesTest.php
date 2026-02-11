@@ -13,7 +13,7 @@ use Cline\Ruler\DSL\SQL\SqlWhereRuleBuilder;
 
 test('handles escaped quotes in strings', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("name = 'O''Brien'");
+    $rule = $srb->parse("name = 'O''Brien'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => "O'Brien"]),
@@ -25,7 +25,7 @@ test('handles escaped quotes in strings', function (): void {
 
 test('handles whitespace correctly', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('  age   >=   18  ');
+    $rule = $srb->parse('  age   >=   18  ', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['age' => 20]),
@@ -34,9 +34,9 @@ test('handles whitespace correctly', function (): void {
 
 test('handles case insensitive keywords', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule1 = $srb->parse("age >= 18 AND country = 'US'");
-    $rule2 = $srb->parse("age >= 18 and country = 'US'");
-    $rule3 = $srb->parse("age >= 18 AnD country = 'US'");
+    $rule1 = $srb->parse("age >= 18 AND country = 'US'", 'test-rule');
+    $rule2 = $srb->parse("age >= 18 and country = 'US'", 'test-rule');
+    $rule3 = $srb->parse("age >= 18 AnD country = 'US'", 'test-rule');
 
     $context = new Context(['age' => 25, 'country' => 'US']);
 
@@ -47,7 +47,7 @@ test('handles case insensitive keywords', function (): void {
 
 test('handles like with underscore wildcard', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("code LIKE 'A_C'");
+    $rule = $srb->parse("code LIKE 'A_C'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['code' => 'ABC']),
@@ -65,7 +65,7 @@ test('handles like with underscore wildcard', function (): void {
 
 test('handles like with multiple wildcards', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("name LIKE '%John%Doe%'");
+    $rule = $srb->parse("name LIKE '%John%Doe%'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => 'John Smith Doe']),
@@ -80,7 +80,7 @@ test('handles like with multiple wildcards', function (): void {
 
 test('handles like pattern at start', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("name LIKE 'John%'");
+    $rule = $srb->parse("name LIKE 'John%'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => 'John Smith']),
@@ -92,7 +92,7 @@ test('handles like pattern at start', function (): void {
 
 test('handles like pattern at end', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("email LIKE '%@gmail.com'");
+    $rule = $srb->parse("email LIKE '%@gmail.com'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'user@gmail.com']),
@@ -104,7 +104,7 @@ test('handles like pattern at end', function (): void {
 
 test('handles complex nested parentheses', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("((age > 18 AND age < 30) OR age > 65) AND status = 'active'");
+    $rule = $srb->parse("((age > 18 AND age < 30) OR age > 65) AND status = 'active'", 'test-rule');
 
     $context1 = new Context(['age' => 25, 'status' => 'active']);
     $context2 = new Context(['age' => 70, 'status' => 'active']);
@@ -120,7 +120,7 @@ test('handles complex nested parentheses', function (): void {
 test('handles operator precedence without parentheses', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // Should parse as: a = 1 OR (b = 2 AND c = 3)
-    $rule = $srb->parse('a = 1 OR b = 2 AND c = 3');
+    $rule = $srb->parse('a = 1 OR b = 2 AND c = 3', 'test-rule');
 
     $context1 = new Context(['a' => 1, 'b' => 0, 'c' => 0]);
     $context2 = new Context(['a' => 0, 'b' => 2, 'c' => 3]);
@@ -133,8 +133,8 @@ test('handles operator precedence without parentheses', function (): void {
 
 test('handles boolean literals', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule1 = $srb->parse('active = TRUE');
-    $rule2 = $srb->parse('disabled = FALSE');
+    $rule1 = $srb->parse('active = TRUE', 'test-rule');
+    $rule2 = $srb->parse('disabled = FALSE', 'test-rule');
 
     expect($rule1->evaluate(
         new Context(['active' => true]),
@@ -152,7 +152,7 @@ test('handles boolean literals', function (): void {
 
 test('handles negative numbers', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('temperature < -10');
+    $rule = $srb->parse('temperature < -10', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['temperature' => -15]),
@@ -164,7 +164,7 @@ test('handles negative numbers', function (): void {
 
 test('handles decimal numbers', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('price >= 99.99');
+    $rule = $srb->parse('price >= 99.99', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['price' => 100.50]),
@@ -176,7 +176,7 @@ test('handles decimal numbers', function (): void {
 
 test('handles in with mixed types', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("value IN (1, 'two', TRUE, NULL)");
+    $rule = $srb->parse("value IN (1, 'two', TRUE, NULL)", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['value' => 1]),
@@ -197,7 +197,7 @@ test('handles in with mixed types', function (): void {
 
 test('handles multiple not operators', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('NOT NOT age >= 18');
+    $rule = $srb->parse('NOT NOT age >= 18', 'test-rule');
 
     $context1 = new Context(['age' => 25]);
     $context2 = new Context(['age' => 15]);
@@ -209,7 +209,7 @@ test('handles multiple not operators', function (): void {
 test('handles complex and or precedence', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // Should parse as: (a AND b) OR (c AND d)
-    $rule = $srb->parse('a = 1 AND b = 2 OR c = 3 AND d = 4');
+    $rule = $srb->parse('a = 1 AND b = 2 OR c = 3 AND d = 4', 'test-rule');
 
     $context1 = new Context(['a' => 1, 'b' => 2, 'c' => 0, 'd' => 0]);
     $context2 = new Context(['a' => 0, 'b' => 0, 'c' => 3, 'd' => 4]);
@@ -222,7 +222,7 @@ test('handles complex and or precedence', function (): void {
 
 test('handles special characters in like pattern', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("name LIKE '%[test]%'");
+    $rule = $srb->parse("name LIKE '%[test]%'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => 'foo[test]bar']),
@@ -250,7 +250,7 @@ test('validate method returns false for invalid sql', function (): void {
 
 test('handles between with edge values', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('value BETWEEN 10 AND 20');
+    $rule = $srb->parse('value BETWEEN 10 AND 20', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['value' => 10]),
@@ -272,18 +272,18 @@ test('handles between with edge values', function (): void {
 test('throws exception for unexpected character', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse('age @ 18'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse('age @ 18', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('throws exception for unterminated string', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse("name = 'John"))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse("name = 'John", 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('handles escaped percent in like pattern', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("name LIKE 'test\\%value'");
+    $rule = $srb->parse("name LIKE 'test\\%value'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['name' => 'test%value']),
@@ -295,7 +295,7 @@ test('handles escaped percent in like pattern', function (): void {
 
 test('handles escaped underscore in like pattern', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("code LIKE 'A\\_C'");
+    $rule = $srb->parse("code LIKE 'A\\_C'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['code' => 'A_C']),
@@ -307,7 +307,7 @@ test('handles escaped underscore in like pattern', function (): void {
 
 test('handles backslash followed by regular character in like pattern', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("text LIKE 'hello\\nworld'");
+    $rule = $srb->parse("text LIKE 'hello\\nworld'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['text' => 'hello\\nworld']),
@@ -317,12 +317,12 @@ test('handles backslash followed by regular character in like pattern', function
 test('throws exception for unexpected token at end', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse('age >= 18 EXTRA'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse('age >= 18 EXTRA', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('throws exception for NOT IN lookahead', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("status NOT IN ('banned', 'suspended')");
+    $rule = $srb->parse("status NOT IN ('banned', 'suspended')", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => 'active']),
@@ -334,7 +334,7 @@ test('throws exception for NOT IN lookahead', function (): void {
 
 test('throws exception for NOT LIKE lookahead', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("email NOT LIKE '%@spam.com'");
+    $rule = $srb->parse("email NOT LIKE '%@spam.com'", 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'user@example.com']),
@@ -347,30 +347,30 @@ test('throws exception for NOT LIKE lookahead', function (): void {
 test('throws exception for unexpected token in primary', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse('age = ,'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse('age = ,', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('throws exception for expected comma in value list', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse("status IN ('active' 'pending')"))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse("status IN ('active' 'pending')", 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('throws exception for missing closing paren in value list', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse("status IN ('active', 'pending'"))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse("status IN ('active', 'pending'", 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('throws exception for consume keyword mismatch', function (): void {
     $srb = new SqlWhereRuleBuilder();
 
-    expect(fn (): Rule => $srb->parse('age BETWEEN 10'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse('age BETWEEN 10', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('parse IS NOT NULL comparison', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('email IS NOT NULL');
+    $rule = $srb->parse('email IS NOT NULL', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['email' => 'user@example.com']),
@@ -383,7 +383,7 @@ test('parse IS NOT NULL comparison', function (): void {
 test('parse TRUE and FALSE literals in IN clause', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlLexer lines 355, 359 for TRUE/FALSE keyword handling
-    $rule = $srb->parse('status IN (TRUE, FALSE)');
+    $rule = $srb->parse('status IN (TRUE, FALSE)', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => true]),
@@ -399,7 +399,7 @@ test('parse TRUE and FALSE literals in IN clause', function (): void {
 test('parse NULL comparison without operator returns field value', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlParser line 242 - when a field IS NULL (special case)
-    $rule = $srb->parse('deletedAt IS NULL');
+    $rule = $srb->parse('deletedAt IS NULL', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['deletedAt' => null]),
@@ -413,7 +413,7 @@ test('parse deeply nested parentheses in primary position', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlParser lines 266-269 - parenthesized expression in parsePrimary()
     // The key is that parentheses appear where a value is expected
-    $rule = $srb->parse('status = (TRUE)');
+    $rule = $srb->parse('status = (TRUE)', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => true]),
@@ -426,7 +426,7 @@ test('parse deeply nested parentheses in primary position', function (): void {
 test('parse NULL literal in comparison', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlParser line 287 - NULL literal handling
-    $rule = $srb->parse('status = NULL');
+    $rule = $srb->parse('status = NULL', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['status' => null]),
@@ -439,7 +439,7 @@ test('parse NULL literal in comparison', function (): void {
 test('parse FALSE literal in IN value list', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlParser line 328 - FALSE in value list
-    $rule = $srb->parse('value IN (FALSE, 0)');
+    $rule = $srb->parse('value IN (FALSE, 0)', 'test-rule');
 
     expect($rule->evaluate(
         new Context(['value' => false]),
@@ -452,5 +452,5 @@ test('parse FALSE literal in IN value list', function (): void {
 test('throws exception for identifier in IN value list', function (): void {
     $srb = new SqlWhereRuleBuilder();
     // This tests SqlParser line 332 - invalid literal in IN list
-    expect(fn (): Rule => $srb->parse('status IN (active, pending)'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $srb->parse('status IN (active, pending)', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });

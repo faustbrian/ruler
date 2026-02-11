@@ -13,7 +13,7 @@ use Cline\Ruler\DSL\LDAP\LDAPFilterRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age>18)');
+    $rule = $ldap->parse('(age>18)', 'test-rule');
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +23,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age>18)');
+    $rule = $ldap->parse('(age>18)', 'test-rule');
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +32,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(status=active)');
+    $rule = $ldap->parse('(status=active)', 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +43,7 @@ test('parse equality operator', function (): void {
 
 test('parse logical and expression', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(age>=18)(country=US))');
+    $rule = $ldap->parse('(&(age>=18)(country=US))', 'test-rule');
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -56,7 +56,7 @@ test('parse logical and expression', function (): void {
 
 test('parse logical or expression', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(|(age>=21)(country=US))');
+    $rule = $ldap->parse('(|(age>=21)(country=US))', 'test-rule');
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -69,7 +69,7 @@ test('parse logical or expression', function (): void {
 
 test('parse expression with nested logic', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(|(&(age>=18)(country=US))(age>=21))');
+    $rule = $ldap->parse('(|(&(age>=18)(country=US))(age>=21))', 'test-rule');
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -82,7 +82,7 @@ test('parse expression with nested logic', function (): void {
 
 test('parse not expression', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(!(age<18))');
+    $rule = $ldap->parse('(!(age<18))', 'test-rule');
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -96,7 +96,7 @@ test('parseWithAction executes callback when true', function (): void {
     $executed = false;
     $rule = $ldap->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
         $executed = true;
-    });
+    }, 'test-rule');
 
     $context = new Context(['age' => 25]);
     $rule->execute($context);
@@ -109,7 +109,7 @@ test('parseWithAction does not execute callback when false', function (): void {
     $executed = false;
     $rule = $ldap->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
         $executed = true;
-    });
+    }, 'test-rule');
 
     $context = new Context(['age' => 15]);
     $rule->execute($context);
@@ -119,7 +119,7 @@ test('parseWithAction does not execute callback when false', function (): void {
 
 test('parse wildcard prefix pattern', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(name=John*)');
+    $rule = $ldap->parse('(name=John*)', 'test-rule');
 
     $trueContext = new Context(['name' => 'John Doe']);
     $falseContext = new Context(['name' => 'Jane Doe']);
@@ -130,7 +130,7 @@ test('parse wildcard prefix pattern', function (): void {
 
 test('parse wildcard suffix pattern', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(email=*@example.com)');
+    $rule = $ldap->parse('(email=*@example.com)', 'test-rule');
 
     $trueContext = new Context(['email' => 'john@example.com']);
     $falseContext = new Context(['email' => 'john@test.com']);
@@ -141,7 +141,7 @@ test('parse wildcard suffix pattern', function (): void {
 
 test('parse wildcard contains pattern', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(description=*important*)');
+    $rule = $ldap->parse('(description=*important*)', 'test-rule');
 
     $trueContext = new Context(['description' => 'This is important stuff']);
     $falseContext = new Context(['description' => 'Nothing to see here']);
@@ -152,7 +152,7 @@ test('parse wildcard contains pattern', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age<=65)');
+    $rule = $ldap->parse('(age<=65)', 'test-rule');
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -163,7 +163,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(status!=inactive)');
+    $rule = $ldap->parse('(status!=inactive)', 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -174,7 +174,7 @@ test('parse inequality operator', function (): void {
 
 test('parse presence check', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(email=*)');
+    $rule = $ldap->parse('(email=*)', 'test-rule');
 
     $trueContext = new Context(['email' => 'test@example.com']);
     $falseContext = new Context(['email' => null]);
@@ -185,7 +185,7 @@ test('parse presence check', function (): void {
 
 test('parse negated presence check', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(!(deletedAt=*))');
+    $rule = $ldap->parse('(!(deletedAt=*))', 'test-rule');
 
     $trueContext = new Context(['deletedAt' => null]);
     $falseContext = new Context(['deletedAt' => '2023-01-01']);
@@ -196,7 +196,7 @@ test('parse negated presence check', function (): void {
 
 test('parse approximate match', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(name~=john)');
+    $rule = $ldap->parse('(name~=john)', 'test-rule');
 
     $trueContext1 = new Context(['name' => 'John']);
     $trueContext2 = new Context(['name' => 'JOHN']);
@@ -211,7 +211,7 @@ test('parse approximate match', function (): void {
 
 test('parse boolean values', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(verified=true)');
+    $rule = $ldap->parse('(verified=true)', 'test-rule');
 
     $trueContext = new Context(['verified' => true]);
     $falseContext = new Context(['verified' => false]);
@@ -222,7 +222,7 @@ test('parse boolean values', function (): void {
 
 test('parse numeric values', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age=18)');
+    $rule = $ldap->parse('(age=18)', 'test-rule');
 
     $trueContext = new Context(['age' => 18]);
     $falseContext = new Context(['age' => 20]);
@@ -233,7 +233,7 @@ test('parse numeric values', function (): void {
 
 test('parse float values', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(price>=19.99)');
+    $rule = $ldap->parse('(price>=19.99)', 'test-rule');
 
     $trueContext = new Context(['price' => 29.99]);
     $falseContext = new Context(['price' => 9.99]);
@@ -244,7 +244,7 @@ test('parse float values', function (): void {
 
 test('parse complex nested conditions', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(|(age>=18)(vip=true))(country=US)(!(status=banned)))');
+    $rule = $ldap->parse('(&(|(age>=18)(vip=true))(country=US)(!(status=banned)))', 'test-rule');
 
     $validContext = new Context(['age' => 20, 'vip' => false, 'country' => 'US', 'status' => 'active']);
     $invalidContext1 = new Context(['age' => 16, 'vip' => false, 'country' => 'US', 'status' => 'active']);
@@ -259,7 +259,7 @@ test('parse complex nested conditions', function (): void {
 
 test('parse very compact expression', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(age>=18)(country=US))');
+    $rule = $ldap->parse('(&(age>=18)(country=US))', 'test-rule');
 
     $trueContext = new Context(['age' => 20, 'country' => 'US']);
     $falseContext = new Context(['age' => 16, 'country' => 'US']);

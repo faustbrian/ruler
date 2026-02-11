@@ -14,12 +14,6 @@ use Cline\Ruler\Core\Rule;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
 use Closure;
 
-use const JSON_THROW_ON_ERROR;
-
-use function is_array;
-use function json_encode;
-use function sha1;
-
 /**
  * Builds executable rules from GraphQL filter syntax.
  *
@@ -75,15 +69,12 @@ final readonly class GraphQLFilterRuleBuilder
      *                                             endsWith/match), null checks, and type validations.
      * @return Rule                        compiled rule ready for evaluation against data contexts using the evaluate() method
      */
-    public function parse(string|array $filter): Rule
+    public function parse(string|array $filter, string $ruleId): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);
-        $idSource = is_array($filter)
-            ? json_encode($filter, JSON_THROW_ON_ERROR)
-            : $filter;
 
-        return $this->ruleBuilder->create($proposition, 'graphql:'.sha1($idSource));
+        return $this->ruleBuilder->create($proposition, $ruleId);
     }
 
     /**
@@ -95,9 +86,9 @@ final readonly class GraphQLFilterRuleBuilder
      * @param  string $json graphQL filter query as JSON string conforming to GraphQL filter syntax
      * @return Rule   compiled rule ready for evaluation against data contexts
      */
-    public function parseJson(string $json): Rule
+    public function parseJson(string $json, string $ruleId): Rule
     {
-        return $this->parse($json);
+        return $this->parse($json, $ruleId);
     }
 
     /**
@@ -111,14 +102,11 @@ final readonly class GraphQLFilterRuleBuilder
      *                                             Receives the context array as parameter.
      * @return Rule                        compiled rule with attached action callback
      */
-    public function parseWithAction(string|array $filter, Closure $action): Rule
+    public function parseWithAction(string|array $filter, Closure $action, string $ruleId): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);
-        $idSource = is_array($filter)
-            ? json_encode($filter, JSON_THROW_ON_ERROR)
-            : $filter;
 
-        return $this->ruleBuilder->create($proposition, 'graphql-action:'.sha1($idSource), $action);
+        return $this->ruleBuilder->create($proposition, $ruleId, $action);
     }
 }

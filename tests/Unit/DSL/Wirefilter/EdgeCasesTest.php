@@ -14,7 +14,7 @@ use Cline\Ruler\DSL\Wirefilter\StringRuleBuilder;
 
 test('parse strict equality operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('value === 42');
+    $rule = $srb->parse('value === 42', 'test-rule');
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => '42']);
@@ -25,7 +25,7 @@ test('parse strict equality operator', function (): void {
 
 test('parse strict inequality operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('value !== "test"');
+    $rule = $srb->parse('value !== "test"', 'test-rule');
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => 'test']);
@@ -38,19 +38,19 @@ test('unsupported binary operator throws exception', function (): void {
     $srb = new StringRuleBuilder();
 
     // This will fail because '&' is not a supported operator
-    expect(fn (): Rule => $srb->parse('a & b'))->toThrow(Exception::class);
+    expect(fn (): Rule => $srb->parse('a & b', 'test-rule'))->toThrow(Exception::class);
 });
 
 test('unsupported unary operator throws exception', function (): void {
     $srb = new StringRuleBuilder();
 
     // This will fail because '~' is not a supported unary operator
-    expect(fn (): Rule => $srb->parse('~value'))->toThrow(Exception::class);
+    expect(fn (): Rule => $srb->parse('~value', 'test-rule'))->toThrow(Exception::class);
 });
 
 test('parse array literal in expression', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('status in ["active", "pending", "approved"]');
+    $rule = $srb->parse('status in ["active", "pending", "approved"]', 'test-rule');
 
     $trueContext = new Context(['status' => 'pending']);
     $falseContext = new Context(['status' => 'rejected']);
@@ -61,7 +61,7 @@ test('parse array literal in expression', function (): void {
 
 test('parse deeply nested object property access', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('user.profile.settings.theme == "dark"');
+    $rule = $srb->parse('user.profile.settings.theme == "dark"', 'test-rule');
 
     $trueContext = new Context([
         'user' => [
@@ -89,7 +89,7 @@ test('parse deeply nested object property access', function (): void {
 
 test('parse empty array literal', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('tags in []');
+    $rule = $srb->parse('tags in []', 'test-rule');
 
     $context = new Context(['tags' => 'urgent']);
 
@@ -98,7 +98,7 @@ test('parse empty array literal', function (): void {
 
 test('parse array with mixed types', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('value in [1, "two", true, null]');
+    $rule = $srb->parse('value in [1, "two", true, null]', 'test-rule');
 
     $trueContext = new Context(['value' => 'two']);
     $falseContext = new Context(['value' => 'three']);
@@ -109,7 +109,7 @@ test('parse array with mixed types', function (): void {
 
 test('parse unary minus operator', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('-value > -10');
+    $rule = $srb->parse('-value > -10', 'test-rule');
 
     $trueContext = new Context(['value' => 5]);  // -5 > -10 = true
     $falseContext = new Context(['value' => 15]); // -15 > -10 = false
@@ -141,7 +141,7 @@ test('expression language compile callback generates function call code', functi
 
 test('parse associative array with string keys', function (): void {
     $srb = new StringRuleBuilder();
-    $rule = $srb->parse('status in {"active": "yes", "pending": "no"}');
+    $rule = $srb->parse('status in {"active": "yes", "pending": "no"}', 'test-rule');
 
     $trueContext = new Context(['status' => 'yes']);
     $falseContext = new Context(['status' => 'rejected']);

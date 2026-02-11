@@ -15,7 +15,7 @@ describe('SQLWhereParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('age > 18');
+            $rule = $parser->parse('age > 18', 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +25,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse comparison with field that fails', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('age > 18');
+            $rule = $parser->parse('age > 18', 'test-rule');
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +34,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse equality operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("status = 'active'");
+            $rule = $parser->parse("status = 'active'", 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +45,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse inequality operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("status != 'inactive'");
+            $rule = $parser->parse("status != 'inactive'", 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -56,7 +56,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse logical AND expression', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("age >= 18 AND country = 'US'");
+            $rule = $parser->parse("age >= 18 AND country = 'US'", 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -69,7 +69,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse logical OR expression', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("age >= 21 OR country = 'US'");
+            $rule = $parser->parse("age >= 21 OR country = 'US'", 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -82,7 +82,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse expression with parentheses', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21");
+            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21", 'test-rule');
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -95,7 +95,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse NOT expression', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('NOT (age < 18)');
+            $rule = $parser->parse('NOT (age < 18)', 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 15]);
@@ -109,7 +109,7 @@ describe('SQLWhereParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -122,7 +122,7 @@ describe('SQLWhereParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -132,7 +132,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse IN operator with array', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("country IN ('US', 'CA', 'UK')");
+            $rule = $parser->parse("country IN ('US', 'CA', 'UK')", 'test-rule');
 
             $trueContext = new Context(['country' => 'US']);
             $falseContext = new Context(['country' => 'FR']);
@@ -143,7 +143,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse NOT IN operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("country NOT IN ('FR', 'DE')");
+            $rule = $parser->parse("country NOT IN ('FR', 'DE')", 'test-rule');
 
             $trueContext = new Context(['country' => 'US']);
             $falseContext = new Context(['country' => 'FR']);
@@ -154,7 +154,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse BETWEEN operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('age BETWEEN 18 AND 65');
+            $rule = $parser->parse('age BETWEEN 18 AND 65', 'test-rule');
 
             $trueContext = new Context(['age' => 30]);
             $falseContext1 = new Context(['age' => 15]);
@@ -167,7 +167,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse LIKE operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("email LIKE '%@example.com'");
+            $rule = $parser->parse("email LIKE '%@example.com'", 'test-rule');
 
             $trueContext = new Context(['email' => 'user@example.com']);
             $falseContext = new Context(['email' => 'user@other.com']);
@@ -178,7 +178,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse NOT LIKE operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse("email NOT LIKE '%@spam.com'");
+            $rule = $parser->parse("email NOT LIKE '%@spam.com'", 'test-rule');
 
             $trueContext = new Context(['email' => 'user@example.com']);
             $falseContext = new Context(['email' => 'user@spam.com']);
@@ -189,7 +189,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse IS NULL operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('middle_name IS NULL');
+            $rule = $parser->parse('middle_name IS NULL', 'test-rule');
 
             $trueContext = new Context(['middle_name' => null]);
             $falseContext = new Context(['middle_name' => 'John']);
@@ -200,7 +200,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse IS NOT NULL operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('email IS NOT NULL');
+            $rule = $parser->parse('email IS NOT NULL', 'test-rule');
 
             $trueContext = new Context(['email' => 'user@example.com']);
             $falseContext = new Context(['email' => null]);
@@ -211,7 +211,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse less than or equal operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('age <= 18');
+            $rule = $parser->parse('age <= 18', 'test-rule');
 
             $trueContext1 = new Context(['age' => 18]);
             $trueContext2 = new Context(['age' => 15]);
@@ -224,7 +224,7 @@ describe('SQLWhereParser', function (): void {
 
         test('parse greater than or equal operator', function (): void {
             $parser = new SQLWhereParser();
-            $rule = $parser->parse('age >= 18');
+            $rule = $parser->parse('age >= 18', 'test-rule');
 
             $trueContext1 = new Context(['age' => 18]);
             $trueContext2 = new Context(['age' => 25]);
@@ -239,6 +239,7 @@ describe('SQLWhereParser', function (): void {
             $parser = new SQLWhereParser();
             $rule = $parser->parse(
                 "(age >= 18 AND country = 'US') OR (age >= 21 AND country IN ('CA', 'UK'))",
+                'test-rule',
             );
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
@@ -257,28 +258,28 @@ describe('SQLWhereParser', function (): void {
         test('throws exception for invalid syntax', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn (): Rule => $parser->parse('age > >'))
+            expect(fn (): Rule => $parser->parse('age > >', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for incomplete expression', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn (): Rule => $parser->parse('age >'))
+            expect(fn (): Rule => $parser->parse('age >', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for missing operand', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn (): Rule => $parser->parse('AND age > 18'))
+            expect(fn (): Rule => $parser->parse('AND age > 18', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
 
         test('throws exception for unmatched parentheses', function (): void {
             $parser = new SQLWhereParser();
 
-            expect(fn (): Rule => $parser->parse('(age > 18'))
+            expect(fn (): Rule => $parser->parse('(age > 18', 'test-rule'))
                 ->toThrow(InvalidArgumentException::class);
         });
     });

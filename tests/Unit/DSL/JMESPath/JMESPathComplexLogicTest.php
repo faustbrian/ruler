@@ -14,6 +14,7 @@ test('complex nested AND OR with multiple levels', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         "((age >= `18` && age < `65`) && (country == 'US' || country == 'CA')) && !(status == 'banned')",
+        'test-rule',
     );
 
     $validContext = new Context(['age' => 30, 'country' => 'US', 'status' => 'active']);
@@ -31,6 +32,7 @@ test('deeply nested parentheses with mixed operators', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         '(((a == `1` || b == `2`) && (c == `3` || d == `4`)) || ((e == `5` && f == `6`) || (g == `7` && h == `8`)))',
+        'test-rule',
     );
 
     $context1 = new Context(['a' => 1, 'b' => 0, 'c' => 3, 'd' => 0, 'e' => 0, 'f' => 0, 'g' => 0, 'h' => 0]);
@@ -48,6 +50,7 @@ test('NOT with deeply nested conditions', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         "!((age < `18` || age > `65`) || (status == 'banned' || status == 'suspended'))",
+        'test-rule',
     );
 
     $validContext = new Context(['age' => 30, 'status' => 'active']);
@@ -66,7 +69,7 @@ test('NOT with deeply nested conditions', function (): void {
 test('complex precedence without parentheses', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // AND has higher precedence than OR in JMESPath
-    $rule = $jmes->parse('a == `1` || b == `2` && c == `3`');
+    $rule = $jmes->parse('a == `1` || b == `2` && c == `3`', 'test-rule');
 
     // Should evaluate as: a == 1 OR (b == 2 AND c == 3)
     $aTrue = new Context(['a' => 1, 'b' => 0, 'c' => 0]);
@@ -82,7 +85,7 @@ test('complex precedence without parentheses', function (): void {
 
 test('multiple NOT operators chained', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('!(!(age >= `18`))');
+    $rule = $jmes->parse('!(!(age >= `18`))', 'test-rule');
 
     // Double negation should equal original condition
     $adultContext = new Context(['age' => 25]);
@@ -98,6 +101,7 @@ test('complex real-world eligibility check', function (): void {
         "((age >= `18` && age <= `65`) && (country == 'US' || country == 'CA')) && ".
         '((income > `50000` && creditScore >= `700`) || (hasGuarantor == `true` && guarantorCreditScore >= `750`)) && '.
         '!(hasBankruptcy == `true` || hasForeclosure == `true`)',
+        'test-rule',
     );
 
     $qualifiedContext = new Context([
@@ -157,6 +161,7 @@ test('stress test with very deep nesting', function (): void {
         '((e == `5` && f == `6`) || (g == `7` && h == `8`))) || '.
         '(((i == `9` && j == `10`) || (k == `11` && l == `12`)) && '.
         '((m == `13` && n == `14`) || (o == `15` && p == `16`))))',
+        'test-rule',
     );
 
     $matchFirstPath = new Context([
@@ -189,6 +194,7 @@ test('extreme depth with 12 levels of nesting', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         '((((((((((((a == `1`) && (b == `2`)) || (c == `3`)) && (d == `4`)) || (e == `5`)) && (f == `6`)) || (g == `7`)) && (h == `8`)) || (i == `9`)) && (j == `10`)) || (k == `11`)) && (l == `12`))',
+        'test-rule',
     );
 
     $allTrue = new Context([
@@ -227,6 +233,7 @@ test('deeply nested access control with complex business rules', function (): vo
         '(((currentTime > resource.publishedAt && currentTime < resource.expiresAt) || '.
         'resource.neverExpires == `true`) && '.
         "(contains(['US', 'EU', 'APAC'], resource.region) && resource.status == 'published'))",
+        'test-rule',
     );
 
     $adminWithAccessContext = new Context([
@@ -339,6 +346,7 @@ test('maximum depth stress test with 15 nested levels', function (): void {
     $jmes = new JMESPathRuleBuilder();
     $rule = $jmes->parse(
         '(((((((((((((((a == `1`) || (b == `2`)) && (c == `3`)) || (d == `4`)) && (e == `5`)) || (f == `6`)) && (g == `7`)) || (h == `8`)) && (i == `9`)) || (j == `10`)) && (k == `11`)) || (l == `12`)) && (m == `13`)) || (n == `14`)) && (o == `15`))',
+        'test-rule',
     );
 
     $deepMatch = new Context([

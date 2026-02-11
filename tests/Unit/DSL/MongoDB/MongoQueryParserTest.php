@@ -15,7 +15,7 @@ describe('MongoQueryParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['age' => ['$gt' => 18]]);
+            $rule = $parser->parse(['age' => ['$gt' => 18]], 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +25,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse comparison with field that fails', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['age' => ['$gt' => 18]]);
+            $rule = $parser->parse(['age' => ['$gt' => 18]], 'test-rule');
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +34,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse implicit equality operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['status' => 'active']);
+            $rule = $parser->parse(['status' => 'active'], 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +45,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse explicit equality operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['status' => ['$eq' => 'active']]);
+            $rule = $parser->parse(['status' => ['$eq' => 'active']], 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -61,7 +61,7 @@ describe('MongoQueryParser', function (): void {
                     ['age' => ['$gte' => 18]],
                     ['country' => 'US'],
                 ],
-            ]);
+            ], 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -77,7 +77,7 @@ describe('MongoQueryParser', function (): void {
             $rule = $parser->parse([
                 'age' => ['$gte' => 18],
                 'country' => 'US',
-            ]);
+            ], 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext = new Context(['age' => 15, 'country' => 'US']);
@@ -93,7 +93,7 @@ describe('MongoQueryParser', function (): void {
                     ['age' => ['$gte' => 21]],
                     ['country' => 'US'],
                 ],
-            ]);
+            ], 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -108,7 +108,7 @@ describe('MongoQueryParser', function (): void {
             $parser = new MongoQueryParser();
             $rule = $parser->parse([
                 '$not' => ['age' => ['$lt' => 18]],
-            ]);
+            ], 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 15]);
@@ -119,7 +119,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse in operator with array', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['country' => ['$in' => ['US', 'CA', 'UK']]]);
+            $rule = $parser->parse(['country' => ['$in' => ['US', 'CA', 'UK']]], 'test-rule');
 
             $trueContext = new Context(['country' => 'US']);
             $falseContext = new Context(['country' => 'FR']);
@@ -130,7 +130,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse nin operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['role' => ['$nin' => ['banned', 'suspended']]]);
+            $rule = $parser->parse(['role' => ['$nin' => ['banned', 'suspended']]], 'test-rule');
 
             $trueContext = new Context(['role' => 'member']);
             $falseContext = new Context(['role' => 'banned']);
@@ -141,7 +141,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse regex operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']]);
+            $rule = $parser->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], 'test-rule');
 
             $trueContext = new Context(['phone' => '123-4567']);
             $falseContext = new Context(['phone' => '12-34567']);
@@ -152,7 +152,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse regex with options', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['name' => ['$regex' => '^john', '$options' => 'i']]);
+            $rule = $parser->parse(['name' => ['$regex' => '^john', '$options' => 'i']], 'test-rule');
 
             $trueContext = new Context(['name' => 'JOHN DOE']);
             $falseContext = new Context(['name' => 'Jane Doe']);
@@ -163,7 +163,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse exists operator true', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['email' => ['$exists' => true]]);
+            $rule = $parser->parse(['email' => ['$exists' => true]], 'test-rule');
 
             $trueContext = new Context(['email' => 'test@example.com']);
             $falseContext = new Context(['email' => null]);
@@ -174,7 +174,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse exists operator false', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['deleted_at' => ['$exists' => false]]);
+            $rule = $parser->parse(['deleted_at' => ['$exists' => false]], 'test-rule');
 
             $trueContext = new Context(['deleted_at' => null]);
             $falseContext = new Context(['deleted_at' => '2025-01-01']);
@@ -185,7 +185,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse type operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['age' => ['$type' => 'number']]);
+            $rule = $parser->parse(['age' => ['$type' => 'number']], 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 'not-a-number']);
@@ -196,7 +196,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse between operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['age' => ['$between' => [18, 65]]]);
+            $rule = $parser->parse(['age' => ['$between' => [18, 65]]], 'test-rule');
 
             $trueContext = new Context(['age' => 30]);
             $falseContext = new Context(['age' => 70]);
@@ -213,6 +213,7 @@ describe('MongoQueryParser', function (): void {
                 function ($context) use (&$executed): void {
                     $executed = true;
                 },
+                'test-rule',
             );
 
             $context = new Context(['age' => 25]);
@@ -229,6 +230,7 @@ describe('MongoQueryParser', function (): void {
                 function ($context) use (&$executed): void {
                     $executed = true;
                 },
+                'test-rule',
             );
 
             $context = new Context(['age' => 15]);
@@ -239,7 +241,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parseJson from JSON string', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parseJson('{"age": {"$gte": 18}}');
+            $rule = $parser->parseJson('{"age": {"$gte": 18}}', 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -254,6 +256,7 @@ describe('MongoQueryParser', function (): void {
                 function ($context) use (&$executed): void {
                     $executed = true;
                 },
+                'test-rule',
             );
 
             $context = new Context(['age' => 25]);
@@ -264,7 +267,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse strict equality operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['age' => ['$same' => 18]]);
+            $rule = $parser->parse(['age' => ['$same' => 18]], 'test-rule');
 
             $trueContext = new Context(['age' => 18]);
             $falseContext = new Context(['age' => '18']);
@@ -275,7 +278,7 @@ describe('MongoQueryParser', function (): void {
 
         test('parse strict inequality operator', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse(['verified' => ['$nsame' => false]]);
+            $rule = $parser->parse(['verified' => ['$nsame' => false]], 'test-rule');
 
             $trueContext = new Context(['verified' => 0]);
             $falseContext = new Context(['verified' => false]);
@@ -287,9 +290,9 @@ describe('MongoQueryParser', function (): void {
         test('parse string operators', function (): void {
             $parser = new MongoQueryParser();
 
-            $startsWithRule = $parser->parse(['name' => ['$startsWith' => 'John']]);
-            $endsWithRule = $parser->parse(['name' => ['$endsWith' => 'Doe']]);
-            $containsRule = $parser->parse(['name' => ['$contains' => 'Middle']]);
+            $startsWithRule = $parser->parse(['name' => ['$startsWith' => 'John']], 'test-rule');
+            $endsWithRule = $parser->parse(['name' => ['$endsWith' => 'Doe']], 'test-rule');
+            $containsRule = $parser->parse(['name' => ['$contains' => 'Middle']], 'test-rule');
 
             $context = new Context(['name' => 'John Middle Doe']);
 
@@ -302,7 +305,7 @@ describe('MongoQueryParser', function (): void {
     describe('Edge Cases', function (): void {
         test('parse empty query matches all', function (): void {
             $parser = new MongoQueryParser();
-            $rule = $parser->parse([]);
+            $rule = $parser->parse([], 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -321,7 +324,7 @@ describe('MongoQueryParser', function (): void {
                     ],
                     ['age' => ['$gte' => 21]],
                 ],
-            ]);
+            ], 'test-rule');
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);

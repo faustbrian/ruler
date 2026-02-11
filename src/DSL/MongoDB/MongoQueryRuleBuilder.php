@@ -19,8 +19,6 @@ use const JSON_THROW_ON_ERROR;
 
 use function is_array;
 use function json_decode;
-use function json_encode;
-use function sha1;
 
 /**
  * Builds executable rules from MongoDB-style query documents.
@@ -63,12 +61,11 @@ final readonly class MongoQueryRuleBuilder
      * @param  array<string, mixed> $query MongoDB-style query document with fields and operators
      * @return Rule                 Compiled rule ready for evaluation against data
      */
-    public function parse(array $query): Rule
+    public function parse(array $query, string $ruleId): Rule
     {
         $proposition = $this->compiler->compile($query);
-        $idSource = json_encode($query, JSON_THROW_ON_ERROR);
 
-        return $this->ruleBuilder->create($proposition, 'mongodb:'.sha1($idSource));
+        return $this->ruleBuilder->create($proposition, $ruleId);
     }
 
     /**
@@ -83,14 +80,14 @@ final readonly class MongoQueryRuleBuilder
      *
      * @return Rule Compiled rule ready for evaluation against data
      */
-    public function parseJson(string $json): Rule
+    public function parseJson(string $json, string $ruleId): Rule
     {
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var array<string, mixed> $query */
         $query = is_array($decoded) ? $decoded : throw new InvalidArgumentException('JSON must decode to array');
 
-        return $this->parse($query);
+        return $this->parse($query, $ruleId);
     }
 
     /**
@@ -103,12 +100,11 @@ final readonly class MongoQueryRuleBuilder
      * @param  Closure              $action Callback to execute when rule evaluates to true
      * @return Rule                 Compiled rule with attached action callback
      */
-    public function parseWithAction(array $query, Closure $action): Rule
+    public function parseWithAction(array $query, Closure $action, string $ruleId): Rule
     {
         $proposition = $this->compiler->compile($query);
-        $idSource = json_encode($query, JSON_THROW_ON_ERROR);
 
-        return $this->ruleBuilder->create($proposition, 'mongodb-action:'.sha1($idSource), $action);
+        return $this->ruleBuilder->create($proposition, $ruleId, $action);
     }
 
     /**
@@ -124,13 +120,13 @@ final readonly class MongoQueryRuleBuilder
      *
      * @return Rule Compiled rule with attached action callback
      */
-    public function parseJsonWithAction(string $json, Closure $action): Rule
+    public function parseJsonWithAction(string $json, Closure $action, string $ruleId): Rule
     {
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var array<string, mixed> $query */
         $query = is_array($decoded) ? $decoded : throw new InvalidArgumentException('JSON must decode to array');
 
-        return $this->parseWithAction($query, $action);
+        return $this->parseWithAction($query, $action, $ruleId);
     }
 }

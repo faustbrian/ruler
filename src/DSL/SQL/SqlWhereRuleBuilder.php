@@ -16,8 +16,6 @@ use Closure;
 use Exception;
 use InvalidArgumentException;
 
-use function sha1;
-
 /**
  * Facade for creating Rules from SQL WHERE clause expressions.
  *
@@ -80,14 +78,14 @@ final readonly class SqlWhereRuleBuilder
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(string $sql): Rule
+    public function parse(string $sql, string $ruleId): Rule
     {
         $ast = $this->parser->parse($sql);
         $proposition = $this->compiler->compile($ast);
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition, 'sql:'.sha1($sql));
+        return $rb->create($proposition, $ruleId);
     }
 
     /**
@@ -103,14 +101,14 @@ final readonly class SqlWhereRuleBuilder
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $sql, Closure $action): Rule
+    public function parseWithAction(string $sql, Closure $action, string $ruleId): Rule
     {
         $ast = $this->parser->parse($sql);
         $proposition = $this->compiler->compile($ast);
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition, 'sql-action:'.sha1($sql), $action);
+        return $rb->create($proposition, $ruleId, $action);
     }
 
     /**

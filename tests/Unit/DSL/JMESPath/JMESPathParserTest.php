@@ -15,7 +15,7 @@ describe('JMESPathParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age > `18`');
+            $rule = $parser->parse('age > `18`', 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +25,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse comparison with field that fails', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age > `18`');
+            $rule = $parser->parse('age > `18`', 'test-rule');
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +34,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse equality operator', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('status == `"active"`');
+            $rule = $parser->parse('status == `"active"`', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +45,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse logical and expression', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age >= `18` && country == `"US"`');
+            $rule = $parser->parse('age >= `18` && country == `"US"`', 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -58,7 +58,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse logical or expression', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age >= `21` || country == `"US"`');
+            $rule = $parser->parse('age >= `21` || country == `"US"`', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -71,7 +71,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse expression with parentheses', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('(age >= `18` && country == `"US"`) || age >= `21`');
+            $rule = $parser->parse('(age >= `18` && country == `"US"`) || age >= `21`', 'test-rule');
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -84,7 +84,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse nested property access', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('user.age >= `18`');
+            $rule = $parser->parse('user.age >= `18`', 'test-rule');
 
             $trueContext = new Context(['user' => ['age' => 25]]);
             $falseContext = new Context(['user' => ['age' => 15]]);
@@ -95,7 +95,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse not equal operator', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('status != `"inactive"`');
+            $rule = $parser->parse('status != `"inactive"`', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -106,7 +106,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse less than operator', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age < `18`');
+            $rule = $parser->parse('age < `18`', 'test-rule');
 
             $trueContext = new Context(['age' => 15]);
             $falseContext = new Context(['age' => 25]);
@@ -117,7 +117,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse less than or equal operator', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age <= `18`');
+            $rule = $parser->parse('age <= `18`', 'test-rule');
 
             $trueContext1 = new Context(['age' => 15]);
             $trueContext2 = new Context(['age' => 18]);
@@ -130,7 +130,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse greater than or equal operator', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('age >= `18`');
+            $rule = $parser->parse('age >= `18`', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25]);
             $trueContext2 = new Context(['age' => 18]);
@@ -146,7 +146,7 @@ describe('JMESPathParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= `18`', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -159,7 +159,7 @@ describe('JMESPathParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= `18`', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -169,7 +169,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse with contains function', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('contains(tags, `"php"`)');
+            $rule = $parser->parse('contains(tags, `"php"`)', 'test-rule');
 
             $trueContext = new Context(['tags' => ['php', 'javascript', 'python']]);
             $falseContext = new Context(['tags' => ['javascript', 'python']]);
@@ -180,7 +180,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse with starts_with function', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('starts_with(email, `"admin"`)');
+            $rule = $parser->parse('starts_with(email, `"admin"`)', 'test-rule');
 
             $trueContext = new Context(['email' => 'admin@example.com']);
             $falseContext = new Context(['email' => 'user@example.com']);
@@ -191,7 +191,7 @@ describe('JMESPathParser', function (): void {
 
         test('parse with array filter', function (): void {
             $parser = new JMESPathParser();
-            $rule = $parser->parse('users[?age > `18`]');
+            $rule = $parser->parse('users[?age > `18`]', 'test-rule');
 
             $trueContext = new Context([
                 'users' => [

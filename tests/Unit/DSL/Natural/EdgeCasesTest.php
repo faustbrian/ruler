@@ -13,7 +13,7 @@ use Cline\Ruler\DSL\Natural\NaturalLanguageRuleBuilder;
 
 test('parse strict equality using explicit comparison', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('value is 42');
+    $rule = $nl->parse('value is 42', 'test-rule');
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => '42']);
@@ -25,7 +25,7 @@ test('parse strict equality using explicit comparison', function (): void {
 
 test('parse strict inequality using explicit comparison', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('value is not "test"');
+    $rule = $nl->parse('value is not "test"', 'test-rule');
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => 'test']);
@@ -36,7 +36,7 @@ test('parse strict inequality using explicit comparison', function (): void {
 
 test('parse array literal in expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('status is one of "active", "pending", "approved"');
+    $rule = $nl->parse('status is one of "active", "pending", "approved"', 'test-rule');
 
     $trueContext = new Context(['status' => 'pending']);
     $falseContext = new Context(['status' => 'rejected']);
@@ -47,7 +47,7 @@ test('parse array literal in expression', function (): void {
 
 test('parse deeply nested object property access', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('user.profile.settings.theme is "dark"');
+    $rule = $nl->parse('user.profile.settings.theme is "dark"', 'test-rule');
 
     $trueContext = new Context([
         'user' => [
@@ -77,7 +77,7 @@ test('parse empty array check', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language doesn't support direct array comparison
     // Test with alternative syntax
-    $rule = $nl->parse('hasData is false');
+    $rule = $nl->parse('hasData is false', 'test-rule');
 
     $context = new Context(['hasData' => false]);
 
@@ -86,7 +86,7 @@ test('parse empty array check', function (): void {
 
 test('parse either or pattern', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('value is either "two" or "three"');
+    $rule = $nl->parse('value is either "two" or "three"', 'test-rule');
 
     $trueContext = new Context(['value' => 'two']);
     $falseContext = new Context(['value' => 'four']);
@@ -98,7 +98,7 @@ test('parse either or pattern', function (): void {
 test('parse unary minus operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language: pre-computed negation
-    $rule = $nl->parse('negativeValue is more than -10');
+    $rule = $nl->parse('negativeValue is more than -10', 'test-rule');
 
     $trueContext = new Context(['negativeValue' => -5]);  // -5 > -10 = true
     $falseContext = new Context(['negativeValue' => -15]); // -15 > -10 = false
@@ -109,7 +109,7 @@ test('parse unary minus operator', function (): void {
 
 test('parse starts with operation', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('name starts with "Mr"');
+    $rule = $nl->parse('name starts with "Mr"', 'test-rule');
 
     $trueContext = new Context(['name' => 'Mr. Smith']);
     $falseContext = new Context(['name' => 'Dr. Jones']);
@@ -120,7 +120,7 @@ test('parse starts with operation', function (): void {
 
 test('parse ends with operation', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('filename ends with ".txt"');
+    $rule = $nl->parse('filename ends with ".txt"', 'test-rule');
 
     $trueContext = new Context(['filename' => 'document.txt']);
     $falseContext = new Context(['filename' => 'image.png']);
@@ -132,12 +132,12 @@ test('parse ends with operation', function (): void {
 test('throws exception for unparseable condition', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
 
-    expect(fn (): Rule => $nl->parse('invalid syntax here'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $nl->parse('invalid syntax here', 'test-rule'))->toThrow(InvalidArgumentException::class);
 });
 
 test('parse contains with unquoted string', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('text contains test');
+    $rule = $nl->parse('text contains test', 'test-rule');
 
     $trueContext = new Context(['text' => 'this is a test']);
     $falseContext = new Context(['text' => 'no match']);
@@ -148,7 +148,7 @@ test('parse contains with unquoted string', function (): void {
 
 test('parse null value comparison', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('value is null');
+    $rule = $nl->parse('value is null', 'test-rule');
 
     $trueContext = new Context(['value' => null]);
     $falseContext = new Context(['value' => 'something']);
@@ -159,7 +159,7 @@ test('parse null value comparison', function (): void {
 
 test('parse unquoted string value', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('status is active');
+    $rule = $nl->parse('status is active', 'test-rule');
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -170,8 +170,8 @@ test('parse unquoted string value', function (): void {
 
 test('parse yes and no boolean values', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule1 = $nl->parse('confirmed is yes');
-    $rule2 = $nl->parse('rejected is no');
+    $rule1 = $nl->parse('confirmed is yes', 'test-rule');
+    $rule2 = $nl->parse('rejected is no', 'test-rule');
 
     expect($rule1->evaluate(
         new Context(['confirmed' => true]),
@@ -191,7 +191,7 @@ test('parse natural language with nested conditions using parentheses', function
     $nl = new NaturalLanguageRuleBuilder();
     // This tests the parentheses depth tracking (lines 401, 405)
     // The parser needs to track depth when splitting by logical operators
-    $rule = $nl->parse('age is more than 18 and ( status is active or role is admin )');
+    $rule = $nl->parse('age is more than 18 and ( status is active or role is admin )', 'test-rule');
 
     $trueContext1 = new Context(['age' => 25, 'status' => 'active', 'role' => 'user']);
     $trueContext2 = new Context(['age' => 25, 'status' => 'inactive', 'role' => 'admin']);

@@ -15,7 +15,7 @@ describe('WirefilterParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('age > 18');
+            $rule = $parser->parse('age > 18', 'test-rule');
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +25,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse comparison with field that fails', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('age > 18');
+            $rule = $parser->parse('age > 18', 'test-rule');
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +34,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse equality operator', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('status == "active"');
+            $rule = $parser->parse('status == "active"', 'test-rule');
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +45,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse logical and expression', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('age >= 18 and country == "US"');
+            $rule = $parser->parse('age >= 18 and country == "US"', 'test-rule');
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -58,7 +58,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse logical or expression', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('age >= 21 or country == "US"');
+            $rule = $parser->parse('age >= 21 or country == "US"', 'test-rule');
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -71,7 +71,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse expression with parentheses', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21');
+            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21', 'test-rule');
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -84,7 +84,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse mathematical expression', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('price + shipping > 100');
+            $rule = $parser->parse('price + shipping > 100', 'test-rule');
 
             $trueContext = new Context(['price' => 80, 'shipping' => 25]);
             $falseContext = new Context(['price' => 50, 'shipping' => 10]);
@@ -95,7 +95,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse not expression', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('not (age < 18)');
+            $rule = $parser->parse('not (age < 18)', 'test-rule');
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 15]);
@@ -109,7 +109,7 @@ describe('WirefilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -122,7 +122,7 @@ describe('WirefilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction('age >= 18', function ($context) use (&$executed): void {
                 $executed = true;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -135,7 +135,7 @@ describe('WirefilterParser', function (): void {
             $capturedContext = null;
             $rule = $parser->parseWithAction('age >= 18', function (Context $context) use (&$capturedContext): void {
                 $capturedContext = $context;
-            });
+            }, 'test-rule');
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -145,7 +145,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse in operator with array', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('country in ["US", "CA", "UK"]');
+            $rule = $parser->parse('country in ["US", "CA", "UK"]', 'test-rule');
 
             $trueContext = new Context(['country' => 'US']);
             $falseContext = new Context(['country' => 'FR']);
@@ -156,7 +156,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse matches operator with regex', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"');
+            $rule = $parser->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"', 'test-rule');
 
             $trueContext = new Context(['phone' => '123-4567']);
             $falseContext = new Context(['phone' => '12-34567']);
@@ -167,7 +167,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse strict equality operator', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('age === 18');
+            $rule = $parser->parse('age === 18', 'test-rule');
 
             $trueContext = new Context(['age' => 18]);
             $falseContext = new Context(['age' => '18']);
@@ -178,7 +178,7 @@ describe('WirefilterParser', function (): void {
 
         test('parse strict inequality operator', function (): void {
             $parser = new WirefilterParser();
-            $rule = $parser->parse('verified !== false');
+            $rule = $parser->parse('verified !== false', 'test-rule');
 
             $trueContext = new Context(['verified' => 0]);
             $falseContext = new Context(['verified' => false]);

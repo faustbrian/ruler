@@ -24,7 +24,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('age > 18');
+            $rule = $parser->parse('age > 18', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age > 18');
@@ -34,7 +34,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("status = 'active'");
+            $rule = $parser->parse("status = 'active'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("status = 'active'");
@@ -44,7 +44,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("status != 'inactive'");
+            $rule = $parser->parse("status != 'inactive'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("status != 'inactive'");
@@ -54,7 +54,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("age >= 18 AND country = 'US'");
+            $rule = $parser->parse("age >= 18 AND country = 'US'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("age >= 18 AND country = 'US'");
@@ -64,7 +64,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("age >= 21 OR country = 'CA'");
+            $rule = $parser->parse("age >= 21 OR country = 'CA'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("age >= 21 OR country = 'CA'");
@@ -74,7 +74,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('NOT (age < 18)');
+            $rule = $parser->parse('NOT (age < 18)', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('NOT (age < 18)');
@@ -84,7 +84,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("country IN ('US', 'CA', 'UK')");
+            $rule = $parser->parse("country IN ('US', 'CA', 'UK')", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("country IN ('US', 'CA', 'UK')");
@@ -94,7 +94,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("country NOT IN ('FR', 'DE')");
+            $rule = $parser->parse("country NOT IN ('FR', 'DE')", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("country NOT IN ('FR', 'DE')");
@@ -104,7 +104,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('age BETWEEN 18 AND 65');
+            $rule = $parser->parse('age BETWEEN 18 AND 65', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age BETWEEN 18 AND 65');
@@ -114,7 +114,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("email LIKE '%@example.com'");
+            $rule = $parser->parse("email LIKE '%@example.com'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("email LIKE '%@example.com'");
@@ -124,7 +124,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("email NOT LIKE '%@spam.com'");
+            $rule = $parser->parse("email NOT LIKE '%@spam.com'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("email NOT LIKE '%@spam.com'");
@@ -134,7 +134,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('middle_name IS NULL');
+            $rule = $parser->parse('middle_name IS NULL', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('middle_name IS NULL');
@@ -144,7 +144,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('email IS NOT NULL');
+            $rule = $parser->parse('email IS NOT NULL', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('email IS NOT NULL');
@@ -154,7 +154,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21");
+            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("(age >= 18 AND country = 'US') OR age >= 21");
@@ -166,6 +166,7 @@ describe('SQLWhereSerializer', function (): void {
 
             $rule = $parser->parse(
                 "(age >= 18 AND country = 'US') OR (age >= 21 AND country IN ('CA', 'UK'))",
+                'test-rule',
             );
             $result = $serializer->serialize($rule);
 
@@ -178,7 +179,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('age <= 65');
+            $rule = $parser->parse('age <= 65', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age <= 65');
@@ -188,7 +189,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('age >= 18');
+            $rule = $parser->parse('age >= 18', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= 18');
@@ -198,7 +199,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("name = 'O''Reilly'");
+            $rule = $parser->parse("name = 'O''Reilly'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("name = 'O''Reilly'");
@@ -208,7 +209,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('price = 99.99');
+            $rule = $parser->parse('price = 99.99', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price = 99.99');
@@ -218,7 +219,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('active = TRUE');
+            $rule = $parser->parse('active = TRUE', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('active = TRUE');
@@ -228,7 +229,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('active = FALSE');
+            $rule = $parser->parse('active = FALSE', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('active = FALSE');
@@ -238,7 +239,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("code LIKE 'A_B'");
+            $rule = $parser->parse("code LIKE 'A_B'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("code LIKE 'A_B'");
@@ -251,7 +252,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = 'age > 18';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -262,7 +263,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = "age >= 18 AND country = 'US'";
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -273,7 +274,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = "age >= 21 OR status = 'verified'";
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -284,7 +285,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = "country IN ('US', 'CA', 'UK')";
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -295,7 +296,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = 'age BETWEEN 18 AND 65';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -306,7 +307,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = "email LIKE '%@example.com'";
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -317,7 +318,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = 'middle_name IS NULL';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -328,7 +329,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = 'email IS NOT NULL';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -339,7 +340,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = "(age >= 18 AND country = 'US') OR age >= 21";
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -350,7 +351,7 @@ describe('SQLWhereSerializer', function (): void {
             $serializer = new SQLWhereSerializer();
 
             $original = 'NOT (age < 18)';
-            $rule = $parser->parse($original);
+            $rule = $parser->parse($original, 'test-rule');
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -360,7 +361,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21");
+            $rule = $parser->parse("(age >= 18 AND country = 'US') OR age >= 21", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('(');
@@ -370,7 +371,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("country IN ('US', 'CA')");
+            $rule = $parser->parse("country IN ('US', 'CA')", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('IN');
@@ -397,7 +398,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("name LIKE 'test\\%value'");
+            $rule = $parser->parse("name LIKE 'test\\%value'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             // The serializer converts escaped patterns back - line 142 coverage
@@ -408,7 +409,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("code LIKE 'A\\_C'");
+            $rule = $parser->parse("code LIKE 'A\\_C'", 'test-rule');
             $result = $serializer->serialize($rule);
 
             // The serializer converts escaped patterns back - line 142 coverage
@@ -589,7 +590,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('age IN (18, 21, 25)');
+            $rule = $parser->parse('age IN (18, 21, 25)', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age IN (18, 21, 25)');
@@ -599,7 +600,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse("value IN (1, 'two', TRUE, NULL)");
+            $rule = $parser->parse("value IN (1, 'two', TRUE, NULL)", 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe("value IN (1, 'two', TRUE, NULL)");
@@ -624,7 +625,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('temperature < -10');
+            $rule = $parser->parse('temperature < -10', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('temperature < -10');
@@ -634,7 +635,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('price = 99.99');
+            $rule = $parser->parse('price = 99.99', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price = 99.99');
@@ -644,7 +645,7 @@ describe('SQLWhereSerializer', function (): void {
             $parser = new SQLWhereParser();
             $serializer = new SQLWhereSerializer();
 
-            $rule = $parser->parse('count = 0');
+            $rule = $parser->parse('count = 0', 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('count = 0');
