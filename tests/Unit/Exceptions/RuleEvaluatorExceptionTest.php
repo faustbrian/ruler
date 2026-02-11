@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Enums\RuleErrorCode;
+use Cline\Ruler\Enums\RuleErrorPhase;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 
 describe('RuleEvaluatorException', function (): void {
@@ -18,8 +20,8 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid rule structure');
-            expect($exception->getErrorCode())->toBe('compile.invalid_rule_structure');
-            expect($exception->getPhase())->toBe('compile');
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($exception->getPhase())->toBe(RuleErrorPhase::Compile);
             expect($exception->getPath())->toBe([]);
         });
 
@@ -30,7 +32,7 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Logical NOT must have exactly one argument');
-            expect($exception->getErrorCode())->toBe('compile.invalid_not_arity');
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileInvalidNotArity);
             expect($exception->getPath())->toBe(['value']);
         });
 
@@ -44,7 +46,7 @@ describe('RuleEvaluatorException', function (): void {
             // Assert
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Invalid combinator: xor');
-            expect($exception->getErrorCode())->toBe('compile.invalid_combinator');
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
             expect($exception->getPath())->toBe(['combinator']);
         });
 
@@ -55,7 +57,7 @@ describe('RuleEvaluatorException', function (): void {
             expect($exception)->toBeInstanceOf(RuleEvaluatorException::class);
             expect($exception->getMessage())->toBe('Unable to generate rule cache key: json encode failed');
             expect($exception->getPrevious())->toBe($previous);
-            expect($exception->getErrorCode())->toBe('compile.cache_key_generation_failed');
+            expect($exception->getErrorCode())->toBe(RuleErrorCode::CompileCacheKeyGenerationFailed);
             expect($exception->getPath())->toBe(['rules']);
         });
     });
@@ -93,6 +95,7 @@ describe('RuleEvaluatorException', function (): void {
             );
 
             expect($exception->toArray())->toBe([
+                'contractVersion' => RuleEvaluatorException::ERROR_CONTRACT_VERSION,
                 'message' => 'Operator must be a string',
                 'errorCode' => 'compile.invalid_rule_structure',
                 'phase' => 'compile',

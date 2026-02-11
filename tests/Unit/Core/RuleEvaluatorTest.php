@@ -13,6 +13,8 @@ use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleEvaluator;
 use Cline\Ruler\Core\RuleEvaluatorCompilationResult;
 use Cline\Ruler\Core\RuleEvaluatorReport;
+use Cline\Ruler\Enums\RuleErrorCode;
+use Cline\Ruler\Enums\RuleErrorPhase;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Illuminate\Http\Request;
 
@@ -534,8 +536,8 @@ YAML;
 
             expect($result->isSuccess())->toBeFalse();
             expect($result->getError())->toBeInstanceOf(RuleEvaluatorException::class);
-            expect($result->getError()?->getErrorCode())->toBe('compile.invalid_combinator');
-            expect($result->getError()?->getPhase())->toBe('compile');
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
+            expect($result->getError()?->getPhase())->toBe(RuleErrorPhase::Compile);
             expect($result->getError()?->getPath())->toBe(['combinator']);
         });
 
@@ -544,8 +546,8 @@ YAML;
 
             expect($result->isSuccess())->toBeFalse();
             expect($result->getError())->toBeInstanceOf(RuleEvaluatorException::class);
-            expect($result->getError()?->getErrorCode())->toBe('compile.invalid_rule_structure');
-            expect($result->getError()?->getPhase())->toBe('compile');
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
+            expect($result->getError()?->getPhase())->toBe(RuleErrorPhase::Compile);
             expect($result->getError()?->getPath())->toBe(['rules']);
             expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
         });
@@ -564,8 +566,8 @@ YAML;
                 ]);
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
             } catch (RuleEvaluatorException $ruleEvaluatorException) {
-                expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_combinator');
-                expect($ruleEvaluatorException->getPhase())->toBe('compile');
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
+                expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Compile);
                 expect($ruleEvaluatorException->getPath())->toBe(['combinator']);
                 expect($ruleEvaluatorException->getDetails())->toBe(['combinator' => 'nandd']);
             }
@@ -580,8 +582,8 @@ YAML;
                 ]);
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
             } catch (RuleEvaluatorException $ruleEvaluatorException) {
-                expect($ruleEvaluatorException->getErrorCode())->toBe('compile.unknown_operator');
-                expect($ruleEvaluatorException->getPhase())->toBe('compile');
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileUnknownOperator);
+                expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Compile);
                 expect($ruleEvaluatorException->getPath())->toBe(['operator']);
                 expect($ruleEvaluatorException->getDetails())->toBe([
                     'operator' => 'unknownOperator',

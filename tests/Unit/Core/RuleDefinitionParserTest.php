@@ -11,6 +11,8 @@ use Cline\Ruler\Core\Definition\CombinatorRuleDefinition;
 use Cline\Ruler\Core\Definition\ComparisonRuleDefinition;
 use Cline\Ruler\Core\Definition\RuleCombinator;
 use Cline\Ruler\Core\Definition\RuleDefinitionParser;
+use Cline\Ruler\Enums\RuleErrorCode;
+use Cline\Ruler\Enums\RuleErrorPhase;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 
 describe('RuleDefinitionParser', function (): void {
@@ -53,8 +55,8 @@ describe('RuleDefinitionParser', function (): void {
             ]);
             test()->fail('Expected RuleEvaluatorException was not thrown.');
         } catch (RuleEvaluatorException $ruleEvaluatorException) {
-            expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_combinator');
-            expect($ruleEvaluatorException->getPhase())->toBe('compile');
+            expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
+            expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Compile);
             expect($ruleEvaluatorException->getPath())->toBe(['combinator']);
             expect($ruleEvaluatorException->getDetails())->toBe(['combinator' => 'invalid']);
         }
@@ -71,7 +73,7 @@ describe('RuleDefinitionParser', function (): void {
             ]);
             test()->fail('Expected RuleEvaluatorException was not thrown.');
         } catch (RuleEvaluatorException $ruleEvaluatorException) {
-            expect($ruleEvaluatorException->getErrorCode())->toBe('compile.invalid_rule_structure');
+            expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
             expect($ruleEvaluatorException->getPath())->toBe(['value', 1]);
             expect($ruleEvaluatorException->getMessage())->toBe('Combinator operands must be rule objects');
         }

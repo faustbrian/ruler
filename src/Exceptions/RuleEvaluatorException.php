@@ -9,6 +9,8 @@
 
 namespace Cline\Ruler\Exceptions;
 
+use Cline\Ruler\Enums\RuleErrorCode;
+use Cline\Ruler\Enums\RuleErrorPhase;
 use Exception;
 use Throwable;
 
@@ -25,14 +27,16 @@ use function sprintf;
  */
 final class RuleEvaluatorException extends Exception
 {
+    public const string ERROR_CONTRACT_VERSION = '1.0.0';
+
     /**
      * @param array<int, int|string> $path
      * @param array<string, mixed>   $details
      */
     private function __construct(
         string $message,
-        private readonly string $errorCode,
-        private readonly string $phase,
+        private readonly RuleErrorCode $errorCode,
+        private readonly RuleErrorPhase $phase,
         private readonly array $path = [],
         private readonly array $details = [],
         ?Throwable $previous = null,
@@ -49,8 +53,8 @@ final class RuleEvaluatorException extends Exception
     {
         return new self(
             sprintf('Invalid combinator: %s', $combinator),
-            'compile.invalid_combinator',
-            'compile',
+            RuleErrorCode::CompileInvalidCombinator,
+            RuleErrorPhase::Compile,
             $path,
             ['combinator' => $combinator],
         );
@@ -69,8 +73,8 @@ final class RuleEvaluatorException extends Exception
     ): self {
         return new self(
             $reason,
-            'compile.invalid_rule_structure',
-            'compile',
+            RuleErrorCode::CompileInvalidRuleStructure,
+            RuleErrorPhase::Compile,
             $path,
             $details,
         );
@@ -85,8 +89,8 @@ final class RuleEvaluatorException extends Exception
     {
         return new self(
             'Logical NOT must have exactly one argument',
-            'compile.invalid_not_arity',
-            'compile',
+            RuleErrorCode::CompileInvalidNotArity,
+            RuleErrorPhase::Compile,
             $path,
         );
     }
@@ -98,8 +102,8 @@ final class RuleEvaluatorException extends Exception
     {
         return new self(
             sprintf('Unable to generate rule cache key: %s', $reason),
-            'compile.cache_key_generation_failed',
-            'compile',
+            RuleErrorCode::CompileCacheKeyGenerationFailed,
+            RuleErrorPhase::Compile,
             ['rules'],
             ['reason' => $reason],
             $previous,
@@ -119,8 +123,8 @@ final class RuleEvaluatorException extends Exception
     ): self {
         return new self(
             sprintf('Unknown operator: "%s"', $operator),
-            'compile.unknown_operator',
-            'compile',
+            RuleErrorCode::CompileUnknownOperator,
+            RuleErrorPhase::Compile,
             $path,
             [
                 'operator' => $operator,
@@ -144,20 +148,20 @@ final class RuleEvaluatorException extends Exception
     ): self {
         return new self(
             $reason,
-            'runtime.evaluation_failed',
-            'runtime',
+            RuleErrorCode::RuntimeEvaluationFailed,
+            RuleErrorPhase::Runtime,
             $path,
             $details,
             $previous,
         );
     }
 
-    public function getErrorCode(): string
+    public function getErrorCode(): RuleErrorCode
     {
         return $this->errorCode;
     }
 
-    public function getPhase(): string
+    public function getPhase(): RuleErrorPhase
     {
         return $this->phase;
     }
@@ -180,6 +184,7 @@ final class RuleEvaluatorException extends Exception
 
     /**
      * @return array{
+     *     contractVersion: string,
      *     message: string,
      *     errorCode: string,
      *     phase: string,
@@ -190,9 +195,10 @@ final class RuleEvaluatorException extends Exception
     public function toArray(): array
     {
         return [
+            'contractVersion' => self::ERROR_CONTRACT_VERSION,
             'message' => $this->getMessage(),
-            'errorCode' => $this->errorCode,
-            'phase' => $this->phase,
+            'errorCode' => $this->errorCode->value,
+            'phase' => $this->phase->value,
             'path' => $this->path,
             'details' => $this->details,
         ];
