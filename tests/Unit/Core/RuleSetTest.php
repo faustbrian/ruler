@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleSet;
@@ -163,7 +164,7 @@ describe('RuleSet', function (): void {
                 'approved' => false,
             ]);
 
-            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+            $rb = new RuleBuilder();
             $executionOrder = [];
 
             $approve = new Rule(
@@ -192,14 +193,18 @@ describe('RuleSet', function (): void {
             // Approval is evaluated first and fails in cycle 1.
             $ruleset = new RuleSet([$approve, $seed]);
 
-            expect($ruleset->executeForwardChaining($context))->toBe(2);
+            $report = $ruleset->executeForwardChaining($context);
+
+            expect($report)->toBeInstanceOf(RuleSetExecutionReport::class);
+            expect($report->getActionExecutionCount())->toBe(2);
+            expect($report->getCycleCount())->toBe(3);
             expect($context['approved'])->toBeTrue();
             expect($executionOrder)->toBe(['seed', 'approve']);
         });
 
         test('forward chaining does not re-fire rules by default', function (): void {
             $context = new Context(['counter' => 0]);
-            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+            $rb = new RuleBuilder();
 
             $rule = new Rule(
                 $rb['counter']->greaterThanOrEqualTo(0),
@@ -212,13 +217,16 @@ describe('RuleSet', function (): void {
 
             $ruleset = new RuleSet([$rule]);
 
-            expect($ruleset->executeForwardChaining($context))->toBe(1);
+            $report = $ruleset->executeForwardChaining($context);
+
+            expect($report->getActionExecutionCount())->toBe(1);
+            expect($report->getCycleCount())->toBe(2);
             expect($context['counter'])->toBe(1);
         });
 
         test('executeRules returns matched and action counts', function (): void {
             $context = new Context(['flag' => true, 'disabledFlag' => true]);
-            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+            $rb = new RuleBuilder();
             $executed = [];
 
             $ruleA = new Rule(
@@ -252,7 +260,7 @@ describe('RuleSet', function (): void {
                 false,
             );
 
-            $report = (new RuleSet([$ruleA, $ruleB, $ruleDisabled]))
+            $report = new RuleSet([$ruleA, $ruleB, $ruleDisabled])
                 ->executeRules($context);
 
             expect($report)->toBeInstanceOf(RuleSetExecutionReport::class);
@@ -371,7 +379,7 @@ describe('RuleSet', function (): void {
 
             $ruleset = new RuleSet([$rule]);
 
-            expect(fn (): int => $ruleset->executeForwardChaining($context, 2, true))
+            expect(fn () => $ruleset->executeForwardChaining($context, 2, true))
                 ->toThrow(RuntimeException::class);
         });
     });

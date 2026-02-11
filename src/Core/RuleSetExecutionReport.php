@@ -16,6 +16,7 @@ use function count;
  * Structured report for a RuleSet execution pass.
  *
  * @author Brian Faust <brian@cline.sh>
+ * @psalm-immutable
  */
 final readonly class RuleSetExecutionReport
 {
@@ -24,6 +25,7 @@ final readonly class RuleSetExecutionReport
      */
     public function __construct(
         private array $results,
+        private int $cycles = 1,
     ) {}
 
     /**
@@ -58,5 +60,13 @@ final readonly class RuleSetExecutionReport
                 static fn (RuleExecutionResult $result): bool => $result->actionExecuted,
             ),
         );
+    }
+
+    /**
+     * Number of cycles executed to produce this report.
+     */
+    public function getCycleCount(): int
+    {
+        return $this->cycles;
     }
 }

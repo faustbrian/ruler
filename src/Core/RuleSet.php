@@ -14,9 +14,10 @@ use RuntimeException;
 
 use function array_filter;
 use function array_values;
+use function spl_object_hash;
+use function throw_if;
 use function throw_unless;
 use function uasort;
-use function spl_object_hash;
 
 /**
  * Collection for managing and executing multiple rules.
@@ -56,11 +57,6 @@ final class RuleSet
     private array $disabledRules = [];
 
     /**
-     * Conflict resolution strategy used for execution ordering.
-     */
-    private ConflictResolutionStrategy $conflictResolutionStrategy;
-
-    /**
      * Create a new RuleSet with optional initial rules.
      *
      * @param array<int, Rule> $rules Optional array of Rule instances to add to the set
@@ -69,11 +65,11 @@ final class RuleSet
      */
     public function __construct(
         array $rules = [],
-        ConflictResolutionStrategy $conflictResolutionStrategy = ConflictResolutionStrategy::InsertionOrder,
-    )
-    {
-        $this->conflictResolutionStrategy = $conflictResolutionStrategy;
-
+        /**
+         * Conflict resolution strategy used for execution ordering.
+         */
+        private ConflictResolutionStrategy $conflictResolutionStrategy = ConflictResolutionStrategy::InsertionOrder,
+    ) {
         foreach ($rules as $rule) {
             $this->addRule($rule);
         }
@@ -93,9 +89,11 @@ final class RuleSet
         $hash = spl_object_hash($rule);
         $this->rules[$hash] = $rule;
 
-        if (!isset($this->ruleOrder[$hash])) {
-            $this->ruleOrder[$hash] = $this->nextOrder++;
+        if (isset($this->ruleOrder[$hash])) {
+            return;
         }
+
+        $this->ruleOrder[$hash] = $this->nextOrder++;
     }
 
     /**
@@ -127,9 +125,11 @@ final class RuleSet
         $this->rules[$replacementHash] = $replacement;
         $this->ruleOrder[$replacementHash] = $order;
 
-        if ($wasDisabled) {
-            $this->disabledRules[$replacementHash] = true;
+        if (!$wasDisabled) {
+            return;
         }
+
+        $this->disabledRules[$replacementHash] = true;
     }
 
     /**
@@ -150,9 +150,11 @@ final class RuleSet
     {
         $hash = $this->resolveRuleHash($rule);
 
-        if ($hash !== null) {
-            $this->disabledRules[$hash] = true;
+        if ($hash === null) {
+            return;
         }
+
+        $this->disabledRules[$hash] = true;
     }
 
     /**
@@ -162,9 +164,11 @@ final class RuleSet
     {
         $hash = $this->resolveRuleHash($rule);
 
-        if ($hash !== null) {
-            unset($this->disabledRules[$hash]);
+        if ($hash === null) {
+            return;
         }
+
+        unset($this->disabledRules[$hash]);
     }
 
     /**
@@ -212,8 +216,8 @@ final class RuleSet
      * context. Each rule evaluates its condition and executes its action if the
      * condition is satisfied.
      *
-     * @param  Context $context the context containing variable values and facts
-     *                          used to evaluate and execute each rule
+     * @param  Context                $context the context containing variable values and facts
+     *                                         used to evaluate and execute each rule
      * @return RuleSetExecutionReport Structured per-rule execution report for the pass
      */
     public function executeRules(Context $context): RuleSetExecutionReport
@@ -234,21 +238,21 @@ final class RuleSet
      * actions that mutate Context facts to activate additional rules in later
      * cycles.
      *
-     * @param  Context $context             Evaluation context (may be mutated by actions)
-     * @param  int     $maxCycles           Hard upper bound to prevent infinite loops
-     * @param  bool    $allowRepeatedFiring When false, each rule may fire at most once
+     * @param Context $context             Evaluation context (may be mutated by actions)
+     * @param int     $maxCycles           Hard upper bound to prevent infinite loops
+     * @param bool    $allowRepeatedFiring When false, each rule may fire at most once
      *
      * @throws RuntimeException When the cycle limit is reached while rules still fire
      *
-     * @return int Number of fired rules across all cycles
+     * @return RuleSetExecutionReport Structured report for all forward-chaining cycles
      */
     public function executeForwardChaining(
         Context $context,
         int $maxCycles = 100,
         bool $allowRepeatedFiring = false,
-    ): int {
+    ): RuleSetExecutionReport {
         $firedRules = [];
-        $totalFired = 0;
+        $results = [];
         $cycle = 0;
 
         do {
@@ -262,22 +266,22 @@ final class RuleSet
                 }
 
                 $result = $rule->execute($context);
+                $results[] = $result;
 
-                if ($result->actionExecuted || $result->matched) {
-                    $firedRules[$hash] = true;
-                    ++$firedThisCycle;
-                    ++$totalFired;
+                if (!$result->actionExecuted && !$result->matched) {
+                    continue;
                 }
+
+                $firedRules[$hash] = true;
+                ++$firedThisCycle;
             }
 
             ++$cycle;
         } while ($firedThisCycle > 0 && $cycle < $maxCycles);
 
-        if ($firedThisCycle > 0) {
-            throw new RuntimeException('Forward chaining exceeded max cycles. Potential rule loop detected.');
-        }
+        throw_if($firedThisCycle > 0, RuntimeException::class, 'Forward chaining exceeded max cycles. Potential rule loop detected.');
 
-        return $totalFired;
+        return new RuleSetExecutionReport($results, $cycle);
     }
 
     /**
