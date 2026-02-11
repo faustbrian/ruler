@@ -292,7 +292,7 @@ YAML;
             $evaluator = RuleEvaluator::createFromArray([
                 'field' => 'amount',
                 'operator' => 'greaterThan',
-                'value' => 'threshold',
+                'value' => '@threshold',
             ]);
 
             $first = $evaluator->evaluateFromArray([
@@ -340,7 +340,7 @@ YAML;
             $evaluator = RuleEvaluator::createFromArray([
                 'field' => 'score',
                 'operator' => 'greaterThanOrEqualTo',
-                'value' => 'limits.minScore',
+                'value' => '@limits.minScore',
             ]);
 
             $first = $evaluator->evaluateFromArray([
@@ -355,6 +355,21 @@ YAML;
 
             expect($first->getResult())->toBeTrue();
             expect($second->getResult())->toBeFalse();
+        });
+
+        test('treats plain string values as literals', function (): void {
+            $evaluator = RuleEvaluator::createFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+
+            $result = $evaluator->evaluateFromArray([
+                'status' => 'active',
+                'active' => 'inactive',
+            ]);
+
+            expect($result->getResult())->toBeTrue();
         });
 
         test('shares compiled rule cache across evaluator instances', function (): void {
@@ -392,7 +407,7 @@ YAML;
             $definition = [
                 'field' => 'amount',
                 'operator' => 'greaterThan',
-                'value' => 'threshold',
+                'value' => '@threshold',
             ];
 
             $firstEvaluator = RuleEvaluator::createFromArray($definition, $cache);

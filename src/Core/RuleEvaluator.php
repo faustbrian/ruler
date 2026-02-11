@@ -32,7 +32,9 @@ use function file_get_contents;
 use function is_array;
 use function is_string;
 use function json_decode;
+use function mb_substr;
 use function str_contains;
+use function str_starts_with;
 use function ucfirst;
 
 /**
@@ -343,9 +345,11 @@ final readonly class RuleEvaluator
 
         if ($definition instanceof ComparisonRuleDefinition) {
             // Resolve value: supports dot notation, direct variable reference, or literal
-            $value = is_string($definition->value)
-                ? new ContextValueReference($definition->value)
-                : $definition->value;
+            $value = $definition->value;
+
+            if (is_string($value) && str_starts_with($value, '@')) {
+                $value = new ContextValueReference(mb_substr($value, 1));
+            }
 
             // Resolve field: supports dot notation for nested field access
             $fieldString = $definition->field;
