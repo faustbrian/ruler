@@ -785,12 +785,12 @@ YAML;
             try {
                 $evaluator->evaluateFromJson('{invalid');
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $exception) {
-                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
-                expect($exception->getPhase())->toBe(RuleErrorPhase::Runtime);
-                expect($exception->getPath())->toBe(['values']);
-                expect($exception->getDetails()['format'] ?? null)->toBe('json');
-                expect($exception->getDetails()['reason'] ?? null)->toBeString();
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Runtime);
+                expect($ruleEvaluatorException->getPath())->toBe(['values']);
+                expect($ruleEvaluatorException->getDetails()['format'] ?? null)->toBe('json');
+                expect($ruleEvaluatorException->getDetails()['reason'] ?? null)->toBeString();
             }
         });
 
@@ -804,10 +804,10 @@ YAML;
             try {
                 $evaluator->evaluateFromJson('true');
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $exception) {
-                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
-                expect($exception->getPath())->toBe(['values']);
-                expect($exception->getDetails())->toBe(['format' => 'json']);
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($ruleEvaluatorException->getPath())->toBe(['values']);
+                expect($ruleEvaluatorException->getDetails())->toBe(['format' => 'json']);
             }
         });
 
@@ -822,12 +822,12 @@ YAML;
             try {
                 $evaluator->evaluateFromJsonFile($path);
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $exception) {
-                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
-                expect($exception->getPath())->toBe(['values']);
-                expect($exception->getDetails()['format'] ?? null)->toBe('json');
-                expect($exception->getDetails()['file'] ?? null)->toBe($path);
-                expect($exception->getDetails()['reason'] ?? null)->toBeString();
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($ruleEvaluatorException->getPath())->toBe(['values']);
+                expect($ruleEvaluatorException->getDetails()['format'] ?? null)->toBe('json');
+                expect($ruleEvaluatorException->getDetails()['file'] ?? null)->toBe($path);
+                expect($ruleEvaluatorException->getDetails()['reason'] ?? null)->toBeString();
             }
         });
 
@@ -841,10 +841,10 @@ YAML;
             try {
                 $evaluator->evaluateFromYaml('true');
                 test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $exception) {
-                expect($exception->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
-                expect($exception->getPath())->toBe(['values']);
-                expect($exception->getDetails())->toBe(['format' => 'yaml']);
+            } catch (RuleEvaluatorException $ruleEvaluatorException) {
+                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::RuntimeEvaluationFailed);
+                expect($ruleEvaluatorException->getPath())->toBe(['values']);
+                expect($ruleEvaluatorException->getDetails())->toBe(['format' => 'yaml']);
             }
         });
 

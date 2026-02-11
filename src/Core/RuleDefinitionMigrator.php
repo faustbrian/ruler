@@ -39,7 +39,7 @@ final readonly class RuleDefinitionMigrator
             $operands = $ruleDefinition['value'];
 
             $ruleDefinition['value'] = array_map(
-                static fn (array $operand): array => self::migrateLegacyStringReferences($operand),
+                self::migrateLegacyStringReferences(...),
                 $operands,
             );
 

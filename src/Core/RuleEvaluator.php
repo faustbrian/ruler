@@ -362,6 +362,7 @@ final readonly class RuleEvaluator
             );
         }
 
+        /** @var array<string, mixed> $decoded */
         return $this->evaluateFromArray($decoded);
     }
 
@@ -440,6 +441,7 @@ final readonly class RuleEvaluator
             );
         }
 
+        /** @var array<string, mixed> $parsed */
         return $this->evaluateFromArray($parsed);
     }
 
