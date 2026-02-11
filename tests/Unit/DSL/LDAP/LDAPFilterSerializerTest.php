@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\LDAP\LDAPFilterParser;
 use Cline\Ruler\DSL\LDAP\LDAPFilterSerializer;
 use Cline\Ruler\Operators\Comparison\EqualTo;
@@ -24,7 +25,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(country=US)', 'test-rule');
+            $rule = $parser->parse('(country=US)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(country=US)');
@@ -34,7 +35,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(age>=18)', 'test-rule');
+            $rule = $parser->parse('(age>=18)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(age>=18)');
@@ -44,7 +45,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(price<=100)', 'test-rule');
+            $rule = $parser->parse('(price<=100)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(price<=100)');
@@ -54,7 +55,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(age>21)', 'test-rule');
+            $rule = $parser->parse('(age>21)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(age>21)');
@@ -64,7 +65,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(quantity<10)', 'test-rule');
+            $rule = $parser->parse('(quantity<10)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(quantity<10)');
@@ -74,7 +75,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(&(age>=18)(country=US))', 'test-rule');
+            $rule = $parser->parse('(&(age>=18)(country=US))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(&(age>=18)(country=US))');
@@ -84,7 +85,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(|(age>=21)(country=US))', 'test-rule');
+            $rule = $parser->parse('(|(age>=21)(country=US))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(|(age>=21)(country=US))');
@@ -94,7 +95,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(!(age<18))', 'test-rule');
+            $rule = $parser->parse('(!(age<18))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(!(age<18))');
@@ -104,7 +105,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(&(|(age>=21)(country=US))(status=active))', 'test-rule');
+            $rule = $parser->parse('(&(|(age>=21)(country=US))(status=active))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(&(|(age>=21)(country=US))(status=active))');
@@ -114,7 +115,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(email=*)', 'test-rule');
+            $rule = $parser->parse('(email=*)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(email=*)');
@@ -124,7 +125,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(name=John*)', 'test-rule');
+            $rule = $parser->parse('(name=John*)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(name=John*)');
@@ -134,7 +135,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(email=*@example.com)', 'test-rule');
+            $rule = $parser->parse('(email=*@example.com)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(email=*@example.com)');
@@ -144,7 +145,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(description=*important*)', 'test-rule');
+            $rule = $parser->parse('(description=*important*)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(description=*important*)');
@@ -154,7 +155,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(name~=john)', 'test-rule');
+            $rule = $parser->parse('(name~=john)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(name~=john)');
@@ -164,7 +165,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(age=25)', 'test-rule');
+            $rule = $parser->parse('(age=25)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(age=25)');
@@ -174,7 +175,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(price=99.99)', 'test-rule');
+            $rule = $parser->parse('(price=99.99)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(price=99.99)');
@@ -184,7 +185,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(verified=true)', 'test-rule');
+            $rule = $parser->parse('(verified=true)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(verified=true)');
@@ -194,7 +195,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(active=false)', 'test-rule');
+            $rule = $parser->parse('(active=false)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(active=false)');
@@ -204,7 +205,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(&(age>=18)(|(country=US)(country=CA))(status=active))', 'test-rule');
+            $rule = $parser->parse('(&(age>=18)(|(country=US)(country=CA))(status=active))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(&(age>=18)(|(country=US)(country=CA))(status=active))');
@@ -214,7 +215,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(&(age>=18)(country=US)(status=active)(verified=true))', 'test-rule');
+            $rule = $parser->parse('(&(age>=18)(country=US)(status=active)(verified=true))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(&(age>=18)(country=US)(status=active)(verified=true))');
@@ -224,7 +225,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(|(role=admin)(role=manager)(role=owner))', 'test-rule');
+            $rule = $parser->parse('(|(role=admin)(role=manager)(role=owner))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(|(role=admin)(role=manager)(role=owner))');
@@ -234,7 +235,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(&(|(age>=21)(country=US))(!(&(status=banned)(verified=false))))', 'test-rule');
+            $rule = $parser->parse('(&(|(age>=21)(country=US))(!(&(status=banned)(verified=false))))', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(&(|(age>=21)(country=US))(!(&(status=banned)(verified=false))))');
@@ -247,9 +248,9 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(age>=18)';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
-            $reparsed = $parser->parse($serialized, 'test-rule');
+            $reparsed = $parser->parse($serialized, RuleIds::fromString('test-rule'));
 
             expect($serialized)->toBe($original);
         });
@@ -259,7 +260,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(&(age>=18)(country=US))';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -270,7 +271,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(|(age>=21)(country=US))';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -281,7 +282,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(!(status=inactive))';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -292,7 +293,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(email=*)';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -303,7 +304,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(name=John*)';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -314,7 +315,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(name~=john)';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -325,7 +326,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(&(age>=18)(|(country=US)(country=CA))(status=active))';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -336,7 +337,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
 
             $original = '(name=*o*n*)';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -348,7 +349,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(name=John Doe)', 'test-rule');
+            $rule = $parser->parse('(name=John Doe)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(name=John Doe)');
@@ -358,7 +359,7 @@ describe('LDAPFilterSerializer', function (): void {
             $parser = new LDAPFilterParser();
             $serializer = new LDAPFilterSerializer();
 
-            $rule = $parser->parse('(email=user@example.com)', 'test-rule');
+            $rule = $parser->parse('(email=user@example.com)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(email=user@example.com)');
@@ -371,7 +372,7 @@ describe('LDAPFilterSerializer', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 null,
-                'rule-unsupported',
+                RuleIds::fromString('rule-unsupported'),
             );
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
@@ -381,7 +382,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
             $var = new Variable('test', 'value');
             $equalTo = new EqualTo($var, $var, $var);
-            $rule = new Rule($equalTo, null, 'rule-bad-eq-arity');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-bad-eq-arity'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -391,7 +392,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $patternVar = new Variable(null, 123);
             $matches = new Matches($nameVar, $patternVar);
-            $rule = new Rule($matches, null, 'rule-matches-pattern-type');
+            $rule = new Rule($matches, null, RuleIds::fromString('rule-matches-pattern-type'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -401,7 +402,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $patternVar = new Variable(null, '/unsupported-pattern/');
             $matches = new Matches($nameVar, $patternVar);
-            $rule = new Rule($matches, null, 'rule-matches-pattern-value');
+            $rule = new Rule($matches, null, RuleIds::fromString('rule-matches-pattern-value'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -410,7 +411,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
             $var = new Variable('test', 'value');
             $matches = new Matches($var, $var, $var);
-            $rule = new Rule($matches, null, 'rule-matches-arity');
+            $rule = new Rule($matches, null, RuleIds::fromString('rule-matches-arity'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -420,7 +421,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable();
             $valueVar = new Variable(null, 'value');
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo, null, 'rule-missing-name');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-missing-name'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -437,7 +438,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[0] = 'not-a-variable';
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = new Rule($equalTo, null, 'rule-non-var-attr');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-non-var-attr'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -455,7 +456,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[1] = 'not-a-variable';
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = new Rule($equalTo, null, 'rule-non-var-value');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-non-var-value'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -465,7 +466,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $valueVar = new Variable(null, ['array', 'value']);
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo, null, 'rule-unsupported-value');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-unsupported-value'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -484,7 +485,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[] = $equalTo;
             $operandsProperty->setValue($not, $operands);
 
-            $rule = new Rule($not, null, 'rule-not-arity');
+            $rule = new Rule($not, null, RuleIds::fromString('rule-not-arity'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -498,7 +499,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($not, ['not-a-proposition']);
 
-            $rule = new Rule($not, null, 'rule-not-type');
+            $rule = new Rule($not, null, RuleIds::fromString('rule-not-type'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -517,7 +518,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[1] = 'not-a-proposition';
             $operandsProperty->setValue($and, $operands);
 
-            $rule = new Rule($and, null, 'rule-logical-type');
+            $rule = new Rule($and, null, RuleIds::fromString('rule-logical-type'));
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -527,7 +528,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('email', 'test');
             $valueVar = new Variable();
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo, null, 'rule-null-presence');
+            $rule = new Rule($equalTo, null, RuleIds::fromString('rule-null-presence'));
 
             $result = $serializer->serialize($rule);
 
@@ -539,7 +540,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('field', 'test');
             $valueVar = new Variable();
             $gt = new GreaterThan($nameVar, $valueVar);
-            $rule = new Rule($gt, null, 'rule-null-format');
+            $rule = new Rule($gt, null, RuleIds::fromString('rule-null-format'));
 
             $result = $serializer->serialize($rule);
 

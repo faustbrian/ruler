@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\JMESPath;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Closure;
 use Exception;
 
@@ -74,7 +75,7 @@ final readonly class JMESPathParser
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(string $expression, string $ruleId): Rule
+    public function parse(string $expression, RuleId $ruleId): Rule
     {
         return $this->builder->parse($expression, $ruleId);
     }
@@ -94,7 +95,7 @@ final readonly class JMESPathParser
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, Closure $action, string $ruleId): Rule
+    public function parseWithAction(string $expression, Closure $action, RuleId $ruleId): Rule
     {
         return $this->builder->parseWithAction($expression, $action, $ruleId);
     }

@@ -9,11 +9,12 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\LDAP\LDAPFilterRuleBuilder;
 
 test('parse multiple OR conditions', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(|(status=active)(status=pending)(status=approved))', 'test-rule');
+    $rule = $ldap->parse('(|(status=active)(status=pending)(status=approved))', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['status' => 'active']),
@@ -31,7 +32,7 @@ test('parse multiple OR conditions', function (): void {
 
 test('parse multiple AND conditions', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(age>=18)(age<=65)(active=true)(verified=true))', 'test-rule');
+    $rule = $ldap->parse('(&(age>=18)(age<=65)(active=true)(verified=true))', RuleIds::fromString('test-rule'));
 
     $validContext = new Context(['age' => 30, 'active' => true, 'verified' => true]);
     $invalidContext = new Context(['age' => 30, 'active' => true, 'verified' => false]);
@@ -42,7 +43,7 @@ test('parse multiple AND conditions', function (): void {
 
 test('parse deeply nested logic', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(|(&(a=1)(b=2))(&(c=3)(d=4)))(e=5))', 'test-rule');
+    $rule = $ldap->parse('(&(|(&(a=1)(b=2))(&(c=3)(d=4)))(e=5))', RuleIds::fromString('test-rule'));
 
     $context1 = new Context(['a' => 1, 'b' => 2, 'e' => 5]);
     $context2 = new Context(['c' => 3, 'd' => 4, 'e' => 5]);
@@ -55,7 +56,7 @@ test('parse deeply nested logic', function (): void {
 
 test('parse complex wildcard patterns', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(code=A*B*C)', 'test-rule');
+    $rule = $ldap->parse('(code=A*B*C)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['code' => 'ABC']),
@@ -76,7 +77,7 @@ test('parse complex wildcard patterns', function (): void {
 
 test('parse wildcard with special regex characters', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(path=/home/*/files)', 'test-rule');
+    $rule = $ldap->parse('(path=/home/*/files)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['path' => '/home/user/files']),
@@ -91,7 +92,7 @@ test('parse wildcard with special regex characters', function (): void {
 
 test('parse dot notation field paths', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(user.age>=18)', 'test-rule');
+    $rule = $ldap->parse('(user.age>=18)', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['user' => ['age' => 25]]);
     $falseContext = new Context(['user' => ['age' => 15]]);
@@ -102,7 +103,7 @@ test('parse dot notation field paths', function (): void {
 
 test('parse deeply nested field paths', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(http.request.uri.path=/api/*)', 'test-rule');
+    $rule = $ldap->parse('(http.request.uri.path=/api/*)', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['http' => ['request' => ['uri' => ['path' => '/api/users']]]]);
     $falseContext = new Context(['http' => ['request' => ['uri' => ['path' => '/home']]]]);
@@ -113,7 +114,7 @@ test('parse deeply nested field paths', function (): void {
 
 test('parse null comparison', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(value=null)', 'test-rule');
+    $rule = $ldap->parse('(value=null)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['value' => null]),
@@ -125,7 +126,7 @@ test('parse null comparison', function (): void {
 
 test('parse empty string wildcard', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(prefix=*)', 'test-rule');
+    $rule = $ldap->parse('(prefix=*)', RuleIds::fromString('test-rule'));
 
     // This is a presence check, not wildcard match
     expect($rule->evaluate(
@@ -141,7 +142,7 @@ test('parse empty string wildcard', function (): void {
 
 test('parse single asterisk at start', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(name=*Smith)', 'test-rule');
+    $rule = $ldap->parse('(name=*Smith)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['name' => 'John Smith']),
@@ -156,7 +157,7 @@ test('parse single asterisk at start', function (): void {
 
 test('parse single asterisk at end', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(name=Mr*)', 'test-rule');
+    $rule = $ldap->parse('(name=Mr*)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['name' => 'Mr Smith']),
@@ -174,7 +175,7 @@ test('parse single asterisk at end', function (): void {
 
 test('parse double negation', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(!(!(status=active)))', 'test-rule');
+    $rule = $ldap->parse('(!(!(status=active)))', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['status' => 'active']),
@@ -186,7 +187,7 @@ test('parse double negation', function (): void {
 
 test('parse less than operator', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age<18)', 'test-rule');
+    $rule = $ldap->parse('(age<18)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['age' => 15]),
@@ -201,7 +202,7 @@ test('parse less than operator', function (): void {
 
 test('parse greater than operator', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(age>65)', 'test-rule');
+    $rule = $ldap->parse('(age>65)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['age' => 70]),
@@ -216,8 +217,8 @@ test('parse greater than operator', function (): void {
 
 test('parse whitespace handling', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule1 = $ldap->parse('( age >= 18 )', 'test-rule');
-    $rule2 = $ldap->parse('(&  (age>=18)  (country=US)  )', 'test-rule');
+    $rule1 = $ldap->parse('( age >= 18 )', RuleIds::fromString('test-rule'));
+    $rule2 = $ldap->parse('(&  (age>=18)  (country=US)  )', RuleIds::fromString('test-rule'));
 
     expect($rule1->evaluate(
         new Context(['age' => 20]),
@@ -229,7 +230,7 @@ test('parse whitespace handling', function (): void {
 
 test('parse field names with dots', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(user.profile.name=John*)', 'test-rule');
+    $rule = $ldap->parse('(user.profile.name=John*)', RuleIds::fromString('test-rule'));
 
     $context = new Context(['user' => ['profile' => ['name' => 'John Doe']]]);
 
@@ -238,7 +239,7 @@ test('parse field names with dots', function (): void {
 
 test('parse field names with underscores and hyphens', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(first_name=John)(last-name=Doe))', 'test-rule');
+    $rule = $ldap->parse('(&(first_name=John)(last-name=Doe))', RuleIds::fromString('test-rule'));
 
     $context = new Context(['first_name' => 'John', 'last-name' => 'Doe']);
 
@@ -249,7 +250,7 @@ test('parse complex real-world filter', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
     $rule = $ldap->parse(
         '(&(age>=18)(age<=65)(|(country=US)(country=CA))(emailVerified=true)(!(|(status=banned)(status=suspended))))',
-        'test-rule',
+        RuleIds::fromString('test-rule'),
     );
 
     $validUser = new Context([
@@ -280,7 +281,7 @@ test('parse complex real-world filter', function (): void {
 
 test('parse product search filter', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(&(category=electronics)(price>=10)(price<=500)(inStock=true)(|(featured=true)(rating>=4.0)))', 'test-rule');
+    $rule = $ldap->parse('(&(category=electronics)(price>=10)(price<=500)(inStock=true)(|(featured=true)(rating>=4.0)))', RuleIds::fromString('test-rule'));
 
     $validProduct = new Context([
         'category' => 'electronics',
@@ -304,7 +305,7 @@ test('parse product search filter', function (): void {
 
 test('parse content moderation filter', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(|(reportCount>=5)(&(userReputation<10)(linkCount>3))(content=*spam*))', 'test-rule');
+    $rule = $ldap->parse('(|(reportCount>=5)(&(userReputation<10)(linkCount>3))(content=*spam*))', RuleIds::fromString('test-rule'));
 
     $highReports = new Context(['reportCount' => 6, 'userReputation' => 50, 'linkCount' => 1, 'content' => 'Normal content']);
     $lowRepWithLinks = new Context(['reportCount' => 2, 'userReputation' => 5, 'linkCount' => 5, 'content' => 'Check out these links']);
@@ -319,7 +320,7 @@ test('parse content moderation filter', function (): void {
 
 test('parse zero value comparisons', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(count=0)', 'test-rule');
+    $rule = $ldap->parse('(count=0)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['count' => 0]),
@@ -331,7 +332,7 @@ test('parse zero value comparisons', function (): void {
 
 test('parse negative number comparisons', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(temperature<0)', 'test-rule');
+    $rule = $ldap->parse('(temperature<0)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['temperature' => -5]),
@@ -343,7 +344,7 @@ test('parse negative number comparisons', function (): void {
 
 test('parse false boolean value', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(active=false)', 'test-rule');
+    $rule = $ldap->parse('(active=false)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['active' => false]),
@@ -356,12 +357,12 @@ test('parse false boolean value', function (): void {
 test('parse empty filter throws exception', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
 
-    expect(fn (): Rule => $ldap->parse('()', 'test-rule'))->toThrow(RuntimeException::class);
+    expect(fn (): Rule => $ldap->parse('()', RuleIds::fromString('test-rule')))->toThrow(RuntimeException::class);
 });
 
 test('parse filter with parentheses in value', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
-    $rule = $ldap->parse('(description=text(with)parens)', 'test-rule');
+    $rule = $ldap->parse('(description=text(with)parens)', RuleIds::fromString('test-rule'));
 
     expect($rule->evaluate(
         new Context(['description' => 'text(with)parens']),
@@ -374,5 +375,5 @@ test('parse filter with parentheses in value', function (): void {
 test('parse invalid filter item throws exception', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
 
-    expect(fn (): Rule => $ldap->parse('(invalid)', 'test-rule'))->toThrow(InvalidArgumentException::class);
+    expect(fn (): Rule => $ldap->parse('(invalid)', RuleIds::fromString('test-rule')))->toThrow(InvalidArgumentException::class);
 });

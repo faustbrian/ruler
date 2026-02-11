@@ -181,7 +181,7 @@ final class RuleSet
     /**
      * Disable a rule at RuleSet level by instance or rule id.
      */
-    public function disableRule(Rule|RuleId|string $rule): void
+    public function disableRule(Rule|RuleId $rule): void
     {
         $hash = $this->resolveRuleHash($rule);
 
@@ -195,7 +195,7 @@ final class RuleSet
     /**
      * Enable a previously disabled rule by instance or rule id.
      */
-    public function enableRule(Rule|RuleId|string $rule): void
+    public function enableRule(Rule|RuleId $rule): void
     {
         $hash = $this->resolveRuleHash($rule);
 
@@ -209,7 +209,7 @@ final class RuleSet
     /**
      * Check if a rule is currently enabled in this RuleSet.
      */
-    public function isRuleEnabled(Rule|RuleId|string $rule): bool
+    public function isRuleEnabled(Rule|RuleId $rule): bool
     {
         $hash = $this->resolveRuleHash($rule);
 
@@ -365,7 +365,7 @@ final class RuleSet
     /**
      * Resolve rule object hash from a Rule instance or rule identifier.
      */
-    private function resolveRuleHash(Rule|RuleId|string $rule): ?string
+    private function resolveRuleHash(Rule|RuleId $rule): ?string
     {
         if ($rule instanceof Rule) {
             $hash = spl_object_hash($rule);
@@ -373,10 +373,6 @@ final class RuleSet
             return isset($this->rules[$hash]) ? $hash : null;
         }
 
-        if ($rule instanceof RuleId) {
-            return $this->ruleIds[$rule->toString()] ?? null;
-        }
-
-        return $this->ruleIds[$rule] ?? null;
+        return $this->ruleIds[$rule->toString()] ?? null;
     }
 }

@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\GraphQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
 use Closure;
 
@@ -69,7 +70,7 @@ final readonly class GraphQLFilterRuleBuilder
      *                                             endsWith/match), null checks, and type validations.
      * @return Rule                        compiled rule ready for evaluation against data contexts using the evaluate() method
      */
-    public function parse(string|array $filter, string $ruleId): Rule
+    public function parse(string|array $filter, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);
@@ -86,7 +87,7 @@ final readonly class GraphQLFilterRuleBuilder
      * @param  string $json graphQL filter query as JSON string conforming to GraphQL filter syntax
      * @return Rule   compiled rule ready for evaluation against data contexts
      */
-    public function parseJson(string $json, string $ruleId): Rule
+    public function parseJson(string $json, RuleId $ruleId): Rule
     {
         return $this->parse($json, $ruleId);
     }
@@ -102,7 +103,7 @@ final readonly class GraphQLFilterRuleBuilder
      *                                             Receives the context array as parameter.
      * @return Rule                        compiled rule with attached action callback
      */
-    public function parseWithAction(string|array $filter, Closure $action, string $ruleId): Rule
+    public function parseWithAction(string|array $filter, Closure $action, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);

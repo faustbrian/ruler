@@ -9,11 +9,12 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\JMESPath\JMESPathRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('age > `18`', 'test-rule');
+    $rule = $jmes->parse('age > `18`', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +24,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('age > `18`', 'test-rule');
+    $rule = $jmes->parse('age > `18`', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +33,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("status == 'active'", 'test-rule');
+    $rule = $jmes->parse("status == 'active'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +44,7 @@ test('parse equality operator', function (): void {
 
 test('parse logical and expression', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("age >= `18` && country == 'US'", 'test-rule');
+    $rule = $jmes->parse("age >= `18` && country == 'US'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -56,7 +57,7 @@ test('parse logical and expression', function (): void {
 
 test('parse logical or expression', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("age >= `21` || country == 'US'", 'test-rule');
+    $rule = $jmes->parse("age >= `21` || country == 'US'", RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -69,7 +70,7 @@ test('parse logical or expression', function (): void {
 
 test('parse expression with parentheses', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("(age >= `18` && country == 'US') || age >= `21`", 'test-rule');
+    $rule = $jmes->parse("(age >= `18` && country == 'US') || age >= `21`", RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -82,7 +83,7 @@ test('parse expression with parentheses', function (): void {
 
 test('parse not expression', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('!(age < `18`)', 'test-rule');
+    $rule = $jmes->parse('!(age < `18`)', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -93,7 +94,7 @@ test('parse not expression', function (): void {
 
 test('parse in operator with array', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("contains(['US', 'CA', 'UK'], country)", 'test-rule');
+    $rule = $jmes->parse("contains(['US', 'CA', 'UK'], country)", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -104,7 +105,7 @@ test('parse in operator with array', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('age <= `65`', 'test-rule');
+    $rule = $jmes->parse('age <= `65`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -115,7 +116,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("status != 'inactive'", 'test-rule');
+    $rule = $jmes->parse("status != 'inactive'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -126,7 +127,7 @@ test('parse inequality operator', function (): void {
 
 test('parse not in operator using logical negation', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("!contains(['banned', 'suspended'], role)", 'test-rule');
+    $rule = $jmes->parse("!contains(['banned', 'suspended'], role)", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -139,7 +140,7 @@ test('parse mathematical expression', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't have native arithmetic in expressions, but supports via functions
     // We test with a pre-computed value instead
-    $rule = $jmes->parse('total > `100`', 'test-rule');
+    $rule = $jmes->parse('total > `100`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['total' => 105]);
     $falseContext = new Context(['total' => 60]);
@@ -151,7 +152,7 @@ test('parse mathematical expression', function (): void {
 test('parse matches operator with regex', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // Use JMESPath's built-in regex matching
-    $rule = $jmes->parse("contains(phone, '-')", 'test-rule');
+    $rule = $jmes->parse("contains(phone, '-')", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '1234567']);
@@ -164,7 +165,7 @@ test('parse modulo operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't support modulo directly
     // Test with pre-computed boolean result
-    $rule = $jmes->parse('isEven == `true`', 'test-rule');
+    $rule = $jmes->parse('isEven == `true`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['isEven' => true]);
     $falseContext = new Context(['isEven' => false]);
@@ -177,7 +178,7 @@ test('parse exponentiate operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't support exponentiation directly
     // Test with pre-computed result
-    $rule = $jmes->parse('result > `100`', 'test-rule');
+    $rule = $jmes->parse('result > `100`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['result' => 125]);
     $falseContext = new Context(['result' => 8]);
@@ -190,7 +191,7 @@ test('parse division operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't support division directly
     // Test with pre-computed result
-    $rule = $jmes->parse('average == `10`', 'test-rule');
+    $rule = $jmes->parse('average == `10`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['average' => 10]);
     $falseContext = new Context(['average' => 20]);
@@ -203,7 +204,7 @@ test('parse multiplication operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't support multiplication directly
     // Test with pre-computed result
-    $rule = $jmes->parse('totalCost > `1000`', 'test-rule');
+    $rule = $jmes->parse('totalCost > `1000`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['totalCost' => 1_200]);
     $falseContext = new Context(['totalCost' => 500]);
@@ -216,7 +217,7 @@ test('parse subtraction operator', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath doesn't support subtraction directly
     // Test with pre-computed result
-    $rule = $jmes->parse('discount < `100`', 'test-rule');
+    $rule = $jmes->parse('discount < `100`', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['discount' => 90]);
     $falseContext = new Context(['discount' => 150]);

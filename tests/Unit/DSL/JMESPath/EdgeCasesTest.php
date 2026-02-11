@@ -8,11 +8,12 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\JMESPath\JMESPathRuleBuilder;
 
 test('parse strict equality by type checking', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("value == `42` && type(value) == 'number'", 'test-rule');
+    $rule = $jmes->parse("value == `42` && type(value) == 'number'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => '42']);
@@ -23,7 +24,7 @@ test('parse strict equality by type checking', function (): void {
 
 test('parse strict inequality using type check', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("value != 'test' || type(value) != 'string'", 'test-rule');
+    $rule = $jmes->parse("value != 'test' || type(value) != 'string'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => 42]);
     $falseContext = new Context(['value' => 'test']);
@@ -34,7 +35,7 @@ test('parse strict inequality using type check', function (): void {
 
 test('parse array literal using contains function', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("contains(['active', 'pending', 'approved'], status)", 'test-rule');
+    $rule = $jmes->parse("contains(['active', 'pending', 'approved'], status)", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'pending']);
     $falseContext = new Context(['status' => 'rejected']);
@@ -45,7 +46,7 @@ test('parse array literal using contains function', function (): void {
 
 test('parse deeply nested object property access', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse("user.profile.settings.theme == 'dark'", 'test-rule');
+    $rule = $jmes->parse("user.profile.settings.theme == 'dark'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context([
         'user' => [
@@ -73,7 +74,7 @@ test('parse deeply nested object property access', function (): void {
 
 test('parse empty array check with literal', function (): void {
     $jmes = new JMESPathRuleBuilder();
-    $rule = $jmes->parse('`[]` == `[]`', 'test-rule');
+    $rule = $jmes->parse('`[]` == `[]`', RuleIds::fromString('test-rule'));
 
     $context = new Context(['tags' => 'urgent']);
 
@@ -84,7 +85,7 @@ test('parse array with mixed types', function (): void {
     $jmes = new JMESPathRuleBuilder();
     // JMESPath array literals don't support mixed types directly in contains()
     // Test with simple string match instead
-    $rule = $jmes->parse("value == 'two'", 'test-rule');
+    $rule = $jmes->parse("value == 'two'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => 'two']);
     $falseContext = new Context(['value' => 'three']);

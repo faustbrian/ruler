@@ -9,11 +9,12 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\Natural\NaturalLanguageRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is more than 18', 'test-rule');
+    $rule = $nl->parse('age is more than 18', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +24,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is more than 18', 'test-rule');
+    $rule = $nl->parse('age is more than 18', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +33,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('status is "active"', 'test-rule');
+    $rule = $nl->parse('status is "active"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +44,7 @@ test('parse equality operator', function (): void {
 
 test('parse logical and expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is at least 18 and country is "US"', 'test-rule');
+    $rule = $nl->parse('age is at least 18 and country is "US"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -56,7 +57,7 @@ test('parse logical and expression', function (): void {
 
 test('parse logical or expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is at least 21 or country is "US"', 'test-rule');
+    $rule = $nl->parse('age is at least 21 or country is "US"', RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -69,7 +70,7 @@ test('parse logical or expression', function (): void {
 
 test('parse expression with parentheses', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('(age is at least 18 and country is "US") or age is at least 21', 'test-rule');
+    $rule = $nl->parse('(age is at least 18 and country is "US") or age is at least 21', RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -83,7 +84,7 @@ test('parse expression with parentheses', function (): void {
 test('parse mathematical expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language uses pre-computed totals
-    $rule = $nl->parse('total is more than 100', 'test-rule');
+    $rule = $nl->parse('total is more than 100', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['total' => 105]);
     $falseContext = new Context(['total' => 60]);
@@ -94,7 +95,7 @@ test('parse mathematical expression', function (): void {
 
 test('parse in operator with array', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('country is one of "US", "CA", "UK"', 'test-rule');
+    $rule = $nl->parse('country is one of "US", "CA", "UK"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -105,7 +106,7 @@ test('parse in operator with array', function (): void {
 
 test('parse string contains with regex', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('phone contains "123"', 'test-rule');
+    $rule = $nl->parse('phone contains "123"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '987-6543']);
@@ -116,7 +117,7 @@ test('parse string contains with regex', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is at most 65', 'test-rule');
+    $rule = $nl->parse('age is at most 65', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -127,7 +128,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('status is not "inactive"', 'test-rule');
+    $rule = $nl->parse('status is not "inactive"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -138,7 +139,7 @@ test('parse inequality operator', function (): void {
 
 test('parse not in operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('role is not one of "banned", "suspended"', 'test-rule');
+    $rule = $nl->parse('role is not one of "banned", "suspended"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -150,7 +151,7 @@ test('parse not in operator', function (): void {
 test('parse modulo operator with pre-computed boolean', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language uses pre-computed results
-    $rule = $nl->parse('isEven is true', 'test-rule');
+    $rule = $nl->parse('isEven is true', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['isEven' => true]);
     $falseContext = new Context(['isEven' => false]);
@@ -161,7 +162,7 @@ test('parse modulo operator with pre-computed boolean', function (): void {
 
 test('parse exponentiate operator with pre-computed result', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('result is more than 100', 'test-rule');
+    $rule = $nl->parse('result is more than 100', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['result' => 125]);
     $falseContext = new Context(['result' => 8]);
@@ -172,7 +173,7 @@ test('parse exponentiate operator with pre-computed result', function (): void {
 
 test('parse division operator with pre-computed result', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('average is 10', 'test-rule');
+    $rule = $nl->parse('average is 10', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['average' => 10]);
     $falseContext = new Context(['average' => 20]);
@@ -183,7 +184,7 @@ test('parse division operator with pre-computed result', function (): void {
 
 test('parse multiplication operator with pre-computed result', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('totalCost is more than 1000', 'test-rule');
+    $rule = $nl->parse('totalCost is more than 1000', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['totalCost' => 1_200]);
     $falseContext = new Context(['totalCost' => 500]);
@@ -194,7 +195,7 @@ test('parse multiplication operator with pre-computed result', function (): void
 
 test('parse subtraction operator with pre-computed result', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('discount is less than 100', 'test-rule');
+    $rule = $nl->parse('discount is less than 100', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['discount' => 90]);
     $falseContext = new Context(['discount' => 150]);
@@ -205,7 +206,7 @@ test('parse subtraction operator with pre-computed result', function (): void {
 
 test('parse between operator', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
-    $rule = $nl->parse('age is between 18 and 65', 'test-rule');
+    $rule = $nl->parse('age is between 18 and 65', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -217,7 +218,7 @@ test('parse between operator', function (): void {
 test('parse not expression', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language: "age is not less than 18"
-    $rule = $nl->parse('age is not less than 18', 'test-rule');
+    $rule = $nl->parse('age is not less than 18', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -229,7 +230,7 @@ test('parse not expression', function (): void {
 test('parse matches operator with regex', function (): void {
     $nl = new NaturalLanguageRuleBuilder();
     // Natural language uses "contains" for substring matching
-    $rule = $nl->parse('phone contains "-"', 'test-rule');
+    $rule = $nl->parse('phone contains "-"', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '1234567']);

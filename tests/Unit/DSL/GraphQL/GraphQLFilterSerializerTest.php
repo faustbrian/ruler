@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\GraphQL\GraphQLFilterParser;
 use Cline\Ruler\DSL\GraphQL\GraphQLFilterSerializer;
 
@@ -16,7 +17,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['age' => ['gt' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gt' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['age' => ['gt' => 18]]);
@@ -26,7 +27,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['status' => ['eq' => 'active']], 'test-rule');
+            $rule = $parser->parse(['status' => ['eq' => 'active']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['status' => ['eq' => 'active']]);
@@ -36,7 +37,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['status' => 'active'], 'test-rule');
+            $rule = $parser->parse(['status' => 'active'], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['status' => ['eq' => 'active']]);
@@ -51,7 +52,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['age' => ['gte' => 18]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toMatchArray([
@@ -67,7 +68,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $rule = $parser->parse([
                 'age' => ['gte' => 18],
                 'country' => 'US',
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toMatchArray([
@@ -85,7 +86,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['age' => ['gte' => 21]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe([
@@ -100,7 +101,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['NOT' => ['age' => ['lt' => 18]]], 'test-rule');
+            $rule = $parser->parse(['NOT' => ['age' => ['lt' => 18]]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['NOT' => ['age' => ['lt' => 18]]]);
@@ -110,7 +111,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['country' => ['in' => ['US', 'CA', 'UK']]], 'test-rule');
+            $rule = $parser->parse(['country' => ['in' => ['US', 'CA', 'UK']]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['country' => ['in' => ['US', 'CA', 'UK']]]);
@@ -120,7 +121,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['role' => ['notIn' => ['banned', 'suspended']]], 'test-rule');
+            $rule = $parser->parse(['role' => ['notIn' => ['banned', 'suspended']]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['role' => ['notIn' => ['banned', 'suspended']]]);
@@ -130,7 +131,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['contains' => '@example.com']], 'test-rule');
+            $rule = $parser->parse(['email' => ['contains' => '@example.com']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['email' => ['contains' => '@example.com']]);
@@ -140,7 +141,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['name' => ['startsWith' => 'John']], 'test-rule');
+            $rule = $parser->parse(['name' => ['startsWith' => 'John']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['name' => ['startsWith' => 'John']]);
@@ -150,7 +151,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['filename' => ['endsWith' => '.pdf']], 'test-rule');
+            $rule = $parser->parse(['filename' => ['endsWith' => '.pdf']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['filename' => ['endsWith' => '.pdf']]);
@@ -160,7 +161,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']], 'test-rule');
+            $rule = $parser->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['phone' => ['match' => '^\\d{3}-\\d{4}$']]);
@@ -170,7 +171,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['status' => ['ne' => 'inactive']], 'test-rule');
+            $rule = $parser->parse(['status' => ['ne' => 'inactive']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['status' => ['ne' => 'inactive']]);
@@ -180,7 +181,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['age' => ['lte' => 65]], 'test-rule');
+            $rule = $parser->parse(['age' => ['lte' => 65]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['age' => ['lte' => 65]]);
@@ -190,7 +191,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['age' => ['gte' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gte' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['age' => ['gte' => 18]]);
@@ -200,7 +201,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['quantity' => ['lt' => 10]], 'test-rule');
+            $rule = $parser->parse(['quantity' => ['lt' => 10]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['quantity' => ['lt' => 10]]);
@@ -210,7 +211,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['age' => ['gte' => 18, 'lte' => 65]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gte' => 18, 'lte' => 65]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // Multiple operators on same field become implicit AND with separate keys
@@ -233,7 +234,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ],
                     ['age' => ['gte' => 21]],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe([
@@ -251,7 +252,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['price' => ['gt' => 99.99]], 'test-rule');
+            $rule = $parser->parse(['price' => ['gt' => 99.99]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['price' => ['gt' => 99.99]]);
@@ -261,7 +262,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['verified' => ['eq' => true]], 'test-rule');
+            $rule = $parser->parse(['verified' => ['eq' => true]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['verified' => ['eq' => true]]);
@@ -274,7 +275,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $serializer = new GraphQLFilterSerializer();
 
             $original = ['age' => ['gt' => 18]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -290,7 +291,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['country' => ['eq' => 'US']],
                 ],
             ];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             // Explicit AND becomes implicit
@@ -310,7 +311,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['country' => ['eq' => 'US']],
                 ],
             ];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -321,7 +322,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $serializer = new GraphQLFilterSerializer();
 
             $original = ['country' => ['in' => ['US', 'CA', 'UK']]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -332,7 +333,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $serializer = new GraphQLFilterSerializer();
 
             $original = ['NOT' => ['age' => ['lt' => 18]]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -344,7 +345,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['isNull' => true]], 'test-rule');
+            $rule = $parser->parse(['email' => ['isNull' => true]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['email' => ['isNull' => true]]);
@@ -354,7 +355,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['isNull' => false]], 'test-rule');
+            $rule = $parser->parse(['email' => ['isNull' => false]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['NOT' => ['email' => ['isNull' => true]]]);
@@ -366,7 +367,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['name' => ['isType' => 'string']], 'test-rule');
+            $rule = $parser->parse(['name' => ['isType' => 'string']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['name' => ['type' => 'string']]);
@@ -376,7 +377,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['age' => ['isType' => 'numeric']], 'test-rule');
+            $rule = $parser->parse(['age' => ['isType' => 'numeric']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['age' => ['type' => 'numeric']]);
@@ -386,7 +387,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['active' => ['isType' => 'boolean']], 'test-rule');
+            $rule = $parser->parse(['active' => ['isType' => 'boolean']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['active' => ['type' => 'boolean']]);
@@ -396,7 +397,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['tags' => ['isType' => 'array']], 'test-rule');
+            $rule = $parser->parse(['tags' => ['isType' => 'array']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['tags' => ['type' => 'array']]);
@@ -408,7 +409,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['containsInsensitive' => 'EXAMPLE']], 'test-rule');
+            $rule = $parser->parse(['email' => ['containsInsensitive' => 'EXAMPLE']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['email' => ['containsInsensitive' => 'EXAMPLE']]);
@@ -418,7 +419,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['notContains' => 'spam']], 'test-rule');
+            $rule = $parser->parse(['email' => ['notContains' => 'spam']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['email' => ['notContains' => 'spam']]);
@@ -428,7 +429,7 @@ describe('GraphQLFilterSerializer', function (): void {
             $parser = new GraphQLFilterParser();
             $serializer = new GraphQLFilterSerializer();
 
-            $rule = $parser->parse(['email' => ['notContainsInsensitive' => 'SPAM']], 'test-rule');
+            $rule = $parser->parse(['email' => ['notContainsInsensitive' => 'SPAM']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe(['email' => ['notContainsInsensitive' => 'SPAM']]);
@@ -445,7 +446,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['OR' => [['age' => ['gt' => 18]], ['age' => ['lt' => 65]]]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe([
@@ -465,7 +466,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['AND' => [['age' => ['gt' => 18]], ['age' => ['lt' => 65]]]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // Nested AND with simple conditions collapses to implicit AND
@@ -484,7 +485,7 @@ describe('GraphQLFilterSerializer', function (): void {
                     ['NOT' => ['age' => ['lt' => 18]]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe([

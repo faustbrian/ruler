@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleIds;
 
 describe('Ruler Functional Tests', function (): void {
     describe('Happy Paths', function (): void {
@@ -24,7 +25,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['q']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalNot(
                     $rb->logicalAnd(
@@ -32,7 +33,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['q']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableTwo');
 
@@ -48,7 +49,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['q']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalNot(
                     $rb->logicalOr(
@@ -56,7 +57,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['q']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableTwo');
 
@@ -68,13 +69,13 @@ describe('Ruler Functional Tests', function (): void {
                     $rb['q']->equalTo(true),
                     $rb['p']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalOr(
                     $rb['p']->equalTo(true),
                     $rb['q']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableTwo');
 
@@ -86,13 +87,13 @@ describe('Ruler Functional Tests', function (): void {
                     $rb['q']->equalTo(true),
                     $rb['p']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalAnd(
                     $rb['p']->equalTo(true),
                     $rb['q']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableTwo');
 
@@ -107,7 +108,7 @@ describe('Ruler Functional Tests', function (): void {
                     ),
                     $rb['r']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalOr(
                     $rb['p']->equalTo(true),
@@ -116,7 +117,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableThree');
 
@@ -131,7 +132,7 @@ describe('Ruler Functional Tests', function (): void {
                     ),
                     $rb['r']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalAnd(
                     $rb['p']->equalTo(true),
@@ -140,7 +141,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableThree');
 
@@ -158,7 +159,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalAnd(
                     $rb['p']->equalTo(true),
@@ -167,7 +168,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableThree');
 
@@ -185,7 +186,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb->logicalOr(
                     $rb['p']->equalTo(true),
@@ -194,7 +195,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['r']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableThree');
 
@@ -207,10 +208,10 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['p']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb['p']->equalTo(true),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableOne');
 
@@ -222,10 +223,10 @@ describe('Ruler Functional Tests', function (): void {
                     $rb['p']->equalTo(true),
                     $rb['p']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb['p']->equalTo(true),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableOne');
 
@@ -237,10 +238,10 @@ describe('Ruler Functional Tests', function (): void {
                     $rb['p']->equalTo(true),
                     $rb['p']->equalTo(true),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context))->toEqual($rb->create(
                 $rb['p']->equalTo(true),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableOne');
 
@@ -254,7 +255,7 @@ describe('Ruler Functional Tests', function (): void {
                         $rb['p']->equalTo(true),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableOne');
 
@@ -270,7 +271,7 @@ describe('Ruler Functional Tests', function (): void {
                         ),
                     ),
                 ),
-                'ruler-rule',
+                RuleIds::fromString('ruler-rule'),
             )->evaluate($context));
         })->with('truthTableOne');
     });

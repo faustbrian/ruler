@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleIds;
 
 describe('Set', function (): void {
     describe('Happy Paths', function (): void {
@@ -26,14 +27,14 @@ describe('Set', function (): void {
                 $rb['foo']->intersect(
                     $rb['bar']->symmetricDifference($rb['baz']),
                 )->setContains($rb['expected']),
-                'set-complicated-1',
+                RuleIds::fromString('set-complicated-1'),
             )->evaluate($context))->toBeTrue();
 
             expect($rb->create(
                 $rb['bar']->union(
                     $rb['bob'],
                 )->containsSubset($rb['foo']),
-                'set-complicated-2',
+                RuleIds::fromString('set-complicated-2'),
             )->evaluate($context))->toBeTrue();
         });
 
@@ -44,7 +45,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->union($rb['b']),
                 ),
-                'set-union',
+                RuleIds::fromString('set-union'),
             )->evaluate($context))->toBeTrue();
         })->with('setUnion');
 
@@ -55,7 +56,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->intersect($rb['b']),
                 ),
-                'set-intersect',
+                RuleIds::fromString('set-intersect'),
             )->evaluate($context))->toBeTrue();
         })->with('setIntersect');
 
@@ -66,7 +67,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->complement($rb['b']),
                 ),
-                'set-complement',
+                RuleIds::fromString('set-complement'),
             )->evaluate($context))->toBeTrue();
         })->with('setComplement');
 
@@ -77,7 +78,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->symmetricDifference($rb['b']),
                 ),
-                'set-symmetric-difference',
+                RuleIds::fromString('set-symmetric-difference'),
             )->evaluate($context))->toBeTrue();
         })->with('setSymmetricDifference');
     });

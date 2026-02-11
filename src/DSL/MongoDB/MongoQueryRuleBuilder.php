@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\MongoDB;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Closure;
 use InvalidArgumentException;
 use JsonException;
@@ -61,7 +62,7 @@ final readonly class MongoQueryRuleBuilder
      * @param  array<string, mixed> $query MongoDB-style query document with fields and operators
      * @return Rule                 Compiled rule ready for evaluation against data
      */
-    public function parse(array $query, string $ruleId): Rule
+    public function parse(array $query, RuleId $ruleId): Rule
     {
         $proposition = $this->compiler->compile($query);
 
@@ -80,7 +81,7 @@ final readonly class MongoQueryRuleBuilder
      *
      * @return Rule Compiled rule ready for evaluation against data
      */
-    public function parseJson(string $json, string $ruleId): Rule
+    public function parseJson(string $json, RuleId $ruleId): Rule
     {
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
@@ -100,7 +101,7 @@ final readonly class MongoQueryRuleBuilder
      * @param  Closure              $action Callback to execute when rule evaluates to true
      * @return Rule                 Compiled rule with attached action callback
      */
-    public function parseWithAction(array $query, Closure $action, string $ruleId): Rule
+    public function parseWithAction(array $query, Closure $action, RuleId $ruleId): Rule
     {
         $proposition = $this->compiler->compile($query);
 
@@ -120,7 +121,7 @@ final readonly class MongoQueryRuleBuilder
      *
      * @return Rule Compiled rule with attached action callback
      */
-    public function parseJsonWithAction(string $json, Closure $action, string $ruleId): Rule
+    public function parseJsonWithAction(string $json, Closure $action, RuleId $ruleId): Rule
     {
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 

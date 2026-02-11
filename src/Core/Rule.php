@@ -34,7 +34,7 @@ final readonly class Rule implements Proposition
      * @param null|Closure $action    Optional callback to execute when the condition
      *                                evaluates to true. The callback must accept the
      *                                current Context as its first argument.
-     * @param RuleId|string $id       Explicit non-empty identifier for this rule.
+     * @param RuleId       $id        Explicit non-empty identifier for this rule.
      */
     public function __construct(
         private Proposition $condition,
@@ -44,7 +44,7 @@ final readonly class Rule implements Proposition
          * @var null|Closure
          */
         private ?Closure $action,
-        RuleId|string $id,
+        private RuleId $id,
         private ?string $name = null,
         private int $priority = 0,
         private bool $enabled = true,
@@ -54,13 +54,7 @@ final readonly class Rule implements Proposition
          * @var array<string, mixed>
          */
         private array $metadata = [],
-    ) {
-        $this->id = $id instanceof RuleId
-            ? $id
-            : RuleIds::fromString($id);
-    }
-
-    private RuleId $id;
+    ) {}
 
     /**
      * Evaluate the rule condition against the given context.

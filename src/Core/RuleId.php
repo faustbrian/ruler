@@ -10,11 +10,12 @@
 namespace Cline\Ruler\Core;
 
 use RuntimeException;
+use Stringable;
 
 use function bin2hex;
+use function mb_trim;
 use function random_bytes;
 use function throw_if;
-use function trim;
 
 /**
  * Immutable value object representing a rule identifier.
@@ -23,12 +24,17 @@ use function trim;
  *
  * @psalm-immutable
  */
-final readonly class RuleId
+final readonly class RuleId implements Stringable
 {
     private function __construct(
         private string $value,
     ) {
-        throw_if(trim($this->value) === '', RuntimeException::class, 'Rule id cannot be empty.');
+        throw_if(mb_trim($this->value) === '', RuntimeException::class, 'Rule id cannot be empty.');
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
     }
 
     public static function fromString(string $value): self
@@ -62,10 +68,4 @@ final readonly class RuleId
     {
         return $this->value === $other->value;
     }
-
-    public function __toString(): string
-    {
-        return $this->value;
-    }
 }
-

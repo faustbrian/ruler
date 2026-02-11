@@ -11,6 +11,7 @@ use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleExecutionResult;
+use Cline\Ruler\Core\RuleIds;
 use Tests\Fixtures\CallbackProposition;
 use Tests\Fixtures\TrueProposition;
 
@@ -20,7 +21,7 @@ describe('Rule', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 null,
-                'rule-interface',
+                RuleIds::fromString('rule-interface'),
             );
             expect($rule)->toBeInstanceOf(Proposition::class);
         });
@@ -41,7 +42,7 @@ describe('Rule', function (): void {
                 function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
-                'rule-one',
+                RuleIds::fromString('rule-one'),
             );
 
             expect($ruleOne->evaluate($context))->toBeFalse();
@@ -63,7 +64,7 @@ describe('Rule', function (): void {
                 function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
-                'rule-two',
+                RuleIds::fromString('rule-two'),
             );
 
             expect($ruleTwo->evaluate($context))->toBeTrue();
@@ -77,14 +78,14 @@ describe('Rule', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 null,
-                'rule-1',
+                RuleIds::fromString('rule-1'),
                 'Adult Access',
                 50,
                 true,
                 ['domain' => 'auth', 'tier' => 'gold'],
             );
 
-            expect($rule->getId())->toBe('rule-1');
+            expect($rule->getRuleId())->toEqual(RuleIds::fromString('rule-1'));
             expect($rule->getName())->toBe('Adult Access');
             expect($rule->getPriority())->toBe(50);
             expect($rule->isEnabled())->toBeTrue();
@@ -97,7 +98,7 @@ describe('Rule', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 null,
-                'rule-disabled',
+                RuleIds::fromString('rule-disabled'),
                 'Disabled Rule',
                 1,
                 false,
@@ -117,7 +118,7 @@ describe('Rule', function (): void {
                 function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
-                'r-100',
+                RuleIds::fromString('r-100'),
                 'Structured Rule',
                 25,
             );
@@ -142,7 +143,7 @@ describe('Rule', function (): void {
                 function (Context $ctx) use (&$capturedContext): void {
                     $capturedContext = $ctx;
                 },
-                'rule-context',
+                RuleIds::fromString('rule-context'),
             );
 
             $result = $rule->execute($context);
@@ -156,10 +157,10 @@ describe('Rule', function (): void {
             $manual = new Rule(
                 new TrueProposition(),
                 null,
-                'manual-id',
+                RuleIds::fromString('manual-id'),
             );
 
-            expect($manual->getId())->toBe('manual-id');
+            expect($manual->getRuleId())->toEqual(RuleIds::fromString('manual-id'));
         });
     });
 
@@ -170,7 +171,7 @@ describe('Rule', function (): void {
             new Rule(
                 new TrueProposition(),
                 'this is not callable',
-                'bad-action',
+                RuleIds::fromString('bad-action'),
             );
         });
 
@@ -189,7 +190,7 @@ describe('Rule', function (): void {
             new Rule(
                 new TrueProposition(),
                 null,
-                '',
+                RuleIds::fromString(''),
             );
         });
     });

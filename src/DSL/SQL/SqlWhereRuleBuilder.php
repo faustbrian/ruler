@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\SQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
 use Closure;
 use Exception;
@@ -78,7 +79,7 @@ final readonly class SqlWhereRuleBuilder
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(string $sql, string $ruleId): Rule
+    public function parse(string $sql, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($sql);
         $proposition = $this->compiler->compile($ast);
@@ -101,7 +102,7 @@ final readonly class SqlWhereRuleBuilder
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $sql, Closure $action, string $ruleId): Rule
+    public function parseWithAction(string $sql, Closure $action, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($sql);
         $proposition = $this->compiler->compile($ast);

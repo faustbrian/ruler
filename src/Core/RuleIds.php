@@ -38,4 +38,3 @@ final readonly class RuleIds
         return RuleId::random();
     }
 }
-

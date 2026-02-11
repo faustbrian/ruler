@@ -9,6 +9,7 @@
 
 namespace Cline\Ruler\DSL\MongoDB;
 
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\Wirefilter\ValidationResult;
 use JsonException;
 use Throwable;
@@ -89,7 +90,7 @@ final readonly class MongoQueryValidator
     public function validate(array $query): bool
     {
         try {
-            $this->parser->parse($query, 'validation-rule');
+            $this->parser->parse($query, RuleIds::fromString('validation-rule'));
 
             return true;
         } catch (Throwable) {
@@ -109,7 +110,7 @@ final readonly class MongoQueryValidator
     public function validateJson(string $json): bool
     {
         try {
-            $this->parser->parseJson($json, 'validation-rule');
+            $this->parser->parseJson($json, RuleIds::fromString('validation-rule'));
 
             return true;
         } catch (Throwable) {
@@ -130,7 +131,7 @@ final readonly class MongoQueryValidator
     public function validateWithErrors(array $query): ValidationResult
     {
         try {
-            $this->parser->parse($query, 'validation-rule');
+            $this->parser->parse($query, RuleIds::fromString('validation-rule'));
 
             return ValidationResult::success();
         } catch (Throwable $throwable) {

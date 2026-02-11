@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\MongoDB\MongoQueryRuleBuilder;
 
 // ============================================================================
@@ -16,7 +17,7 @@ use Cline\Ruler\DSL\MongoDB\MongoQueryRuleBuilder;
 
 test('$same operator - strict equality', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['value' => ['$same' => 42]], 'test-rule');
+    $rule = $mongo->parse(['value' => ['$same' => 42]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => 42]);
     $falseContext1 = new Context(['value' => '42']); // String '42' !== int 42
@@ -28,7 +29,7 @@ test('$same operator - strict equality', function (): void {
 
 test('$nsame operator - strict inequality', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['value' => ['$nsame' => '42']], 'test-rule');
+    $rule = $mongo->parse(['value' => ['$nsame' => '42']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => 42]); // int !== string
     $falseContext = new Context(['value' => '42']);
@@ -39,7 +40,7 @@ test('$nsame operator - strict inequality', function (): void {
 
 test('$between operator with numeric range', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['age' => ['$between' => [18, 65]]], 'test-rule');
+    $rule = $mongo->parse(['age' => ['$between' => [18, 65]]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext1 = new Context(['age' => 15]);
@@ -56,7 +57,7 @@ test('$between operator with numeric range', function (): void {
 
 test('$startsWith operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['name' => ['$startsWith' => 'John']], 'test-rule');
+    $rule = $mongo->parse(['name' => ['$startsWith' => 'John']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['name' => 'John Doe']);
     $falseContext = new Context(['name' => 'jane smith']);
@@ -67,7 +68,7 @@ test('$startsWith operator', function (): void {
 
 test('$startsWithi operator - case insensitive', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['name' => ['$startsWithi' => 'john']], 'test-rule');
+    $rule = $mongo->parse(['name' => ['$startsWithi' => 'john']], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['name' => 'John Doe']);
     $trueContext2 = new Context(['name' => 'JOHN SMITH']);
@@ -80,7 +81,7 @@ test('$startsWithi operator - case insensitive', function (): void {
 
 test('$endsWith operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['email' => ['$endsWith' => '@example.com']], 'test-rule');
+    $rule = $mongo->parse(['email' => ['$endsWith' => '@example.com']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['email' => 'user@example.com']);
     $falseContext = new Context(['email' => 'user@test.org']);
@@ -91,7 +92,7 @@ test('$endsWith operator', function (): void {
 
 test('$endsWithi operator - case insensitive', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['email' => ['$endsWithi' => '@EXAMPLE.COM']], 'test-rule');
+    $rule = $mongo->parse(['email' => ['$endsWithi' => '@EXAMPLE.COM']], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['email' => 'user@example.com']);
     $trueContext2 = new Context(['email' => 'admin@EXAMPLE.COM']);
@@ -104,7 +105,7 @@ test('$endsWithi operator - case insensitive', function (): void {
 
 test('$contains operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['description' => ['$contains' => 'important']], 'test-rule');
+    $rule = $mongo->parse(['description' => ['$contains' => 'important']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['description' => 'This is important information']);
     $falseContext = new Context(['description' => 'This is trivial']);
@@ -115,7 +116,7 @@ test('$contains operator', function (): void {
 
 test('$containsi operator - case insensitive', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['description' => ['$containsi' => 'IMPORTANT']], 'test-rule');
+    $rule = $mongo->parse(['description' => ['$containsi' => 'IMPORTANT']], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['description' => 'This is important information']);
     $trueContext2 = new Context(['description' => 'This is IMPORTANT']);
@@ -128,7 +129,7 @@ test('$containsi operator - case insensitive', function (): void {
 
 test('$notContains operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['description' => ['$notContains' => 'spam']], 'test-rule');
+    $rule = $mongo->parse(['description' => ['$notContains' => 'spam']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['description' => 'This is a clean message']);
     $falseContext = new Context(['description' => 'This is spam']);
@@ -139,7 +140,7 @@ test('$notContains operator', function (): void {
 
 test('$notContainsi operator - case insensitive', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['description' => ['$notContainsi' => 'SPAM']], 'test-rule');
+    $rule = $mongo->parse(['description' => ['$notContainsi' => 'SPAM']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['description' => 'This is a clean message']);
     $falseContext1 = new Context(['description' => 'This is spam']);
@@ -152,7 +153,7 @@ test('$notContainsi operator - case insensitive', function (): void {
 
 test('$strLength with exact match', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['code' => ['$strLength' => 5]], 'test-rule');
+    $rule = $mongo->parse(['code' => ['$strLength' => 5]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['code' => 'ABCDE']);
     $falseContext = new Context(['code' => 'ABC']);
@@ -163,7 +164,7 @@ test('$strLength with exact match', function (): void {
 
 test('$strLength with comparison operators', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['password' => ['$strLength' => ['$gte' => 8]]], 'test-rule');
+    $rule = $mongo->parse(['password' => ['$strLength' => ['$gte' => 8]]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['password' => 'securePassword']);
     $falseContext = new Context(['password' => 'short']);
@@ -174,7 +175,7 @@ test('$strLength with comparison operators', function (): void {
 
 test('$notRegex operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['username' => ['$notRegex' => '/[^a-zA-Z0-9]/']], 'test-rule');
+    $rule = $mongo->parse(['username' => ['$notRegex' => '/[^a-zA-Z0-9]/']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['username' => 'user123']);
     $falseContext = new Context(['username' => 'user@123']);
@@ -189,7 +190,7 @@ test('$notRegex operator', function (): void {
 
 test('$after operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['createdAt' => ['$after' => '2024-01-01']], 'test-rule');
+    $rule = $mongo->parse(['createdAt' => ['$after' => '2024-01-01']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['createdAt' => '2024-06-15']);
     $falseContext = new Context(['createdAt' => '2023-12-31']);
@@ -200,7 +201,7 @@ test('$after operator', function (): void {
 
 test('$before operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['expiresAt' => ['$before' => '2024-12-31']], 'test-rule');
+    $rule = $mongo->parse(['expiresAt' => ['$before' => '2024-12-31']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['expiresAt' => '2024-06-15']);
     $falseContext = new Context(['expiresAt' => '2025-01-01']);
@@ -211,7 +212,7 @@ test('$before operator', function (): void {
 
 test('$betweenDates operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['eventDate' => ['$betweenDates' => ['2024-01-01', '2024-12-31']]], 'test-rule');
+    $rule = $mongo->parse(['eventDate' => ['$betweenDates' => ['2024-01-01', '2024-12-31']]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['eventDate' => '2024-06-15']);
     $falseContext1 = new Context(['eventDate' => '2023-12-31']);
@@ -228,7 +229,7 @@ test('$betweenDates operator', function (): void {
 
 test('$type operator with null', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['value' => ['$type' => 'null']], 'test-rule');
+    $rule = $mongo->parse(['value' => ['$type' => 'null']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => null]);
     $falseContext = new Context(['value' => '']);
@@ -239,7 +240,7 @@ test('$type operator with null', function (): void {
 
 test('$type operator with array', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['value' => ['$type' => 'array']], 'test-rule');
+    $rule = $mongo->parse(['value' => ['$type' => 'array']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['value' => [1, 2, 3]]);
     $falseContext = new Context(['value' => 'not array']);
@@ -250,7 +251,7 @@ test('$type operator with array', function (): void {
 
 test('$type operator with boolean', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['flag' => ['$type' => 'bool']], 'test-rule');
+    $rule = $mongo->parse(['flag' => ['$type' => 'bool']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['flag' => true]);
     $falseContext = new Context(['flag' => 1]);
@@ -261,7 +262,7 @@ test('$type operator with boolean', function (): void {
 
 test('$type operator with numeric', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['count' => ['$type' => 'number']], 'test-rule');
+    $rule = $mongo->parse(['count' => ['$type' => 'number']], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['count' => 42]);
     $trueContext2 = new Context(['count' => 3.14]);
@@ -276,7 +277,7 @@ test('$type operator with numeric', function (): void {
 
 test('$type operator with string', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['name' => ['$type' => 'string']], 'test-rule');
+    $rule = $mongo->parse(['name' => ['$type' => 'string']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['name' => 'John']);
     $falseContext = new Context(['name' => 123]);
@@ -287,7 +288,7 @@ test('$type operator with string', function (): void {
 
 test('$size operator with exact count', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['tags' => ['$size' => 3]], 'test-rule');
+    $rule = $mongo->parse(['tags' => ['$size' => 3]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['tags' => ['a', 'b', 'c']]);
     $falseContext = new Context(['tags' => ['a', 'b']]);
@@ -298,7 +299,7 @@ test('$size operator with exact count', function (): void {
 
 test('$size operator with comparison operators', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['items' => ['$size' => ['$gte' => 5]]], 'test-rule');
+    $rule = $mongo->parse(['items' => ['$size' => ['$gte' => 5]]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['items' => [1, 2, 3, 4, 5, 6]]);
     $falseContext = new Context(['items' => [1, 2, 3]]);
@@ -309,7 +310,7 @@ test('$size operator with comparison operators', function (): void {
 
 test('$empty operator - should be empty', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['data' => ['$empty' => true]], 'test-rule');
+    $rule = $mongo->parse(['data' => ['$empty' => true]], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['data' => []]);
     $trueContext2 = new Context(['data' => '']);
@@ -324,7 +325,7 @@ test('$empty operator - should be empty', function (): void {
 
 test('$empty operator - should not be empty', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['data' => ['$empty' => false]], 'test-rule');
+    $rule = $mongo->parse(['data' => ['$empty' => false]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['data' => [1, 2, 3]]);
     $falseContext1 = new Context(['data' => []]);
@@ -346,7 +347,7 @@ test('$xor operator - exactly one condition must be true', function (): void {
             ['age' => ['$gte' => 18]],
             ['country' => 'US'],
         ],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']); // Only age passes
     $trueContext2 = new Context(['age' => 15, 'country' => 'US']); // Only country passes
@@ -366,7 +367,7 @@ test('$nand operator - not all conditions can be true', function (): void {
             ['age' => ['$gte' => 18]],
             ['country' => 'US'],
         ],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 15, 'country' => 'US']); // Not all true
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']); // Not all true

@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Builder\RuleBuilder;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\MongoDB\MongoQueryParser;
 use Cline\Ruler\DSL\MongoDB\MongoQuerySerializer;
 use Cline\Ruler\Operators\Type\IsEmpty;
@@ -19,7 +20,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$gt' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$gt' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$gt":18}}');
@@ -29,7 +30,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['status' => 'active'], 'test-rule');
+            $rule = $parser->parse(['status' => 'active'], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"status":"active"}');
@@ -39,7 +40,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['status' => ['$eq' => 'active']], 'test-rule');
+            $rule = $parser->parse(['status' => ['$eq' => 'active']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"status":"active"}');
@@ -54,7 +55,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['age' => ['$gte' => 18]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -71,7 +72,7 @@ describe('MongoQuerySerializer', function (): void {
             $rule = $parser->parse([
                 'age' => ['$gte' => 18],
                 'country' => 'US',
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -89,7 +90,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['age' => ['$gte' => 21]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -105,7 +106,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $rule = $parser->parse([
                 '$not' => ['age' => ['$lt' => 18]],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -117,7 +118,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['country' => ['$in' => ['US', 'CA', 'UK']]], 'test-rule');
+            $rule = $parser->parse(['country' => ['$in' => ['US', 'CA', 'UK']]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"country":{"$in":["US","CA","UK"]}}');
@@ -127,7 +128,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['role' => ['$nin' => ['banned', 'suspended']]], 'test-rule');
+            $rule = $parser->parse(['role' => ['$nin' => ['banned', 'suspended']]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"role":{"$nin":["banned","suspended"]}}');
@@ -137,7 +138,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], 'test-rule');
+            $rule = $parser->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -150,7 +151,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['name' => ['$regex' => '^john', '$options' => 'i']], 'test-rule');
+            $rule = $parser->parse(['name' => ['$regex' => '^john', '$options' => 'i']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -165,7 +166,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['email' => ['$exists' => true]], 'test-rule');
+            $rule = $parser->parse(['email' => ['$exists' => true]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -178,7 +179,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$type' => 'number']], 'test-rule');
+            $rule = $parser->parse(['age' => ['$type' => 'number']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$type":"number"}}');
@@ -188,7 +189,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$between' => [18, 65]]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$between' => [18, 65]]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$between":[18,65]}}');
@@ -198,7 +199,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['status' => ['$ne' => 'inactive']], 'test-rule');
+            $rule = $parser->parse(['status' => ['$ne' => 'inactive']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"status":{"$ne":"inactive"}}');
@@ -208,7 +209,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$lte' => 65]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$lte' => 65]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$lte":65}}');
@@ -218,7 +219,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$gte' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$gte' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$gte":18}}');
@@ -228,7 +229,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['quantity' => ['$lt' => 10]], 'test-rule');
+            $rule = $parser->parse(['quantity' => ['$lt' => 10]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"quantity":{"$lt":10}}');
@@ -238,7 +239,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$same' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$same' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"age":{"$same":18}}');
@@ -248,7 +249,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['verified' => ['$nsame' => false]], 'test-rule');
+            $rule = $parser->parse(['verified' => ['$nsame' => false]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"verified":{"$nsame":false}}');
@@ -258,7 +259,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['verified' => true], 'test-rule');
+            $rule = $parser->parse(['verified' => true], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"verified":true}');
@@ -268,7 +269,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['deleted' => false], 'test-rule');
+            $rule = $parser->parse(['deleted' => false], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"deleted":false}');
@@ -278,7 +279,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['deleted_at' => null], 'test-rule');
+            $rule = $parser->parse(['deleted_at' => null], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // MongoDB semantics: {field: null} is equivalent to {field: {$exists: false}}
@@ -289,7 +290,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['price' => ['$gt' => 99.99]], 'test-rule');
+            $rule = $parser->parse(['price' => ['$gt' => 99.99]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"price":{"$gt":99.99}}');
@@ -299,7 +300,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['name' => ['$startsWith' => 'John']], 'test-rule');
+            $rule = $parser->parse(['name' => ['$startsWith' => 'John']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"name":{"$startsWith":"John"}}');
@@ -309,7 +310,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['age' => ['$gte' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['$gte' => 18]], RuleIds::fromString('test-rule'));
             $result = $serializer->serializeToArray($rule);
 
             expect($result)->toBeArray()
@@ -325,9 +326,9 @@ describe('MongoQuerySerializer', function (): void {
             $serializer = new MongoQuerySerializer();
 
             $original = ['age' => ['$gt' => 18]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serializeToArray($rule);
-            $reparsed = $parser->parse($serialized, 'test-rule');
+            $reparsed = $parser->parse($serialized, RuleIds::fromString('test-rule'));
 
             expect($serialized)->toEqual($original);
         });
@@ -337,7 +338,7 @@ describe('MongoQuerySerializer', function (): void {
             $serializer = new MongoQuerySerializer();
 
             $original = ['status' => 'active'];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serializeToArray($rule);
 
             expect($serialized)->toEqual($original);
@@ -353,7 +354,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['country' => 'US'],
                 ],
             ];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serializeToArray($rule);
 
             expect($serialized)->toEqual($original);
@@ -364,7 +365,7 @@ describe('MongoQuerySerializer', function (): void {
             $serializer = new MongoQuerySerializer();
 
             $original = ['country' => ['$in' => ['US', 'CA', 'UK']]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serializeToArray($rule);
 
             expect($serialized)->toEqual($original);
@@ -375,7 +376,7 @@ describe('MongoQuerySerializer', function (): void {
             $serializer = new MongoQuerySerializer();
 
             $original = ['age' => ['$between' => [18, 65]]];
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serializeToArray($rule);
 
             expect($serialized)->toEqual($original);
@@ -399,7 +400,7 @@ describe('MongoQuerySerializer', function (): void {
                 ],
             ];
 
-            $rule = $parser->parse($query, 'test-rule');
+            $rule = $parser->parse($query, RuleIds::fromString('test-rule'));
             $result = $serializer->serializeToArray($rule);
 
             expect($result)->toHaveKey('$or')
@@ -417,7 +418,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['status' => 'banned'],
                     ['status' => 'suspended'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -436,7 +437,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['premium' => true],
                     ['trial' => true],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -455,7 +456,7 @@ describe('MongoQuerySerializer', function (): void {
                     ['age' => ['$lt' => 18]],
                     ['guardian_consent' => false],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -471,7 +472,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $rule = $parser->parse([
                 'created_at' => ['$betweenDates' => ['2024-01-01', '2024-12-31']],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -486,7 +487,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['email' => ['$endsWith' => '@example.com']], 'test-rule');
+            $rule = $parser->parse(['email' => ['$endsWith' => '@example.com']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"email":{"$endsWith":"@example.com"}}');
@@ -496,7 +497,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['email' => ['$endsWithi' => '@EXAMPLE.COM']], 'test-rule');
+            $rule = $parser->parse(['email' => ['$endsWithi' => '@EXAMPLE.COM']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"email":{"$endsWithi":"@EXAMPLE.COM"}}');
@@ -506,7 +507,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['name' => ['$startsWithi' => 'JOHN']], 'test-rule');
+            $rule = $parser->parse(['name' => ['$startsWithi' => 'JOHN']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"name":{"$startsWithi":"JOHN"}}');
@@ -516,7 +517,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['description' => ['$contains' => 'urgent']], 'test-rule');
+            $rule = $parser->parse(['description' => ['$contains' => 'urgent']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"description":{"$contains":"urgent"}}');
@@ -526,7 +527,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['description' => ['$containsi' => 'URGENT']], 'test-rule');
+            $rule = $parser->parse(['description' => ['$containsi' => 'URGENT']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"description":{"$containsi":"URGENT"}}');
@@ -536,7 +537,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['description' => ['$notContains' => 'spam']], 'test-rule');
+            $rule = $parser->parse(['description' => ['$notContains' => 'spam']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"description":{"$notContains":"spam"}}');
@@ -546,7 +547,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['description' => ['$notContainsi' => 'SPAM']], 'test-rule');
+            $rule = $parser->parse(['description' => ['$notContainsi' => 'SPAM']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"description":{"$notContainsi":"SPAM"}}');
@@ -556,7 +557,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['username' => ['$notRegex' => '^admin']], 'test-rule');
+            $rule = $parser->parse(['username' => ['$notRegex' => '^admin']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"username":{"$notRegex":"^admin"}}');
@@ -566,7 +567,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['created_at' => ['$after' => '2024-01-01']], 'test-rule');
+            $rule = $parser->parse(['created_at' => ['$after' => '2024-01-01']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"created_at":{"$after":"2024-01-01"}}');
@@ -576,7 +577,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['expires_at' => ['$before' => '2024-12-31']], 'test-rule');
+            $rule = $parser->parse(['expires_at' => ['$before' => '2024-12-31']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"expires_at":{"$before":"2024-12-31"}}');
@@ -586,7 +587,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['name' => ['$type' => 'string']], 'test-rule');
+            $rule = $parser->parse(['name' => ['$type' => 'string']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"name":{"$type":"string"}}');
@@ -596,7 +597,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['tags' => ['$type' => 'array']], 'test-rule');
+            $rule = $parser->parse(['tags' => ['$type' => 'array']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"tags":{"$type":"array"}}');
@@ -606,7 +607,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['active' => ['$type' => 'boolean']], 'test-rule');
+            $rule = $parser->parse(['active' => ['$type' => 'boolean']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"active":{"$type":"boolean"}}');
@@ -616,7 +617,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['count' => ['$type' => 'number']], 'test-rule');
+            $rule = $parser->parse(['count' => ['$type' => 'number']], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"count":{"$type":"number"}}');
@@ -626,7 +627,7 @@ describe('MongoQuerySerializer', function (): void {
             $parser = new MongoQueryParser();
             $serializer = new MongoQuerySerializer();
 
-            $rule = $parser->parse(['description' => ['$empty' => true]], 'test-rule');
+            $rule = $parser->parse(['description' => ['$empty' => true]], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('{"description":{"$empty":true}}');
@@ -639,7 +640,7 @@ describe('MongoQuerySerializer', function (): void {
             // LogicalNot(EqualTo(field, null)) should become {field: {$exists: true}}
             $rule = $parser->parse([
                 '$not' => ['email' => null],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             $decoded = json_decode($result, true, 512, \JSON_THROW_ON_ERROR);
@@ -657,7 +658,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $var = $builder['deleted_at'];
             $proposition = new IsNull($var);
-            $rule = $builder->create($proposition, 'test-rule');
+            $rule = $builder->create($proposition, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -674,7 +675,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $var = $builder['notes'];
             $proposition = new IsEmpty($var);
-            $rule = $builder->create($proposition, 'test-rule');
+            $rule = $builder->create($proposition, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 

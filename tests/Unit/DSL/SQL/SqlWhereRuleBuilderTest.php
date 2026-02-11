@@ -9,11 +9,12 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\SQL\SqlWhereRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('age > 18', 'test-rule');
+    $rule = $srb->parse('age > 18', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +24,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('age > 18', 'test-rule');
+    $rule = $srb->parse('age > 18', RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +33,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("status = 'active'", 'test-rule');
+    $rule = $srb->parse("status = 'active'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -43,7 +44,7 @@ test('parse equality operator', function (): void {
 
 test('parse logical and expression', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("age >= 18 AND country = 'US'", 'test-rule');
+    $rule = $srb->parse("age >= 18 AND country = 'US'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -56,7 +57,7 @@ test('parse logical and expression', function (): void {
 
 test('parse logical or expression', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("age >= 21 OR country = 'US'", 'test-rule');
+    $rule = $srb->parse("age >= 21 OR country = 'US'", RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -69,7 +70,7 @@ test('parse logical or expression', function (): void {
 
 test('parse expression with parentheses', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("(age >= 18 AND country = 'US') OR age >= 21", 'test-rule');
+    $rule = $srb->parse("(age >= 18 AND country = 'US') OR age >= 21", RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -82,7 +83,7 @@ test('parse expression with parentheses', function (): void {
 
 test('parse not expression', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('NOT (age < 18)', 'test-rule');
+    $rule = $srb->parse('NOT (age < 18)', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -96,7 +97,7 @@ test('parseWithAction executes callback when true', function (): void {
     $executed = false;
     $rule = $srb->parseWithAction('age >= 18', function ($context) use (&$executed): void {
         $executed = true;
-    }, 'test-rule');
+    }, RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 25]);
     $rule->execute($context);
@@ -109,7 +110,7 @@ test('parseWithAction does not execute callback when false', function (): void {
     $executed = false;
     $rule = $srb->parseWithAction('age >= 18', function ($context) use (&$executed): void {
         $executed = true;
-    }, 'test-rule');
+    }, RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 15]);
     $rule->execute($context);
@@ -119,7 +120,7 @@ test('parseWithAction does not execute callback when false', function (): void {
 
 test('parse in operator with values', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("country IN ('US', 'CA', 'UK')", 'test-rule');
+    $rule = $srb->parse("country IN ('US', 'CA', 'UK')", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -130,7 +131,7 @@ test('parse in operator with values', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('age <= 65', 'test-rule');
+    $rule = $srb->parse('age <= 65', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -141,7 +142,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("status != 'inactive'", 'test-rule');
+    $rule = $srb->parse("status != 'inactive'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -152,7 +153,7 @@ test('parse inequality operator', function (): void {
 
 test('parse not in operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("role NOT IN ('banned', 'suspended')", 'test-rule');
+    $rule = $srb->parse("role NOT IN ('banned', 'suspended')", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -163,7 +164,7 @@ test('parse not in operator', function (): void {
 
 test('parse like operator with percent wildcard', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("email LIKE '%@example.com'", 'test-rule');
+    $rule = $srb->parse("email LIKE '%@example.com'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['email' => 'john@example.com']);
     $falseContext = new Context(['email' => 'john@test.com']);
@@ -174,7 +175,7 @@ test('parse like operator with percent wildcard', function (): void {
 
 test('parse not like operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("email NOT LIKE '%@test.com'", 'test-rule');
+    $rule = $srb->parse("email NOT LIKE '%@test.com'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['email' => 'john@example.com']);
     $falseContext = new Context(['email' => 'john@test.com']);
@@ -185,7 +186,7 @@ test('parse not like operator', function (): void {
 
 test('parse between operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('age BETWEEN 18 AND 65', 'test-rule');
+    $rule = $srb->parse('age BETWEEN 18 AND 65', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -196,7 +197,7 @@ test('parse between operator', function (): void {
 
 test('parse is null operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('deleted_at IS NULL', 'test-rule');
+    $rule = $srb->parse('deleted_at IS NULL', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['deleted_at' => null]);
     $falseContext = new Context(['deleted_at' => '2024-01-01']);
@@ -207,7 +208,7 @@ test('parse is null operator', function (): void {
 
 test('parse is not null operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('email IS NOT NULL', 'test-rule');
+    $rule = $srb->parse('email IS NOT NULL', RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['email' => 'test@example.com']);
     $falseContext = new Context(['email' => null]);
@@ -218,7 +219,7 @@ test('parse is not null operator', function (): void {
 
 test('parse alternative not equal operator', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse("status <> 'inactive'", 'test-rule');
+    $rule = $srb->parse("status <> 'inactive'", RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -229,7 +230,7 @@ test('parse alternative not equal operator', function (): void {
 
 test('parse dot notation for nested fields', function (): void {
     $srb = new SqlWhereRuleBuilder();
-    $rule = $srb->parse('user.profile.age >= 18', 'test-rule');
+    $rule = $srb->parse('user.profile.age >= 18', RuleIds::fromString('test-rule'));
 
     $context = new Context([
         'user' => ['profile' => ['age' => 25]],

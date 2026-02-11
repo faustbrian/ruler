@@ -9,6 +9,7 @@
 
 namespace Cline\Ruler\DSL\SQL;
 
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\Wirefilter\ValidationResult;
 use Throwable;
 
@@ -92,7 +93,7 @@ final readonly class SQLWhereValidator
     public function validateWithErrors(string $expression): ValidationResult
     {
         try {
-            $this->builder->parse($expression, 'validation-rule');
+            $this->builder->parse($expression, RuleIds::fromString('validation-rule'));
 
             return ValidationResult::success();
         } catch (Throwable $throwable) {

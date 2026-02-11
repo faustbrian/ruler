@@ -9,13 +9,14 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\GraphQL\GraphQLFilterParser;
 
 describe('GraphQLFilterParser', function (): void {
     describe('Happy Paths', function (): void {
         test('parse simple comparison expression', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['age' => ['gt' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gt' => 18]], RuleIds::fromString('test-rule'));
 
             $context = new Context(['age' => 25]);
 
@@ -25,7 +26,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse comparison with field that fails', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['age' => ['gt' => 18]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gt' => 18]], RuleIds::fromString('test-rule'));
 
             $context = new Context(['age' => 15]);
 
@@ -34,7 +35,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse equality operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['status' => ['eq' => 'active']], 'test-rule');
+            $rule = $parser->parse(['status' => ['eq' => 'active']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -45,7 +46,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse implicit equality', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['status' => 'active'], 'test-rule');
+            $rule = $parser->parse(['status' => 'active'], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -61,7 +62,7 @@ describe('GraphQLFilterParser', function (): void {
                     ['age' => ['gte' => 18]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -77,7 +78,7 @@ describe('GraphQLFilterParser', function (): void {
             $rule = $parser->parse([
                 'age' => ['gte' => 18],
                 'country' => 'US',
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -95,7 +96,7 @@ describe('GraphQLFilterParser', function (): void {
                     ['age' => ['gte' => 21]],
                     ['country' => 'US'],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
 
             $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
             $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -108,7 +109,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse NOT expression', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['NOT' => ['age' => ['lt' => 18]]], 'test-rule');
+            $rule = $parser->parse(['NOT' => ['age' => ['lt' => 18]]], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 25]);
             $falseContext = new Context(['age' => 15]);
@@ -122,7 +123,7 @@ describe('GraphQLFilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction(['age' => ['gte' => 18]], function ($context) use (&$executed): void {
                 $executed = true;
-            }, 'test-rule');
+            }, RuleIds::fromString('test-rule'));
 
             $context = new Context(['age' => 25]);
             $rule->execute($context);
@@ -135,7 +136,7 @@ describe('GraphQLFilterParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction(['age' => ['gte' => 18]], function ($context) use (&$executed): void {
                 $executed = true;
-            }, 'test-rule');
+            }, RuleIds::fromString('test-rule'));
 
             $context = new Context(['age' => 15]);
             $rule->execute($context);
@@ -145,7 +146,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse in operator with array', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['country' => ['in' => ['US', 'CA', 'UK']]], 'test-rule');
+            $rule = $parser->parse(['country' => ['in' => ['US', 'CA', 'UK']]], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['country' => 'US']);
             $falseContext = new Context(['country' => 'FR']);
@@ -156,7 +157,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse notIn operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['role' => ['notIn' => ['banned', 'suspended']]], 'test-rule');
+            $rule = $parser->parse(['role' => ['notIn' => ['banned', 'suspended']]], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['role' => 'active']);
             $falseContext = new Context(['role' => 'banned']);
@@ -167,7 +168,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse contains operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['email' => ['contains' => '@example.com']], 'test-rule');
+            $rule = $parser->parse(['email' => ['contains' => '@example.com']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['email' => 'user@example.com']);
             $falseContext = new Context(['email' => 'user@test.com']);
@@ -178,7 +179,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse startsWith operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['name' => ['startsWith' => 'John']], 'test-rule');
+            $rule = $parser->parse(['name' => ['startsWith' => 'John']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['name' => 'John Doe']);
             $falseContext = new Context(['name' => 'Jane Smith']);
@@ -189,7 +190,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse endsWith operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['filename' => ['endsWith' => '.pdf']], 'test-rule');
+            $rule = $parser->parse(['filename' => ['endsWith' => '.pdf']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['filename' => 'document.pdf']);
             $falseContext = new Context(['filename' => 'document.docx']);
@@ -200,7 +201,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse match operator with regex', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']], 'test-rule');
+            $rule = $parser->parse(['phone' => ['match' => '^\\d{3}-\\d{4}$']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['phone' => '123-4567']);
             $falseContext = new Context(['phone' => '12-34567']);
@@ -211,7 +212,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse inequality operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['status' => ['ne' => 'inactive']], 'test-rule');
+            $rule = $parser->parse(['status' => ['ne' => 'inactive']], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['status' => 'active']);
             $falseContext = new Context(['status' => 'inactive']);
@@ -222,7 +223,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse less than or equal operator', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['age' => ['lte' => 65]], 'test-rule');
+            $rule = $parser->parse(['age' => ['lte' => 65]], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 30]);
             $falseContext = new Context(['age' => 70]);
@@ -233,7 +234,7 @@ describe('GraphQLFilterParser', function (): void {
 
         test('parse range query with multiple operators', function (): void {
             $parser = new GraphQLFilterParser();
-            $rule = $parser->parse(['age' => ['gte' => 18, 'lte' => 65]], 'test-rule');
+            $rule = $parser->parse(['age' => ['gte' => 18, 'lte' => 65]], RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 30]);
             $falseContext1 = new Context(['age' => 15]);
@@ -256,7 +257,7 @@ describe('GraphQLFilterParser', function (): void {
                     ],
                     ['age' => ['gte' => 21]],
                 ],
-            ], 'test-rule');
+            ], RuleIds::fromString('test-rule'));
 
             $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
             $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -270,7 +271,7 @@ describe('GraphQLFilterParser', function (): void {
         test('parse JSON string input', function (): void {
             $parser = new GraphQLFilterParser();
             $json = '{"age": {"gte": 18}, "country": "US"}';
-            $rule = $parser->parse($json, 'test-rule');
+            $rule = $parser->parse($json, RuleIds::fromString('test-rule'));
 
             $trueContext = new Context(['age' => 25, 'country' => 'US']);
             $falseContext = new Context(['age' => 15, 'country' => 'US']);

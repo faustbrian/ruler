@@ -9,11 +9,12 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\MongoDB\MongoQueryRuleBuilder;
 
 test('parse simple comparison expression', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['age' => ['$gt' => 18]], 'test-rule');
+    $rule = $mongo->parse(['age' => ['$gt' => 18]], RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 25]);
 
@@ -23,7 +24,7 @@ test('parse simple comparison expression', function (): void {
 
 test('parse comparison with field that fails', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['age' => ['$gt' => 18]], 'test-rule');
+    $rule = $mongo->parse(['age' => ['$gt' => 18]], RuleIds::fromString('test-rule'));
 
     $context = new Context(['age' => 15]);
 
@@ -32,7 +33,7 @@ test('parse comparison with field that fails', function (): void {
 
 test('parse equality operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['status' => 'active'], 'test-rule');
+    $rule = $mongo->parse(['status' => 'active'], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -48,7 +49,7 @@ test('parse logical and expression', function (): void {
             ['age' => ['$gte' => 18]],
             ['country' => 'US'],
         ],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25, 'country' => 'US']);
     $falseContext1 = new Context(['age' => 15, 'country' => 'US']);
@@ -66,7 +67,7 @@ test('parse logical or expression', function (): void {
             ['age' => ['$gte' => 21]],
             ['country' => 'US'],
         ],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 25, 'country' => 'CA']);
     $trueContext2 = new Context(['age' => 18, 'country' => 'US']);
@@ -90,7 +91,7 @@ test('parse expression with parentheses', function (): void {
             ],
             ['age' => ['$gte' => 21]],
         ],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext1 = new Context(['age' => 20, 'country' => 'US']);
     $trueContext2 = new Context(['age' => 25, 'country' => 'CA']);
@@ -105,7 +106,7 @@ test('parse mathematical expression', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support inline arithmetic
     // Test with pre-computed total value
-    $rule = $mongo->parse(['total' => ['$gt' => 100]], 'test-rule');
+    $rule = $mongo->parse(['total' => ['$gt' => 100]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['total' => 105]); // price + shipping = 105
     $falseContext = new Context(['total' => 60]);  // price + shipping = 60
@@ -118,7 +119,7 @@ test('parse not expression', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     $rule = $mongo->parse([
         '$not' => ['age' => ['$lt' => 18]],
-    ], 'test-rule');
+    ], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 25]);
     $falseContext = new Context(['age' => 15]);
@@ -129,7 +130,7 @@ test('parse not expression', function (): void {
 
 test('parse in operator with array', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['country' => ['$in' => ['US', 'CA', 'UK']]], 'test-rule');
+    $rule = $mongo->parse(['country' => ['$in' => ['US', 'CA', 'UK']]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['country' => 'US']);
     $falseContext = new Context(['country' => 'FR']);
@@ -140,7 +141,7 @@ test('parse in operator with array', function (): void {
 
 test('parse matches operator with regex', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], 'test-rule');
+    $rule = $mongo->parse(['phone' => ['$regex' => '^\\d{3}-\\d{4}$']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['phone' => '123-4567']);
     $falseContext = new Context(['phone' => '12-34567']);
@@ -151,7 +152,7 @@ test('parse matches operator with regex', function (): void {
 
 test('parse less than or equal operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['age' => ['$lte' => 65]], 'test-rule');
+    $rule = $mongo->parse(['age' => ['$lte' => 65]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['age' => 30]);
     $falseContext = new Context(['age' => 70]);
@@ -162,7 +163,7 @@ test('parse less than or equal operator', function (): void {
 
 test('parse inequality operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['status' => ['$ne' => 'inactive']], 'test-rule');
+    $rule = $mongo->parse(['status' => ['$ne' => 'inactive']], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['status' => 'active']);
     $falseContext = new Context(['status' => 'inactive']);
@@ -173,7 +174,7 @@ test('parse inequality operator', function (): void {
 
 test('parse notIn operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
-    $rule = $mongo->parse(['role' => ['$nin' => ['banned', 'suspended']]], 'test-rule');
+    $rule = $mongo->parse(['role' => ['$nin' => ['banned', 'suspended']]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['role' => 'active']);
     $falseContext = new Context(['role' => 'banned']);
@@ -186,7 +187,7 @@ test('parse modulo operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support modulo in query language
     // Test with pre-computed boolean result
-    $rule = $mongo->parse(['isEven' => true], 'test-rule');
+    $rule = $mongo->parse(['isEven' => true], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['isEven' => true]);  // value % 2 == 0
     $falseContext = new Context(['isEven' => false]); // value % 2 != 0
@@ -199,7 +200,7 @@ test('parse exponentiate operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support exponentiation in query language
     // Test with pre-computed result
-    $rule = $mongo->parse(['result' => ['$gt' => 100]], 'test-rule');
+    $rule = $mongo->parse(['result' => ['$gt' => 100]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['result' => 125]);  // 5 ** 3 = 125
     $falseContext = new Context(['result' => 8]);   // 2 ** 3 = 8
@@ -212,7 +213,7 @@ test('parse division operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support division in query language
     // Test with pre-computed result
-    $rule = $mongo->parse(['average' => 10], 'test-rule');
+    $rule = $mongo->parse(['average' => 10], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['average' => 10]);  // 100 / 10 = 10
     $falseContext = new Context(['average' => 20]); // 100 / 5 = 20
@@ -225,7 +226,7 @@ test('parse multiplication operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support multiplication in query language
     // Test with pre-computed total
-    $rule = $mongo->parse(['total' => ['$gt' => 1_000]], 'test-rule');
+    $rule = $mongo->parse(['total' => ['$gt' => 1_000]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['total' => 1_200]);  // 20 * 60 = 1200
     $falseContext = new Context(['total' => 500]);  // 10 * 50 = 500
@@ -238,7 +239,7 @@ test('parse subtraction operator', function (): void {
     $mongo = new MongoQueryRuleBuilder();
     // MongoDB doesn't support subtraction in query language
     // Test with pre-computed final value
-    $rule = $mongo->parse(['final' => ['$lt' => 100]], 'test-rule');
+    $rule = $mongo->parse(['final' => ['$lt' => 100]], RuleIds::fromString('test-rule'));
 
     $trueContext = new Context(['final' => 90]);   // 120 - 30 = 90
     $falseContext = new Context(['final' => 150]); // 200 - 50 = 150

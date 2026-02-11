@@ -25,6 +25,7 @@ use Throwable;
 
 use const JSON_THROW_ON_ERROR;
 
+use function array_keys;
 use function array_map;
 use function array_reduce;
 use function assert;
@@ -362,8 +363,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        /** @var array<string, mixed> $decoded */
-        return $this->evaluateFromArray($decoded);
+        return $this->evaluateFromArray($this->assertStringKeyedArray($decoded, 'json'));
     }
 
     /**
@@ -441,8 +441,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        /** @var array<string, mixed> $parsed */
-        return $this->evaluateFromArray($parsed);
+        return $this->evaluateFromArray($this->assertStringKeyedArray($parsed, 'yaml'));
     }
 
     /**
@@ -591,6 +590,29 @@ final readonly class RuleEvaluator
     }
 
     /**
+     * @param  array<mixed, mixed>  $values
+     * @param  'json'|'yaml'        $format
+     * @return array<string, mixed>
+     */
+    private function assertStringKeyedArray(array $values, string $format): array
+    {
+        foreach (array_keys($values) as $key) {
+            if (is_string($key)) {
+                continue;
+            }
+
+            throw RuleEvaluatorException::runtimeEvaluationFailed(
+                'Values payload must decode to an object with string keys',
+                ['values'],
+                ['format' => $format],
+            );
+        }
+
+        /** @var array<string, mixed> $values */
+        return $values;
+    }
+
+    /**
      * Compile and cache the rule definition as an executable Rule instance.
      */
     private function getCompiledRule(): Rule
@@ -605,7 +627,7 @@ final readonly class RuleEvaluator
         $ruleBuilder = new RuleBuilder();
         $proposition = self::proposition($this->definition, $ruleBuilder);
 
-        $rule = $ruleBuilder->create($proposition, $key);
+        $rule = $ruleBuilder->create($proposition, RuleIds::fromString($key));
         $this->compiledRuleCache->put($key, $rule);
 
         return $rule;

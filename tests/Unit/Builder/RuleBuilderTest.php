@@ -11,6 +11,7 @@ use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\Operators\Logical\LogicalAnd;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Cline\Ruler\Operators\Logical\LogicalOr;
@@ -76,12 +77,12 @@ describe('RuleBuilder', function (): void {
             $true = new TrueProposition();
             $false = new FalseProposition();
 
-            expect($rb->create($true, 'rule-true'))->toBeInstanceOf(Rule::class);
-            expect($rb->create($true, 'rule-true-eval')->evaluate($context))->toBeTrue();
-            expect($rb->create($false, 'rule-false-eval')->evaluate($context))->toBeFalse();
+            expect($rb->create($true, RuleIds::fromString('rule-true')))->toBeInstanceOf(Rule::class);
+            expect($rb->create($true, RuleIds::fromString('rule-true-eval'))->evaluate($context))->toBeTrue();
+            expect($rb->create($false, RuleIds::fromString('rule-false-eval'))->evaluate($context))->toBeFalse();
 
             $executed = false;
-            $rule = $rb->create($true, 'rule-with-action', function ($context) use (&$executed): void {
+            $rule = $rb->create($true, RuleIds::fromString('rule-with-action'), function ($context) use (&$executed): void {
                 $executed = true;
             });
 
@@ -130,11 +131,11 @@ describe('RuleBuilder', function (): void {
             $rb = new RuleBuilder();
             $first = $rb->create(
                 new TrueProposition(),
-                'first-explicit-id',
+                RuleIds::fromString('first-explicit-id'),
             );
             $second = $rb->create(
                 new TrueProposition(),
-                'second-explicit-id',
+                RuleIds::fromString('second-explicit-id'),
             );
 
             expect($first->getId())->toBe('first-explicit-id');

@@ -10,6 +10,7 @@
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\Core\RuleSet;
 use Cline\Ruler\Core\RuleSetExecutionReport;
 use Cline\Ruler\Enums\ConflictResolutionStrategy;
@@ -24,17 +25,17 @@ describe('RuleSet', function (): void {
             $executedActionA = false;
             $ruleA = new Rule($true, function ($context) use (&$executedActionA): void {
                 $executedActionA = true;
-            }, 'rule-a');
+            }, RuleIds::fromString('rule-a'));
 
             $executedActionB = false;
             $ruleB = new Rule($true, function ($context) use (&$executedActionB): void {
                 $executedActionB = true;
-            }, 'rule-b');
+            }, RuleIds::fromString('rule-b'));
 
             $executedActionC = false;
             $ruleC = new Rule($true, function ($context) use (&$executedActionC): void {
                 $executedActionC = true;
-            }, 'rule-c');
+            }, RuleIds::fromString('rule-c'));
 
             $ruleset = new RuleSet([$ruleA]);
 
@@ -62,7 +63,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'low';
                 },
-                'low',
+                RuleIds::fromString('low'),
                 'Low priority',
                 10,
             );
@@ -72,7 +73,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'high';
                 },
-                'high',
+                RuleIds::fromString('high'),
                 'High priority',
                 100,
             );
@@ -97,7 +98,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'first';
                 },
-                'first',
+                RuleIds::fromString('first'),
                 'First',
                 5,
             );
@@ -107,7 +108,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'second';
                 },
-                'second',
+                RuleIds::fromString('second'),
                 'Second',
                 5,
             );
@@ -132,7 +133,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'high';
                 },
-                'high',
+                RuleIds::fromString('high'),
                 'High',
                 100,
             );
@@ -142,7 +143,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'low';
                 },
-                'low',
+                RuleIds::fromString('low'),
                 'Low',
                 1,
             );
@@ -173,7 +174,7 @@ describe('RuleSet', function (): void {
                     $executionOrder[] = 'approve';
                     $context['approved'] = true;
                 },
-                'approve',
+                RuleIds::fromString('approve'),
                 'Approval Rule',
                 20,
             );
@@ -185,7 +186,7 @@ describe('RuleSet', function (): void {
                     $context['seeded'] = true;
                     $context['eligible'] = true;
                 },
-                'seed',
+                RuleIds::fromString('seed'),
                 'Seed Rule',
                 10,
             );
@@ -213,7 +214,7 @@ describe('RuleSet', function (): void {
                     ++$counter;
                     $context['counter'] = $counter;
                 },
-                'counter',
+                RuleIds::fromString('counter'),
                 'Counter Rule',
             );
 
@@ -233,7 +234,7 @@ describe('RuleSet', function (): void {
             $rule = new Rule(
                 $rb['ready']->sameAs(true),
                 null,
-                'match-only',
+                RuleIds::fromString('match-only'),
                 'Match Only',
             );
 
@@ -255,7 +256,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'A';
                 },
-                'A',
+                RuleIds::fromString('A'),
                 'Rule A',
                 10,
             );
@@ -265,7 +266,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'B';
                 },
-                'B',
+                RuleIds::fromString('B'),
                 'Rule B',
                 5,
             );
@@ -275,7 +276,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'DISABLED';
                 },
-                'D',
+                RuleIds::fromString('D'),
                 'Disabled Rule',
                 100,
                 false,
@@ -301,7 +302,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'A';
                 },
-                'rule-a',
+                RuleIds::fromString('rule-a'),
                 'A',
             );
             $ruleB = new Rule(
@@ -309,22 +310,22 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'B';
                 },
-                'rule-b',
+                RuleIds::fromString('rule-b'),
                 'B',
             );
 
             $ruleset = new RuleSet([$ruleA, $ruleB]);
-            $ruleset->disableRule('rule-a');
+            $ruleset->disableRule(RuleIds::fromString('rule-a'));
             $ruleset->executeRules($context);
 
-            expect($ruleset->isRuleEnabled('rule-a'))->toBeFalse();
+            expect($ruleset->isRuleEnabled(RuleIds::fromString('rule-a')))->toBeFalse();
             expect($executed)->toBe(['B']);
 
             $executed = [];
-            $ruleset->enableRule('rule-a');
+            $ruleset->enableRule(RuleIds::fromString('rule-a'));
             $ruleset->executeRules($context);
 
-            expect($ruleset->isRuleEnabled('rule-a'))->toBeTrue();
+            expect($ruleset->isRuleEnabled(RuleIds::fromString('rule-a')))->toBeTrue();
             expect($executed)->toBe(['A', 'B']);
         });
 
@@ -338,7 +339,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'original';
                 },
-                'original',
+                RuleIds::fromString('original'),
                 'Original',
             );
 
@@ -347,7 +348,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'replacement';
                 },
-                'replacement',
+                RuleIds::fromString('replacement'),
                 'Replacement',
             );
 
@@ -356,7 +357,7 @@ describe('RuleSet', function (): void {
                 function ($context) use (&$executed): void {
                     $executed[] = 'remove';
                 },
-                'remove',
+                RuleIds::fromString('remove'),
                 'Remove',
             );
 
@@ -373,16 +374,16 @@ describe('RuleSet', function (): void {
 
         test('clearRules removes all rules and resets lifecycle state', function (): void {
             $true = new TrueProposition();
-            $ruleA = new Rule($true, null, 'a', 'A');
-            $ruleB = new Rule($true, null, 'b', 'B');
+            $ruleA = new Rule($true, null, RuleIds::fromString('a'), 'A');
+            $ruleB = new Rule($true, null, RuleIds::fromString('b'), 'B');
 
             $ruleset = new RuleSet([$ruleA, $ruleB]);
-            $ruleset->disableRule('a');
+            $ruleset->disableRule(RuleIds::fromString('a'));
             $ruleset->clearRules();
 
             expect($ruleset->getRules())->toBe([]);
-            expect($ruleset->isRuleEnabled('a'))->toBeFalse();
-            expect($ruleset->isRuleEnabled('b'))->toBeFalse();
+            expect($ruleset->isRuleEnabled(RuleIds::fromString('a')))->toBeFalse();
+            expect($ruleset->isRuleEnabled(RuleIds::fromString('b')))->toBeFalse();
         });
     });
 
@@ -391,7 +392,7 @@ describe('RuleSet', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 static function ($context): void {},
-                'explicit-id',
+                RuleIds::fromString('explicit-id'),
             );
 
             $ruleset = new RuleSet([$rule]);
@@ -404,8 +405,8 @@ describe('RuleSet', function (): void {
             $this->expectException(RuntimeException::class);
 
             $true = new TrueProposition();
-            $first = new Rule($true, static function ($context): void {}, 'dupe');
-            $second = new Rule($true, static function ($context): void {}, 'dupe');
+            $first = new Rule($true, static function ($context): void {}, RuleIds::fromString('dupe'));
+            $second = new Rule($true, static function ($context): void {}, RuleIds::fromString('dupe'));
 
             new RuleSet([$first, $second]);
         });
@@ -417,7 +418,7 @@ describe('RuleSet', function (): void {
             $rule = new Rule(
                 $true,
                 static function ($context): void {},
-                'loop',
+                RuleIds::fromString('loop'),
                 'Loop Rule',
             );
 

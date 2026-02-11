@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\Wirefilter\WirefilterParser;
 use Cline\Ruler\DSL\Wirefilter\WirefilterSerializer;
 use Cline\Ruler\Operators\Comparison\Between;
@@ -32,7 +33,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age > 18', 'test-rule');
+            $rule = $parser->parse('age > 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age > 18');
@@ -42,7 +43,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('status == "active"', 'test-rule');
+            $rule = $parser->parse('status == "active"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status == "active"');
@@ -52,7 +53,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age >= 18 and country == "US"', 'test-rule');
+            $rule = $parser->parse('age >= 18 and country == "US"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= 18 and country == "US"');
@@ -62,7 +63,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age >= 21 or country == "US"', 'test-rule');
+            $rule = $parser->parse('age >= 21 or country == "US"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= 21 or country == "US"');
@@ -72,7 +73,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('not (age < 18)', 'test-rule');
+            $rule = $parser->parse('not (age < 18)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('not (age < 18)');
@@ -82,7 +83,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('price + shipping > 100', 'test-rule');
+            $rule = $parser->parse('price + shipping > 100', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price + shipping > 100');
@@ -92,7 +93,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('total - discount < 100', 'test-rule');
+            $rule = $parser->parse('total - discount < 100', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('total - discount < 100');
@@ -102,7 +103,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('quantity * price > 1000', 'test-rule');
+            $rule = $parser->parse('quantity * price > 1000', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('quantity * price > 1000');
@@ -112,7 +113,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('total / count == 10', 'test-rule');
+            $rule = $parser->parse('total / count == 10', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('total / count == 10');
@@ -122,7 +123,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('value % 2 == 0', 'test-rule');
+            $rule = $parser->parse('value % 2 == 0', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('value % 2 == 0');
@@ -132,7 +133,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('base ** power > 100', 'test-rule');
+            $rule = $parser->parse('base ** power > 100', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('base ** power > 100');
@@ -142,7 +143,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('-value < 0', 'test-rule');
+            $rule = $parser->parse('-value < 0', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('-value < 0');
@@ -152,7 +153,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('country in ["US", "CA", "UK"]', 'test-rule');
+            $rule = $parser->parse('country in ["US", "CA", "UK"]', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('country in ["US", "CA", "UK"]');
@@ -162,7 +163,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('role not in ["banned", "suspended"]', 'test-rule');
+            $rule = $parser->parse('role not in ["banned", "suspended"]', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('role not in ["banned", "suspended"]');
@@ -172,7 +173,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"', 'test-rule');
+            $rule = $parser->parse('phone matches "/^\\\\d{3}-\\\\d{4}$/"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('phone matches "/^\\\\d{3}-\\\\d{4}$/"');
@@ -182,7 +183,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age === 18', 'test-rule');
+            $rule = $parser->parse('age === 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age === 18');
@@ -192,7 +193,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('verified !== false', 'test-rule');
+            $rule = $parser->parse('verified !== false', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('verified !== false');
@@ -202,7 +203,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('status != "inactive"', 'test-rule');
+            $rule = $parser->parse('status != "inactive"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status != "inactive"');
@@ -212,7 +213,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age <= 65', 'test-rule');
+            $rule = $parser->parse('age <= 65', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age <= 65');
@@ -222,7 +223,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('age >= 18', 'test-rule');
+            $rule = $parser->parse('age >= 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age >= 18');
@@ -232,7 +233,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('quantity < 10', 'test-rule');
+            $rule = $parser->parse('quantity < 10', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('quantity < 10');
@@ -242,7 +243,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('(age >= 18 and country == "US") or age >= 21');
@@ -252,7 +253,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('verified == true', 'test-rule');
+            $rule = $parser->parse('verified == true', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('verified == true');
@@ -262,7 +263,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('deleted == false', 'test-rule');
+            $rule = $parser->parse('deleted == false', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('deleted == false');
@@ -272,7 +273,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('deleted_at == null', 'test-rule');
+            $rule = $parser->parse('deleted_at == null', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('deleted_at == null');
@@ -282,7 +283,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('price > 99.99', 'test-rule');
+            $rule = $parser->parse('price > 99.99', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price > 99.99');
@@ -292,7 +293,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and country == "US") or age >= 21', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // Should preserve parentheses for AND inside OR
@@ -303,7 +304,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('value === 1', 'test-rule');
+            $rule = $parser->parse('value === 1', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('===');
@@ -313,7 +314,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('value !== 1', 'test-rule');
+            $rule = $parser->parse('value !== 1', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('!==');
@@ -328,7 +329,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('name');
             $value = new Variable(null, 'John');
             $operator = new StartsWith($variable, $value);
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -343,7 +344,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('text');
             $value = new Variable(null, 'test');
             $operator = new StringContains($variable, $value);
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -360,7 +361,7 @@ describe('WirefilterSerializer', function (): void {
             $min = new Variable(null, 18);
             $max = new Variable(null, 65);
             $between = new Between($age, $min, $max);
-            $rule = $builder->create($between, 'test-rule');
+            $rule = $builder->create($between, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -377,7 +378,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new GreaterThanOrEqualTo($age, new Variable(null, 18));
             $verifiedCheck = new EqualTo($verified, new Variable(null, true));
             $xor = new LogicalXor([$ageCheck, $verifiedCheck]);
-            $rule = $builder->create($xor, 'test-rule');
+            $rule = $builder->create($xor, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -393,7 +394,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new GreaterThanOrEqualTo($age, new Variable(null, 18));
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nand = new LogicalNand([$ageCheck, $countryCheck]);
-            $rule = $builder->create($nand, 'test-rule');
+            $rule = $builder->create($nand, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -409,7 +410,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new LessThan($age, new Variable(null, 18));
             $bannedCheck = new EqualTo($banned, new Variable(null, true));
             $nor = new LogicalNor([$ageCheck, $bannedCheck]);
-            $rule = $builder->create($nor, 'test-rule');
+            $rule = $builder->create($nor, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -420,7 +421,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('message == "Hello \\"World\\""', 'test-rule');
+            $rule = $parser->parse('message == "Hello \\"World\\""', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('Hello');
@@ -430,7 +431,7 @@ describe('WirefilterSerializer', function (): void {
             $parser = new WirefilterParser();
             $serializer = new WirefilterSerializer();
 
-            $rule = $parser->parse('tags in [1, 2, 3]', 'test-rule');
+            $rule = $parser->parse('tags in [1, 2, 3]', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('tags in [1, 2, 3]');
@@ -446,7 +447,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $objectValue = new Variable(null, new stdClass());
             $operator = new EqualTo($variable, $objectValue);
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Cannot cast value to string: object');
@@ -465,7 +466,7 @@ describe('WirefilterSerializer', function (): void {
                 }
             };
 
-            $rule = $builder->create($customOperator, 'test-rule');
+            $rule = $builder->create($customOperator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class);
@@ -484,7 +485,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($operator, [$variable]); // Only 1 operand instead of 2
 
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Binary operator == requires exactly 2 operands');
@@ -505,7 +506,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($notOperator, [$condition, $var2]); // 2 operands instead of 1
 
-            $rule = $builder->create($notOperator, 'test-rule');
+            $rule = $builder->create($notOperator, RuleIds::fromString('test-rule'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'NOT operator requires exactly 1 operand');
@@ -518,7 +519,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // This tests the path where variable has null name and value is a math operator
-            $rule = $parser->parse('price + 10 > 100', 'test-rule');
+            $rule = $parser->parse('price + 10 > 100', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price + 10 > 100');
@@ -539,7 +540,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($notOperator, [$variable]);
 
-            $rule = $builder->create($notOperator, 'test-rule');
+            $rule = $builder->create($notOperator, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -551,7 +552,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // This creates nested propositions as operands
-            $rule = $parser->parse('(age >= 18 and country == "US") or (age >= 21 and country == "CA")', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and country == "US") or (age >= 21 and country == "CA")', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('and');
@@ -563,7 +564,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // Test wrapping: AND inside OR needs parentheses
-            $rule = $parser->parse('(age >= 18 and verified == true) or country == "US"', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and verified == true) or country == "US"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('(');
@@ -575,7 +576,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // Test wrapping: OR inside AND needs parentheses
-            $rule = $parser->parse('(age >= 18 or verified == true) and country == "US"', 'test-rule');
+            $rule = $parser->parse('(age >= 18 or verified == true) and country == "US"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('(');
@@ -587,7 +588,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // Test wrapping: AND inside XOR needs parentheses
-            $rule = $parser->parse('(age >= 18 and verified == true) xor country == "US"', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and verified == true) xor country == "US"', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toContain('(');
@@ -607,7 +608,7 @@ describe('WirefilterSerializer', function (): void {
             $orOp = new LogicalOr([$ageCheck, $verifiedCheck]);
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nand = new LogicalNand([$orOp, $countryCheck]);
-            $rule = $builder->create($nand, 'test-rule');
+            $rule = $builder->create($nand, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -628,7 +629,7 @@ describe('WirefilterSerializer', function (): void {
             $andOp = new LogicalAnd([$ageCheck, $verifiedCheck]);
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nor = new LogicalNor([$andOp, $countryCheck]);
-            $rule = $builder->create($nor, 'test-rule');
+            $rule = $builder->create($nor, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -644,7 +645,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $value = new Variable(null, 'simple_value');
             $operator = new EqualTo($variable, $value);
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -666,7 +667,7 @@ describe('WirefilterSerializer', function (): void {
                 }
             };
 
-            $rule = $builder->create($customOp, 'test-rule');
+            $rule = $builder->create($customOp, RuleIds::fromString('test-rule'));
 
             // This should use the fallback path (lines 134-135)
             expect(fn (): string => $serializer->serialize($rule))
@@ -678,7 +679,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             // Create a very nested structure with proposition inside math operation
-            $rule = $parser->parse('(age >= 18 and country == "US") or (price + (quantity * 2) > 100)', 'test-rule');
+            $rule = $parser->parse('(age >= 18 and country == "US") or (price + (quantity * 2) > 100)', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // This tests line 298 - nested propositions as operands
@@ -696,7 +697,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $value = new Variable(null, 42);
             $operator = new EqualTo($variable, $value);
-            $rule = $builder->create($operator, 'test-rule');
+            $rule = $builder->create($operator, RuleIds::fromString('test-rule'));
 
             $result = $serializer->serialize($rule);
 
@@ -710,9 +711,9 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             $original = 'age > 18';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
-            $reparsed = $parser->parse($serialized, 'test-rule');
+            $reparsed = $parser->parse($serialized, RuleIds::fromString('test-rule'));
 
             expect($serialized)->toBe($original);
         });
@@ -722,7 +723,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             $original = 'age >= 18 and country == "US"';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -733,7 +734,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             $original = 'price + shipping > 100';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -744,7 +745,7 @@ describe('WirefilterSerializer', function (): void {
             $serializer = new WirefilterSerializer();
 
             $original = 'country in ["US", "CA", "UK"]';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);

@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\DSL\Natural\NaturalLanguageParser;
 use Cline\Ruler\DSL\Natural\NaturalLanguageSerializer;
 use Cline\Ruler\Operators\Comparison\EqualTo;
@@ -23,7 +24,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('age is greater than 18', 'test-rule');
+            $rule = $parser->parse('age is greater than 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than 18');
@@ -33,7 +34,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('status equals active', 'test-rule');
+            $rule = $parser->parse('status equals active', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status equals active');
@@ -43,7 +44,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('status is not inactive', 'test-rule');
+            $rule = $parser->parse('status is not inactive', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status is not inactive');
@@ -54,7 +55,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             // Parser uses "is at least", serializer outputs the full form
-            $rule = $parser->parse('age is at least 18', 'test-rule');
+            $rule = $parser->parse('age is at least 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than or equal to 18');
@@ -64,7 +65,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('age is less than 65', 'test-rule');
+            $rule = $parser->parse('age is less than 65', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is less than 65');
@@ -75,7 +76,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             // Parser uses "is at most", serializer outputs the full form
-            $rule = $parser->parse('age is at most 65', 'test-rule');
+            $rule = $parser->parse('age is at most 65', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is less than or equal to 65');
@@ -85,7 +86,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('age is at least 18 and country equals US', 'test-rule');
+            $rule = $parser->parse('age is at least 18 and country equals US', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than or equal to 18 and country equals US');
@@ -95,7 +96,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('age is at least 21 or country equals US', 'test-rule');
+            $rule = $parser->parse('age is at least 21 or country equals US', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than or equal to 21 or country equals US');
@@ -105,7 +106,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('age is between 18 and 65', 'test-rule');
+            $rule = $parser->parse('age is between 18 and 65', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is between 18 and 65');
@@ -115,7 +116,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('country is one of US, CA, UK', 'test-rule');
+            $rule = $parser->parse('country is one of US, CA, UK', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('country is one of US, CA, UK');
@@ -125,7 +126,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('status is either active or pending', 'test-rule');
+            $rule = $parser->parse('status is either active or pending', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('status is either active or pending');
@@ -135,7 +136,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('country is not one of US, CA', 'test-rule');
+            $rule = $parser->parse('country is not one of US, CA', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('country is not one of US, CA');
@@ -145,7 +146,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('name contains John', 'test-rule');
+            $rule = $parser->parse('name contains John', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('name contains John');
@@ -155,7 +156,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('email starts with admin', 'test-rule');
+            $rule = $parser->parse('email starts with admin', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('email starts with admin');
@@ -165,7 +166,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('filename ends with .pdf', 'test-rule');
+            $rule = $parser->parse('filename ends with .pdf', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('filename ends with .pdf');
@@ -175,7 +176,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('active is true', 'test-rule');
+            $rule = $parser->parse('active is true', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('active equals true');
@@ -185,7 +186,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('deleted is false', 'test-rule');
+            $rule = $parser->parse('deleted is false', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('deleted equals false');
@@ -195,7 +196,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('price is greater than 99.99', 'test-rule');
+            $rule = $parser->parse('price is greater than 99.99', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('price is greater than 99.99');
@@ -205,7 +206,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('(age is at least 18 and country equals US) or age is at least 21', 'test-rule');
+            $rule = $parser->parse('(age is at least 18 and country equals US) or age is at least 21', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             // Note: Parentheses are not preserved when not needed for precedence
@@ -219,7 +220,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'age is greater than 18';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -230,7 +231,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'status equals active';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -242,7 +243,7 @@ describe('NaturalLanguageSerializer', function (): void {
 
             // Use "is at least" for parsing, serializer will output full form
             $original = 'age is at least 18 and country equals US';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             // Serializer outputs the canonical form
@@ -254,7 +255,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'age is between 18 and 65';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -265,7 +266,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'country is one of US, CA, UK';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -276,7 +277,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'status is either active or pending';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -287,7 +288,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             $original = 'name contains John';
-            $rule = $parser->parse($original, 'test-rule');
+            $rule = $parser->parse($original, RuleIds::fromString('test-rule'));
             $serialized = $serializer->serialize($rule);
 
             expect($serialized)->toBe($original);
@@ -299,7 +300,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $parser = new NaturalLanguageParser();
             $serializer = new NaturalLanguageSerializer();
 
-            $rule = $parser->parse('value equals null', 'test-rule');
+            $rule = $parser->parse('value equals null', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('value equals null');
@@ -311,7 +312,7 @@ describe('NaturalLanguageSerializer', function (): void {
             // Create a Variable without a name
             $variable = new Variable(null, 'test');
             $proposition = new EqualTo($variable, new Variable(null, 'value'));
-            $rule = new Rule($proposition, null, 'rule-missing-field-name');
+            $rule = new Rule($proposition, null, RuleIds::fromString('rule-missing-field-name'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Expected variable with name for field reference');
@@ -326,7 +327,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 new Variable('field'),
                 $variable,
             );
-            $rule = new Rule($proposition, null, 'rule-unsupported-value-type');
+            $rule = new Rule($proposition, null, RuleIds::fromString('rule-unsupported-value-type'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class);
@@ -341,7 +342,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 new Variable('field'),
                 $variable,
             );
-            $rule = new Rule($proposition, null, 'rule-list-membership-type');
+            $rule = new Rule($proposition, null, RuleIds::fromString('rule-list-membership-type'));
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Expected variable with array value for list membership');
@@ -352,7 +353,7 @@ describe('NaturalLanguageSerializer', function (): void {
             $serializer = new NaturalLanguageSerializer();
 
             // Use a standard operator that should work with getOperands() method
-            $rule = $parser->parse('age is greater than 18', 'test-rule');
+            $rule = $parser->parse('age is greater than 18', RuleIds::fromString('test-rule'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than 18');
@@ -382,7 +383,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 $orProposition,
             ]);
 
-            $rule = new Rule($andProposition, null, 'rule-parenthesized-or');
+            $rule = new Rule($andProposition, null, RuleIds::fromString('rule-parenthesized-or'));
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than 18 and (status equals active or status equals pending)');

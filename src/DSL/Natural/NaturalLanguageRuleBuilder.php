@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\Natural;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Closure;
 use InvalidArgumentException;
 
@@ -65,7 +66,7 @@ final readonly class NaturalLanguageRuleBuilder
      *
      * @return Rule Compiled rule ready for evaluation against data
      */
-    public function parse(string $text, string $ruleId): Rule
+    public function parse(string $text, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($text);
         $proposition = $this->compiler->compile($ast);
@@ -86,7 +87,7 @@ final readonly class NaturalLanguageRuleBuilder
      *
      * @return Rule Compiled rule with action callback
      */
-    public function parseWithAction(string $text, Closure $action, string $ruleId): Rule
+    public function parseWithAction(string $text, Closure $action, RuleId $ruleId): Rule
     {
         $ast = $this->parser->parse($text);
         $proposition = $this->compiler->compile($ast);

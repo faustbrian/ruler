@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\LDAP;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Closure;
 use LogicException;
 use RuntimeException;
@@ -82,7 +83,7 @@ final readonly class LDAPFilterParser
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(string $expression, string $ruleId): Rule
+    public function parse(string $expression, RuleId $ruleId): Rule
     {
         return $this->builder->parse($expression, $ruleId);
     }
@@ -103,7 +104,7 @@ final readonly class LDAPFilterParser
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(string $expression, Closure $action, string $ruleId): Rule
+    public function parseWithAction(string $expression, Closure $action, RuleId $ruleId): Rule
     {
         return $this->builder->parseWithAction($expression, $action, $ruleId);
     }

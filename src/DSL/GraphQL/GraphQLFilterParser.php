@@ -11,6 +11,7 @@ namespace Cline\Ruler\DSL\GraphQL;
 
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
 use Closure;
 use InvalidArgumentException;
 use JsonException;
@@ -79,7 +80,7 @@ final readonly class GraphQLFilterParser
      *
      * @return Rule The compiled Rule ready for evaluation
      */
-    public function parse(array|string $filter, string $ruleId): Rule
+    public function parse(array|string $filter, RuleId $ruleId): Rule
     {
         return $this->builder->parse($filter, $ruleId);
     }
@@ -100,7 +101,7 @@ final readonly class GraphQLFilterParser
      *
      * @return Rule The compiled Rule with attached action callback
      */
-    public function parseWithAction(array|string $filter, Closure $action, string $ruleId): Rule
+    public function parseWithAction(array|string $filter, Closure $action, RuleId $ruleId): Rule
     {
         return $this->builder->parseWithAction($filter, $action, $ruleId);
     }
