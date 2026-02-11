@@ -12,6 +12,7 @@ namespace Cline\Ruler\DSL\GraphQL;
 use Cline\Ruler\Exceptions\InvalidFilterException;
 use Cline\Ruler\Exceptions\InvalidFilterOperandException;
 use Cline\Ruler\Exceptions\UnsupportedComparisonOperatorException;
+use InvalidArgumentException;
 
 use const JSON_THROW_ON_ERROR;
 

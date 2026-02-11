@@ -11,6 +11,7 @@ namespace Cline\Ruler\Values;
 
 use Cline\Ruler\Exceptions\DivisionByZeroException;
 use Cline\Ruler\Exceptions\ValuesNotNumericException;
+use RuntimeException;
 use Stringable;
 
 use function ceil;

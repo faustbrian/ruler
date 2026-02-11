@@ -56,6 +56,7 @@ use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
+use InvalidArgumentException;
 
 use function array_key_exists;
 use function array_key_first;

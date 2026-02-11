@@ -42,6 +42,7 @@ use Cline\Ruler\Operators\Type\IsNull;
 use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
+use LogicException;
 use ReflectionClass;
 
 use function array_key_exists;
