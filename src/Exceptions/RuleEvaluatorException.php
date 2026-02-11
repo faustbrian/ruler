@@ -48,9 +48,9 @@ final class RuleEvaluatorException extends Exception
      *
      * @return self New exception instance with generic structure error message
      */
-    public static function invalidRuleStructure(): self
+    public static function invalidRuleStructure(string $reason = 'Invalid rule structure'): self
     {
-        return new self('Invalid rule structure');
+        return new self($reason);
     }
 
     /**

@@ -12,8 +12,11 @@ namespace Cline\Ruler\Core;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Builder\VariableProperty;
-use Cline\Ruler\Core\Context;
-use Cline\Ruler\Core\Operator;
+use Cline\Ruler\Core\Definition\CombinatorRuleDefinition;
+use Cline\Ruler\Core\Definition\ComparisonRuleDefinition;
+use Cline\Ruler\Core\Definition\RuleCombinator;
+use Cline\Ruler\Core\Definition\RuleDefinition;
+use Cline\Ruler\Core\Definition\RuleDefinitionParser;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Cline\Ruler\Variables\ContextValueReference;
 use Illuminate\Http\Request;
@@ -21,21 +24,15 @@ use Symfony\Component\Yaml\Yaml;
 
 use const JSON_THROW_ON_ERROR;
 
-use function array_key_exists;
 use function array_map;
 use function array_reduce;
 use function assert;
-use function count;
 use function explode;
 use function file_get_contents;
-use function in_array;
 use function is_array;
-use function is_int;
 use function is_string;
 use function json_decode;
 use function str_contains;
-use function throw_if;
-use function throw_unless;
 use function ucfirst;
 
 /**
@@ -61,6 +58,7 @@ final readonly class RuleEvaluator
      */
     private function __construct(
         private array $rules,
+        private RuleDefinition $definition,
         private CompiledRuleCache $compiledRuleCache,
         private CompiledRuleKeyGenerator $compiledRuleKeyGenerator,
     ) {}
@@ -83,8 +81,10 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
+        $definition = RuleDefinitionParser::fromArray($rules);
         $evaluator = new self(
             $rules,
+            $definition,
             $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
             $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
         );
@@ -312,75 +312,43 @@ final readonly class RuleEvaluator
      * corresponding proposition tree. Handles nested rules by recursively building
      * sub-propositions for complex logical expressions.
      *
-     * @param array<string, mixed> $rule        Rule definition containing either a combinator
-     *                                          with nested rules or an operator with field and value
-     * @param RuleBuilder          $ruleBuilder Builder instance used to construct propositions
-     *                                          and access variable values through array syntax
+     * @param RuleDefinition $definition  Typed rule definition containing either
+     *                                    combinator nodes or comparison nodes
+     * @param RuleBuilder    $ruleBuilder Builder instance used to construct propositions
+     *                                    and access variable values through array syntax
      *
      * @throws RuleEvaluatorException When the rule structure is invalid, the NOT
      *                                combinator has multiple values, or an unsupported
      *                                combinator is encountered
      *
-     * @return Operator|Proposition Constructed operator or proposition representing
-     *                              the rule definition logic
+     * @return Proposition Constructed proposition representing the rule definition
+     *                     logic
      */
-    private static function proposition(array $rule, RuleBuilder $ruleBuilder): Operator|Proposition
+    private static function proposition(RuleDefinition $definition, RuleBuilder $ruleBuilder): Proposition
     {
-        // Handle combinator-based rules (and, or, xor, not)
-        if (array_key_exists('combinator', $rule)) {
-            assert(is_string($rule['combinator']));
-            $method = 'logical'.ucfirst($rule['combinator']);
+        if ($definition instanceof CombinatorRuleDefinition) {
+            $method = 'logical'.ucfirst($definition->combinator->value);
 
-            // NOT combinator requires exactly one operand
-            if ($rule['combinator'] === 'not') {
-                assert(is_array($rule['value']));
-
-                throw_if(count($rule['value']) !== 1, RuleEvaluatorException::invalidNotRule());
-
-                assert(is_array($rule['value'][0]));
-
-                /** @var array<string, mixed> $firstValue */
-                $firstValue = $rule['value'][0];
-
-                $result = $ruleBuilder->{$method}(
-                    self::proposition($firstValue, $ruleBuilder)
-                );
-                assert($result instanceof Operator || $result instanceof Proposition);
-
-                return $result;
+            if ($definition->combinator === RuleCombinator::Not) {
+                return $ruleBuilder->{$method}(self::proposition($definition->operands[0], $ruleBuilder));
             }
 
-            // Validate supported combinators
-            throw_unless(in_array($rule['combinator'], ['and', 'or', 'xor'], true), RuleEvaluatorException::invalidCombinator($rule['combinator']));
-
-            // Recursively process multiple sub-rules for and/or/xor
-            assert(is_array($rule['value']));
-
-            /** @var array<int, array<string, mixed>> $ruleValues */
-            $ruleValues = $rule['value'];
-
-            $result = $ruleBuilder->{$method}(
+            return $ruleBuilder->{$method}(
                 ...array_map(
-                    fn (array $subRule): Operator|Proposition => self::proposition($subRule, $ruleBuilder),
-                    $ruleValues,
-                )
+                    fn (RuleDefinition $subRule): Proposition => self::proposition($subRule, $ruleBuilder),
+                    $definition->operands,
+                ),
             );
-            assert($result instanceof Operator || $result instanceof Proposition);
-
-            return $result;
         }
 
-        // Handle operator-based rules (comparison, arithmetic, etc.)
-        if (array_key_exists('operator', $rule)) {
+        if ($definition instanceof ComparisonRuleDefinition) {
             // Resolve value: supports dot notation, direct variable reference, or literal
-            $value = is_string($rule['value'] ?? null)
-                ? new ContextValueReference($rule['value'])
-                : $rule['value'];
+            $value = is_string($definition->value)
+                ? new ContextValueReference($definition->value)
+                : $definition->value;
 
             // Resolve field: supports dot notation for nested field access
-            assert(array_key_exists('field', $rule));
-            assert(is_string($rule['field']) || is_int($rule['field']));
-            $fieldString = is_string($rule['field']) ? $rule['field'] : (string) $rule['field'];
+            $fieldString = $definition->field;
 
             /** @var BuilderVariable $builder */
             $builder = str_contains($fieldString, '.')
@@ -395,12 +363,10 @@ final readonly class RuleEvaluator
                         $builder[$segment],
                     $ruleBuilder,
                 )
-                : $ruleBuilder[(string) $rule['field']];
+                : $ruleBuilder[$fieldString];
 
-            assert(is_string($rule['operator']));
-
-            $result = $builder->{$rule['operator']}($value);
-            assert($result instanceof Operator || $result instanceof Proposition);
+            $result = $builder->{$definition->operator}($value);
+            assert($result instanceof Proposition);
 
             return $result;
         }
@@ -421,8 +387,7 @@ final readonly class RuleEvaluator
         }
 
         $ruleBuilder = new RuleBuilder();
-        $proposition = self::proposition($this->rules, $ruleBuilder);
-        assert($proposition instanceof Proposition);
+        $proposition = self::proposition($this->definition, $ruleBuilder);
 
         $rule = $ruleBuilder->create($proposition);
         $this->compiledRuleCache->put($key, $rule);
