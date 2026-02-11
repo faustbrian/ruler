@@ -10,6 +10,7 @@ command=(
   --parallel
   --compact
   --no-progress
+  --colors=never
   --class=Cline\\Ruler\\Core\\RuleEvaluator,Cline\\Ruler\\Exceptions\\RuleEvaluatorException,Cline\\Ruler\\Enums\\RuleErrorCode,Cline\\Ruler\\Enums\\RuleErrorPhase
   --min=55
   --ignore-min-score-on-zero-mutations
@@ -19,6 +20,11 @@ set +e
 "${command[@]}" >"${log_file}" 2>&1
 status=$?
 set -e
+
+if [ -n "${MUTATION_LOG_PATH:-}" ]; then
+  mkdir -p "$(dirname "${MUTATION_LOG_PATH}")"
+  cp "${log_file}" "${MUTATION_LOG_PATH}"
+fi
 
 echo "Mutation summary:"
 grep -E "Mutating application files|Mutations for|Mutations:|Score:|Duration:|Parallel:" "${log_file}" || true
