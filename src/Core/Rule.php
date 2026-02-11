@@ -89,13 +89,32 @@ final readonly class Rule implements Proposition
      */
     public function execute(Context $context): void
     {
-        if (!$this->evaluate($context) || $this->action === null) {
-            return;
+        $this->executeWithResult($context);
+    }
+
+    /**
+     * Execute the rule and return a structured result.
+     */
+    public function executeWithResult(Context $context): RuleExecutionResult
+    {
+        $matched = $this->evaluate($context);
+        $actionExecuted = false;
+
+        if ($matched && $this->action !== null) {
+            throw_unless(is_callable($this->action), LogicException::class, 'Rule actions must be callable.');
+
+            ($this->action)();
+            $actionExecuted = true;
         }
 
-        throw_unless(is_callable($this->action), LogicException::class, 'Rule actions must be callable.');
-
-        ($this->action)();
+        return new RuleExecutionResult(
+            $this->id,
+            $this->name,
+            $this->priority,
+            $this->enabled,
+            $matched,
+            $actionExecuted,
+        );
     }
 
     /**

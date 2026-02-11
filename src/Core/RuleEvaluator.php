@@ -154,15 +154,31 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromArray(array $values): bool
     {
+        return $this->evaluateFromArrayWithReport($values)->getResult();
+    }
+
+    /**
+     * Evaluates rules against an array and returns a structured report.
+     *
+     * @param  array<string, mixed> $values Data values to evaluate against the configured rule tree
+     * @return RuleEvaluatorReport   Structured report including boolean outcome and rule execution details
+     */
+    public function evaluateFromArrayWithReport(array $values): RuleEvaluatorReport
+    {
         $ruleBuilder = new RuleBuilder();
         $proposition = self::proposition($values, $this->rules, $ruleBuilder);
         assert($proposition instanceof Proposition);
 
-        return $ruleBuilder
+        $context = new Context($values);
+        $ruleResult = $ruleBuilder
             ->create($proposition)
-            ->evaluate(
-                new Context($values),
-            );
+            ->executeWithResult($context);
+
+        return new RuleEvaluatorReport(
+            $ruleResult->matched,
+            $ruleResult,
+            $values,
+        );
     }
 
     /**

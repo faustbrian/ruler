@@ -10,6 +10,7 @@
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleSet;
+use Cline\Ruler\Core\RuleSetExecutionReport;
 use Cline\Ruler\Enums\ConflictResolutionStrategy;
 use Tests\Fixtures\TrueProposition;
 
@@ -213,6 +214,52 @@ describe('RuleSet', function (): void {
 
             expect($ruleset->executeForwardChaining($context))->toBe(1);
             expect($context['counter'])->toBe(1);
+        });
+
+        test('executeRulesWithReport returns matched and action counts', function (): void {
+            $context = new Context(['flag' => true, 'disabledFlag' => true]);
+            $rb = new \Cline\Ruler\Builder\RuleBuilder();
+            $executed = [];
+
+            $ruleA = new Rule(
+                $rb['flag']->sameAs(true),
+                function () use (&$executed): void {
+                    $executed[] = 'A';
+                },
+                'A',
+                'Rule A',
+                10,
+            );
+
+            $ruleB = new Rule(
+                $rb['flag']->sameAs(false),
+                function () use (&$executed): void {
+                    $executed[] = 'B';
+                },
+                'B',
+                'Rule B',
+                5,
+            );
+
+            $ruleDisabled = new Rule(
+                $rb['disabledFlag']->sameAs(true),
+                function () use (&$executed): void {
+                    $executed[] = 'DISABLED';
+                },
+                'D',
+                'Disabled Rule',
+                100,
+                false,
+            );
+
+            $report = (new RuleSet([$ruleA, $ruleB, $ruleDisabled]))
+                ->executeRulesWithReport($context);
+
+            expect($report)->toBeInstanceOf(RuleSetExecutionReport::class);
+            expect($report->getMatchedCount())->toBe(1);
+            expect($report->getActionExecutionCount())->toBe(1);
+            expect($executed)->toBe(['A']);
+            expect($report->getResults())->toHaveCount(3);
         });
     });
 

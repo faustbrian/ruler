@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\RuleEvaluator;
+use Cline\Ruler\Core\RuleEvaluatorReport;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Illuminate\Http\Request;
 
@@ -39,6 +40,38 @@ describe('RuleEvaluator', function (): void {
 
             // Assert
             expect($result)->toBeTrue();
+        });
+
+        test('returns structured evaluation report', function (): void {
+            $evaluator = RuleEvaluator::createFromArray([
+                'combinator' => 'and',
+                'value' => [
+                    [
+                        'field' => 'age',
+                        'operator' => 'greaterThanOrEqualTo',
+                        'value' => 18,
+                    ],
+                    [
+                        'field' => 'status',
+                        'operator' => 'sameAs',
+                        'value' => 'active',
+                    ],
+                ],
+            ]);
+
+            $report = $evaluator->evaluateFromArrayWithReport([
+                'age' => 21,
+                'status' => 'active',
+            ]);
+
+            expect($report)->toBeInstanceOf(RuleEvaluatorReport::class);
+            expect($report->getResult())->toBeTrue();
+            expect($report->getRuleResult()->matched)->toBeTrue();
+            expect($report->getRuleResult()->actionExecuted)->toBeFalse();
+            expect($report->getValues())->toBe([
+                'age' => 21,
+                'status' => 'active',
+            ]);
         });
 
         test('creates evaluator from json string', function (): void {

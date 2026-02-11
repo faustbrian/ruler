@@ -10,6 +10,7 @@
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleExecutionResult;
 use Tests\Fixtures\CallbackProposition;
 use Tests\Fixtures\TrueProposition;
 
@@ -99,6 +100,31 @@ describe('Rule', function (): void {
             );
 
             expect($rule->evaluate(new Context()))->toBeFalse();
+        });
+
+        test('executeWithResult returns structured execution details', function (): void {
+            $context = new Context();
+            $actionExecuted = false;
+
+            $rule = new Rule(
+                new TrueProposition(),
+                function () use (&$actionExecuted): void {
+                    $actionExecuted = true;
+                },
+                'r-100',
+                'Structured Rule',
+                25,
+            );
+
+            $result = $rule->executeWithResult($context);
+
+            expect($result)->toBeInstanceOf(RuleExecutionResult::class);
+            expect($result->ruleId)->toBe('r-100');
+            expect($result->ruleName)->toBe('Structured Rule');
+            expect($result->priority)->toBe(25);
+            expect($result->matched)->toBeTrue();
+            expect($result->actionExecuted)->toBeTrue();
+            expect($actionExecuted)->toBeTrue();
         });
     });
 

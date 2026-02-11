@@ -125,6 +125,20 @@ final class RuleSet
     }
 
     /**
+     * Execute rules and return a structured single-pass report.
+     */
+    public function executeRulesWithReport(Context $context): RuleSetExecutionReport
+    {
+        $results = [];
+
+        foreach ($this->getOrderedRules() as $rule) {
+            $results[] = $rule->executeWithResult($context);
+        }
+
+        return new RuleSetExecutionReport($results);
+    }
+
+    /**
      * Execute rules using forward chaining until no more rules fire.
      *
      * Re-evaluates the ordered rule set across multiple cycles. This allows
