@@ -63,6 +63,7 @@ final readonly class RuleEvaluator
      */
     private function __construct(
         private array $rules,
+        private CompiledRuleCache $compiledRuleCache,
     ) {}
 
     /**
@@ -73,9 +74,11 @@ final readonly class RuleEvaluator
      *                                     propositional logic to evaluate
      * @return self                 New RuleEvaluator instance initialized with the provided rules
      */
-    public static function createFromArray(array $rules): self
-    {
-        return new self($rules);
+    public static function createFromArray(
+        array $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+    ): self {
+        return new self($rules, $compiledRuleCache ?? new InMemoryCompiledRuleCache());
     }
 
     /**
@@ -85,13 +88,15 @@ final readonly class RuleEvaluator
      *                       logic structure to evaluate
      * @return self   New RuleEvaluator instance initialized with the parsed rules
      */
-    public static function createFromJson(string $rules): self
-    {
+    public static function createFromJson(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+    ): self {
         $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($decoded));
 
         /** @var array<string, mixed> $decoded */
-        return self::createFromArray($decoded);
+        return self::createFromArray($decoded, $compiledRuleCache);
     }
 
     /**
@@ -100,12 +105,14 @@ final readonly class RuleEvaluator
      * @param  string $rules File path to a JSON file containing the rule definition
      * @return self   New RuleEvaluator instance initialized with the parsed rules
      */
-    public static function createFromJsonFile(string $rules): self
-    {
+    public static function createFromJsonFile(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+    ): self {
         $contents = file_get_contents($rules);
         assert(is_string($contents));
 
-        return self::createFromJson($contents);
+        return self::createFromJson($contents, $compiledRuleCache);
     }
 
     /**
@@ -115,13 +122,15 @@ final readonly class RuleEvaluator
      *                       logic structure to evaluate
      * @return self   New RuleEvaluator instance initialized with the parsed rules
      */
-    public static function createFromYaml(string $rules): self
-    {
+    public static function createFromYaml(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+    ): self {
         $parsed = Yaml::parse($rules);
         assert(is_array($parsed));
 
         /** @var array<string, mixed> $parsed */
-        return self::createFromArray($parsed);
+        return self::createFromArray($parsed, $compiledRuleCache);
     }
 
     /**
@@ -130,12 +139,14 @@ final readonly class RuleEvaluator
      * @param  string $rules File path to a YAML file containing the rule definition
      * @return self   New RuleEvaluator instance initialized with the parsed rules
      */
-    public static function createFromYamlFile(string $rules): self
-    {
+    public static function createFromYamlFile(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+    ): self {
         $contents = file_get_contents($rules);
         assert(is_string($contents));
 
-        return self::createFromYaml($contents);
+        return self::createFromYaml($contents, $compiledRuleCache);
     }
 
     /**
@@ -372,19 +383,20 @@ final readonly class RuleEvaluator
      */
     private function getCompiledRule(): Rule
     {
-        /** @var array<string, Rule> $cache */
-        static $cache = [];
-
         $key = md5(serialize($this->rules));
+        $cachedRule = $this->compiledRuleCache->get($key);
 
-        if (!array_key_exists($key, $cache)) {
-            $ruleBuilder = new RuleBuilder();
-            $proposition = self::proposition($this->rules, $ruleBuilder);
-            assert($proposition instanceof Proposition);
-
-            $cache[$key] = $ruleBuilder->create($proposition);
+        if ($cachedRule instanceof Rule) {
+            return $cachedRule;
         }
 
-        return $cache[$key];
+        $ruleBuilder = new RuleBuilder();
+        $proposition = self::proposition($this->rules, $ruleBuilder);
+        assert($proposition instanceof Proposition);
+
+        $rule = $ruleBuilder->create($proposition);
+        $this->compiledRuleCache->put($key, $rule);
+
+        return $rule;
     }
 }

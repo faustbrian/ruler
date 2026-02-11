@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Core\CompiledRuleCache;
+use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleEvaluator;
 use Cline\Ruler\Core\RuleEvaluatorReport;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
@@ -326,6 +328,64 @@ YAML;
             expect($first->getResult())->toBeTrue();
             expect($second->getResult())->toBeFalse();
         });
+
+        test('shares compiled rule cache across evaluator instances', function (): void {
+            $cache = new class() implements CompiledRuleCache
+            {
+                public int $hits = 0;
+
+                public int $misses = 0;
+
+                public int $writes = 0;
+
+                /** @var array<string, Rule> */
+                private array $rules = [];
+
+                public function get(string $key): ?Rule
+                {
+                    if (!isset($this->rules[$key])) {
+                        ++$this->misses;
+
+                        return null;
+                    }
+
+                    ++$this->hits;
+
+                    return $this->rules[$key];
+                }
+
+                public function put(string $key, Rule $rule): void
+                {
+                    ++$this->writes;
+                    $this->rules[$key] = $rule;
+                }
+            };
+
+            $definition = [
+                'field' => 'amount',
+                'operator' => 'greaterThan',
+                'value' => 'threshold',
+            ];
+
+            $firstEvaluator = RuleEvaluator::createFromArray($definition, $cache);
+            $secondEvaluator = RuleEvaluator::createFromArray($definition, $cache);
+
+            $firstResult = $firstEvaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 5,
+            ]);
+
+            $secondResult = $secondEvaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 20,
+            ]);
+
+            expect($firstResult->getResult())->toBeTrue();
+            expect($secondResult->getResult())->toBeFalse();
+            expect($cache->writes)->toBe(1);
+            expect($cache->misses)->toBe(1);
+            expect($cache->hits)->toBe(1);
+        });
     });
 
     describe('Sad Paths', function (): void {
@@ -365,7 +425,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn () => $evaluator->evaluateFromArray(['status' => 'active', 'enabled' => true]))
+            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray(['status' => 'active', 'enabled' => true]))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
@@ -377,7 +437,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn () => $evaluator->evaluateFromArray([]))
+            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray([]))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
@@ -390,7 +450,7 @@ YAML;
             ]);
 
             // Act & Assert
-            expect(fn () => $evaluator->evaluateFromArray(['status' => 'active']))
+            expect(fn (): RuleEvaluatorReport => $evaluator->evaluateFromArray(['status' => 'active']))
                 ->toThrow(RuleEvaluatorException::class);
         });
 
