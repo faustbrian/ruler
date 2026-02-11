@@ -42,7 +42,7 @@ describe('DoesNotMatch', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid value type', function (): void {
-            $this->expectException(RuntimeException::class);
+            $this->expectException(ValueNotStringException::class);
             $this->expectExceptionMessage('DoesNotMatch: value must be a string');
 
             $varA = new Variable('a', 123);
@@ -54,8 +54,8 @@ describe('DoesNotMatch', function (): void {
         });
 
         test('invalid pattern type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('DoesNotMatch: pattern must be a string');
+            $this->expectException(ValueNotStringException::class);
+            $this->expectExceptionMessage('DoesNotMatch: value must be a string');
 
             $varA = new Variable('a', 'test');
             $varB = new Variable('b', 123);

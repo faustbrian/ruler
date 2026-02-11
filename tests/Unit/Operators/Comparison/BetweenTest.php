@@ -9,6 +9,7 @@
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Variables\Variable;
 
@@ -51,8 +52,8 @@ describe('Between', function (): void {
 
     describe('Sad Paths', function (): void {
         test('invalid value type', function (): void {
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage('Between: all values must be numeric');
+            $this->expectException(ValuesNotNumericException::class);
+            $this->expectExceptionMessage('Between: values must be numeric');
 
             $value = new Variable('value', 'string');
             $min = new Variable('min', 1);

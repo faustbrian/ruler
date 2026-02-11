@@ -104,7 +104,7 @@ describe('VariableOperator', function (): void {
     describe('Sad Paths', function (): void {
         test('throws exception when adding second operand to unary operator', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessageMatches('/expects unary.*operands/');
+            $this->expectExceptionMessageMatches('/expects unary \(1\) operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
             $operand2 = $this->createMock(VariableOperand::class);

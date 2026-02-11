@@ -56,7 +56,7 @@ describe('Operator', function (): void {
     describe('Sad Paths', function (): void {
         test('throws exception for unary operator with wrong operand count', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessageMatches('/expects unary.*operands/');
+            $this->expectExceptionMessageMatches('/expects 1 operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
             $operand2 = $this->createMock(VariableOperand::class);
@@ -79,7 +79,7 @@ describe('Operator', function (): void {
 
         test('throws exception for binary operator with wrong operand count', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessageMatches('/expects binary.*operands/');
+            $this->expectExceptionMessageMatches('/expects 2 operands/');
 
             $operand1 = $this->createMock(VariableOperand::class);
 
@@ -101,7 +101,7 @@ describe('Operator', function (): void {
 
         test('throws exception for multiple operator with no operands', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessageMatches('/expects at least 1.*operands/');
+            $this->expectExceptionMessageMatches('/expects at least 1 operands/');
 
             $operator = new class() extends Operator
             {

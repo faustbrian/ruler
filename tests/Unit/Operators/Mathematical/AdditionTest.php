@@ -48,7 +48,7 @@ describe('Addition', function (): void {
 
         test('throws exception when instantiated with only one operand', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects binary (2) operands, got 1');
+            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects 2 operands, got 1');
 
             $varA = new Variable('a', 1);
             $op = new Addition($varA);
@@ -58,7 +58,7 @@ describe('Addition', function (): void {
 
         test('throws exception when instantiated with more than two operands', function (): void {
             $this->expectException(InvalidOperandCardinalityException::class);
-            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects binary (2) operands, got 3');
+            $this->expectExceptionMessage('Cline\Ruler\Operators\Mathematical\Addition expects 2 operands, got 3');
 
             $varA = new Variable('a', 1);
             $varB = new Variable('b', 2);
