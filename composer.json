@@ -32,6 +32,7 @@
     "pestphp/pest": "^4.2.0",
     "pestphp/pest-plugin-laravel": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.3",
+    "pestphp/pest-plugin-mutate": "^4.0",
     "symfony/var-dumper": "^7.4.0"
   },
   "minimum-stability": "stable",
@@ -61,10 +62,12 @@
       "@test:type-coverage",
       "@test:unit",
       "@test:types",
-      "@test:refactor"
+      "@test:refactor",
+      "@test:mutation-core"
     ],
     "test:lint": "ecs check",
     "test:refactor": "rector --dry-run",
+    "test:mutation-core": "pest --mutate --parallel --class=Cline\\\\Ruler\\\\Core\\\\RuleEvaluator,Cline\\\\Ruler\\\\Exceptions\\\\RuleEvaluatorException,Cline\\\\Ruler\\\\Enums\\\\RuleErrorCode,Cline\\\\Ruler\\\\Enums\\\\RuleErrorPhase --min=55 --ignore-min-score-on-zero-mutations",
     "test:type-coverage": "pest --parallel --min=80 --type-coverage",
     "test:types": "phpstan",
     "test:unit": "pest --parallel --min=80 --coverage"
