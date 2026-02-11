@@ -11,6 +11,7 @@ use Cline\Ruler\Core\CompiledRuleCache;
 use Cline\Ruler\Core\CompiledRuleKeyGenerator;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleEvaluator;
+use Cline\Ruler\Core\RuleEvaluatorCompilationResult;
 use Cline\Ruler\Core\RuleEvaluatorReport;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Illuminate\Http\Request;
@@ -91,6 +92,33 @@ describe('RuleEvaluator', function (): void {
 
             // Assert
             expect($result->getResult())->toBeTrue();
+        });
+
+        test('compiles evaluator from array without throwing', function (): void {
+            $result = RuleEvaluator::compileFromArray([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ]);
+
+            expect($result)->toBeInstanceOf(RuleEvaluatorCompilationResult::class);
+            expect($result->isSuccess())->toBeTrue();
+            expect($result->getEvaluator()->evaluateFromArray(['status' => 'active'])->getResult())
+                ->toBeTrue();
+        });
+
+        test('compiles evaluator from json without throwing', function (): void {
+            $jsonRules = json_encode([
+                'field' => 'status',
+                'operator' => 'sameAs',
+                'value' => 'active',
+            ], \JSON_THROW_ON_ERROR);
+
+            $result = RuleEvaluator::compileFromJson($jsonRules);
+
+            expect($result->isSuccess())->toBeTrue();
+            expect($result->getEvaluator()->evaluateFromArray(['status' => 'active'])->getResult())
+                ->toBeTrue();
         });
 
         test('creates evaluator from json file', function (): void {
@@ -490,6 +518,36 @@ YAML;
                     ],
                 ],
             ]))->toThrow(RuleEvaluatorException::class);
+        });
+
+        test('returns structured compile failure for invalid combinator', function (): void {
+            $result = RuleEvaluator::compileFromArray([
+                'combinator' => 'nandd',
+                'value' => [
+                    [
+                        'field' => 'status',
+                        'operator' => 'sameAs',
+                        'value' => 'active',
+                    ],
+                ],
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError())->toBeInstanceOf(RuleEvaluatorException::class);
+            expect($result->getError()?->getErrorCode())->toBe('compile.invalid_combinator');
+            expect($result->getError()?->getPhase())->toBe('compile');
+            expect($result->getError()?->getPath())->toBe(['combinator']);
+        });
+
+        test('returns structured compile failure for invalid json payload', function (): void {
+            $result = RuleEvaluator::compileFromJson('{invalid json');
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError())->toBeInstanceOf(RuleEvaluatorException::class);
+            expect($result->getError()?->getErrorCode())->toBe('compile.invalid_rule_structure');
+            expect($result->getError()?->getPhase())->toBe('compile');
+            expect($result->getError()?->getPath())->toBe(['rules']);
+            expect($result->getError()?->getDetails()['format'] ?? null)->toBe('json');
         });
 
         test('returns structured compile error payload for invalid combinator', function (): void {

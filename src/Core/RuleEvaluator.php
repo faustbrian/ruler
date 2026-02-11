@@ -84,16 +84,55 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
-        $definition = RuleDefinitionParser::fromArray($rules);
-        $evaluator = new self(
-            $rules,
-            $definition,
-            $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
-            $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
-        );
-        $evaluator->getCompiledRule();
+        $result = self::compileFromArray($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
 
-        return $evaluator;
+        if ($result->isSuccess()) {
+            return $result->getEvaluator();
+        }
+
+        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile an evaluator from a rule definition array without throwing.
+     *
+     * @param  array<string, mixed>           $rules                    Rule definition array containing combinators,
+     *                                                                  operators, fields, and values that define the
+     *                                                                  propositional logic to evaluate
+     * @param  null|CompiledRuleCache         $compiledRuleCache        Optional shared compiled-rule cache.
+     *                                                                  When omitted, this evaluator owns an isolated
+     *                                                                  in-memory cache for its lifetime.
+     * @param  null|CompiledRuleKeyGenerator  $compiledRuleKeyGenerator Optional cache
+     *                                                                  key strategy for compiled rules.
+     * @return RuleEvaluatorCompilationResult Compilation result containing either evaluator or structured error
+     */
+    public static function compileFromArray(
+        array $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ): RuleEvaluatorCompilationResult {
+        try {
+            $definition = RuleDefinitionParser::fromArray($rules);
+            $evaluator = new self(
+                $rules,
+                $definition,
+                $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
+                $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
+            );
+            $evaluator->getCompiledRule();
+
+            return RuleEvaluatorCompilationResult::success($evaluator);
+        } catch (RuleEvaluatorException $exception) {
+            return RuleEvaluatorCompilationResult::failure($exception);
+        } catch (Throwable $exception) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Rule compilation failed',
+                    ['rules'],
+                    ['reason' => $exception->getMessage()],
+                ),
+            );
+        }
     }
 
     /**
@@ -113,11 +152,57 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
-        $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
-        assert(is_array($decoded));
+        $result = self::compileFromJson($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
 
-        /** @var array<string, mixed> $decoded */
-        return self::createFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator);
+        if ($result->isSuccess()) {
+            return $result->getEvaluator();
+        }
+
+        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile an evaluator from JSON rules without throwing.
+     *
+     * @param  string                         $rules                    JSON-encoded rule definition containing the propositional
+     *                                                                  logic structure to evaluate
+     * @param  null|CompiledRuleCache         $compiledRuleCache        Optional shared compiled-rule cache.
+     * @param  null|CompiledRuleKeyGenerator  $compiledRuleKeyGenerator Optional cache
+     *                                                                  key strategy for compiled rules.
+     * @return RuleEvaluatorCompilationResult Compilation result containing either evaluator or structured error
+     */
+    public static function compileFromJson(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ): RuleEvaluatorCompilationResult {
+        try {
+            $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
+
+            if (!is_array($decoded)) {
+                return RuleEvaluatorCompilationResult::failure(
+                    RuleEvaluatorException::invalidRuleStructure(
+                        'JSON rules must decode to an object',
+                        ['rules'],
+                        ['format' => 'json'],
+                    ),
+                );
+            }
+
+            /** @var array<string, mixed> $decoded */
+            return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator);
+        } catch (Throwable $throwable) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Invalid JSON rule payload',
+                    ['rules'],
+                    [
+                        'format' => 'json',
+                        'reason' => $throwable->getMessage(),
+                    ],
+                ),
+            );
+        }
     }
 
     /**
@@ -134,10 +219,45 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
-        $contents = file_get_contents($rules);
-        assert(is_string($contents));
+        $result = self::compileFromJsonFile($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
 
-        return self::createFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
+        if ($result->isSuccess()) {
+            return $result->getEvaluator();
+        }
+
+        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile an evaluator from a JSON rule definition file without throwing.
+     *
+     * @param  string                         $rules                    File path to a JSON file containing the rule definition
+     * @param  null|CompiledRuleCache         $compiledRuleCache        Optional shared compiled-rule cache.
+     * @param  null|CompiledRuleKeyGenerator  $compiledRuleKeyGenerator Optional cache
+     *                                                                  key strategy for compiled rules.
+     * @return RuleEvaluatorCompilationResult Compilation result containing either evaluator or structured error
+     */
+    public static function compileFromJsonFile(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ): RuleEvaluatorCompilationResult {
+        $contents = file_get_contents($rules);
+
+        if (!is_string($contents)) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Unable to read JSON rule file',
+                    ['rules'],
+                    [
+                        'format' => 'json',
+                        'file' => $rules,
+                    ],
+                ),
+            );
+        }
+
+        return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
     }
 
     /**
@@ -155,11 +275,57 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
-        $parsed = Yaml::parse($rules);
-        assert(is_array($parsed));
+        $result = self::compileFromYaml($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
 
-        /** @var array<string, mixed> $parsed */
-        return self::createFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator);
+        if ($result->isSuccess()) {
+            return $result->getEvaluator();
+        }
+
+        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile an evaluator from YAML rules without throwing.
+     *
+     * @param  string                         $rules                    YAML-formatted rule definition containing the propositional
+     *                                                                  logic structure to evaluate
+     * @param  null|CompiledRuleCache         $compiledRuleCache        Optional shared compiled-rule cache.
+     * @param  null|CompiledRuleKeyGenerator  $compiledRuleKeyGenerator Optional cache
+     *                                                                  key strategy for compiled rules.
+     * @return RuleEvaluatorCompilationResult Compilation result containing either evaluator or structured error
+     */
+    public static function compileFromYaml(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ): RuleEvaluatorCompilationResult {
+        try {
+            $parsed = Yaml::parse($rules);
+
+            if (!is_array($parsed)) {
+                return RuleEvaluatorCompilationResult::failure(
+                    RuleEvaluatorException::invalidRuleStructure(
+                        'YAML rules must decode to an object',
+                        ['rules'],
+                        ['format' => 'yaml'],
+                    ),
+                );
+            }
+
+            /** @var array<string, mixed> $parsed */
+            return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator);
+        } catch (Throwable $throwable) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Invalid YAML rule payload',
+                    ['rules'],
+                    [
+                        'format' => 'yaml',
+                        'reason' => $throwable->getMessage(),
+                    ],
+                ),
+            );
+        }
     }
 
     /**
@@ -176,10 +342,45 @@ final readonly class RuleEvaluator
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
     ): self {
-        $contents = file_get_contents($rules);
-        assert(is_string($contents));
+        $result = self::compileFromYamlFile($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
 
-        return self::createFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
+        if ($result->isSuccess()) {
+            return $result->getEvaluator();
+        }
+
+        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile an evaluator from a YAML rule definition file without throwing.
+     *
+     * @param  string                         $rules                    File path to a YAML file containing the rule definition
+     * @param  null|CompiledRuleCache         $compiledRuleCache        Optional shared compiled-rule cache.
+     * @param  null|CompiledRuleKeyGenerator  $compiledRuleKeyGenerator Optional cache
+     *                                                                  key strategy for compiled rules.
+     * @return RuleEvaluatorCompilationResult Compilation result containing either evaluator or structured error
+     */
+    public static function compileFromYamlFile(
+        string $rules,
+        ?CompiledRuleCache $compiledRuleCache = null,
+        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ): RuleEvaluatorCompilationResult {
+        $contents = file_get_contents($rules);
+
+        if (!is_string($contents)) {
+            return RuleEvaluatorCompilationResult::failure(
+                RuleEvaluatorException::invalidRuleStructure(
+                    'Unable to read YAML rule file',
+                    ['rules'],
+                    [
+                        'format' => 'yaml',
+                        'file' => $rules,
+                    ],
+                ),
+            );
+        }
+
+        return self::compileFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
     }
 
     /**
