@@ -209,7 +209,9 @@ describe('RuleSet', function (): void {
             $rule = new Rule(
                 $rb['counter']->greaterThanOrEqualTo(0),
                 function (Context $context): void {
-                    $context['counter'] = $context['counter'] + 1;
+                    $counter = $context['counter'];
+                    ++$counter;
+                    $context['counter'] = $counter;
                 },
                 'counter',
                 'Counter Rule',
@@ -400,7 +402,7 @@ describe('RuleSet', function (): void {
 
             $ruleset = new RuleSet([$rule]);
 
-            expect(fn () => $ruleset->executeForwardChaining($context, 2, true))
+            expect(fn (): RuleSetExecutionReport => $ruleset->executeForwardChaining($context, 2, true))
                 ->toThrow(RuntimeException::class);
         });
     });
