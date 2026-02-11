@@ -14,8 +14,8 @@ use RuntimeException;
 
 use function array_filter;
 use function array_values;
-use function sprintf;
 use function spl_object_hash;
+use function sprintf;
 use function throw_if;
 use function throw_unless;
 use function uasort;
@@ -123,9 +123,11 @@ final class RuleSet
 
         unset($this->rules[$hash], $this->ruleOrder[$hash], $this->disabledRules[$hash]);
 
-        if ($id !== null && isset($this->ruleIds[$id]) && $this->ruleIds[$id] === $hash) {
-            unset($this->ruleIds[$id]);
+        if ($id === null || !isset($this->ruleIds[$id]) || $this->ruleIds[$id] !== $hash) {
+            return;
         }
+
+        unset($this->ruleIds[$id]);
     }
 
     /**

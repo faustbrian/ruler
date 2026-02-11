@@ -22,6 +22,7 @@ use function str_contains;
  * context fields (including dot notation) or fall back to string literals.
  *
  * @author Brian Faust <brian@cline.sh>
+ * @psalm-immutable
  */
 final readonly class ContextValueReference implements VariableOperand
 {

@@ -13,6 +13,7 @@ namespace Cline\Ruler\Core;
  * Structured execution result for a single rule evaluation attempt.
  *
  * @author Brian Faust <brian@cline.sh>
+ * @psalm-immutable
  */
 final readonly class RuleExecutionResult
 {
