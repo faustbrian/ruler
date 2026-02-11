@@ -67,7 +67,7 @@
     ],
     "test:lint": "ecs check",
     "test:refactor": "rector --dry-run",
-    "test:mutation-core": "pest --mutate --parallel --class=Cline\\\\Ruler\\\\Core\\\\RuleEvaluator,Cline\\\\Ruler\\\\Exceptions\\\\RuleEvaluatorException,Cline\\\\Ruler\\\\Enums\\\\RuleErrorCode,Cline\\\\Ruler\\\\Enums\\\\RuleErrorPhase --min=55 --ignore-min-score-on-zero-mutations",
+    "test:mutation-core": "bash tools/ci/run-mutation-core.sh",
     "test:type-coverage": "pest --parallel --min=80 --type-coverage",
     "test:types": "phpstan",
     "test:unit": "pest --parallel --min=80 --coverage"
