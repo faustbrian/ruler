@@ -10,9 +10,6 @@
 namespace Cline\Ruler\Core;
 
 use Closure;
-use RuntimeException;
-
-use function throw_if;
 
 /**
  * Represents a conditional rule with an optional action.
@@ -37,7 +34,7 @@ final readonly class Rule implements Proposition
      * @param null|Closure $action    Optional callback to execute when the condition
      *                                evaluates to true. The callback must accept the
      *                                current Context as its first argument.
-     * @param string       $id        Explicit non-empty identifier for this rule.
+     * @param RuleId|string $id       Explicit non-empty identifier for this rule.
      */
     public function __construct(
         private Proposition $condition,
@@ -47,7 +44,7 @@ final readonly class Rule implements Proposition
          * @var null|Closure
          */
         private ?Closure $action,
-        private string $id,
+        RuleId|string $id,
         private ?string $name = null,
         private int $priority = 0,
         private bool $enabled = true,
@@ -58,8 +55,12 @@ final readonly class Rule implements Proposition
          */
         private array $metadata = [],
     ) {
-        throw_if($this->id === '', RuntimeException::class, 'Rule id cannot be empty.');
+        $this->id = $id instanceof RuleId
+            ? $id
+            : RuleIds::fromString($id);
     }
+
+    private RuleId $id;
 
     /**
      * Evaluate the rule condition against the given context.
@@ -100,7 +101,7 @@ final readonly class Rule implements Proposition
         }
 
         return new RuleExecutionResult(
-            $this->id,
+            $this->id->toString(),
             $this->name,
             $this->priority,
             $this->enabled,
@@ -113,6 +114,14 @@ final readonly class Rule implements Proposition
      * Get the unique rule identifier.
      */
     public function getId(): string
+    {
+        return $this->id->toString();
+    }
+
+    /**
+     * Get the unique rule identifier value object.
+     */
+    public function getRuleId(): RuleId
     {
         return $this->id;
     }

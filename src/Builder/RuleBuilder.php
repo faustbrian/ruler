@@ -13,6 +13,8 @@ use ArrayAccess;
 use Cline\Ruler\Builder\Variable;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleId;
+use Cline\Ruler\Core\RuleIds;
 use Cline\Ruler\Operators\Logical\LogicalAnd;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Cline\Ruler\Operators\Logical\LogicalOr;
@@ -67,17 +69,19 @@ final class RuleBuilder implements ArrayAccess
      *
      * @param  Proposition  $condition the propositional condition that determines when
      *                                 the rule is satisfied and the action should execute
-     * @param  string       $id        Explicit non-empty rule identifier.
+     * @param  RuleId|string $id       Explicit non-empty rule identifier.
      * @param  null|Closure $action    Optional callback to execute when the condition
      *                                 evaluates to true. Receives Context and returns void.
      * @return Rule         the constructed Rule instance
      */
-    public function create(Proposition $condition, string $id, ?Closure $action = null): Rule
+    public function create(Proposition $condition, RuleId|string $id, ?Closure $action = null): Rule
     {
+        $ruleId = $id instanceof RuleId ? $id : RuleIds::fromString($id);
+
         return new Rule(
             $condition,
             $action,
-            $id,
+            $ruleId,
         );
     }
 
