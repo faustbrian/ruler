@@ -9,7 +9,8 @@
 
 namespace Cline\Ruler\DSL\SQL;
 
-use InvalidArgumentException;
+use Cline\Ruler\Exceptions\UnexpectedCharacterException;
+use Cline\Ruler\Exceptions\UnterminatedStringException;
 
 use function ctype_alnum;
 use function ctype_alpha;
@@ -19,7 +20,6 @@ use function mb_strlen;
 use function mb_strtoupper;
 use function mb_substr;
 use function ord;
-use function sprintf;
 
 /**
  * Lexer for SQL WHERE clause expressions.
@@ -74,8 +74,8 @@ final class SqlLexer
      * @param string $sql SQL WHERE clause expression to tokenize. Should contain only
      *                    the WHERE clause content without the "WHERE" keyword itself.
      *
-     * @throws InvalidArgumentException if invalid syntax is encountered, such as unterminated
-     *                                  strings or unexpected characters that cannot be tokenized
+     * @throws UnexpectedCharacterException if an invalid character is encountered that cannot be tokenized
+     * @throws UnterminatedStringException  if a string literal is not properly terminated
      *
      * @return array<int, Token> Array of tokens in the order they appear in the input.
      *                           The last token is always Token::EOF to mark end of input.
@@ -150,7 +150,7 @@ final class SqlLexer
                 continue;
             }
 
-            throw new InvalidArgumentException(sprintf('Unexpected character at position %d: %s', $this->position, $char));
+            throw UnexpectedCharacterException::atPosition($this->position, $char);
         }
 
         $tokens[] = new Token(Token::EOF, null, $this->position);
@@ -200,8 +200,8 @@ final class SqlLexer
      * Parses a SQL string literal enclosed in single quotes. Handles escaped
      * quotes using the SQL convention where '' represents a literal single quote.
      *
-     * @throws InvalidArgumentException if the string is not properly terminated before
-     *                                  the end of input
+     * @throws UnterminatedStringException if the string is not properly terminated before
+     *                                     the end of input
      *
      * @return Token a STRING token containing the unescaped string value
      */
@@ -233,7 +233,7 @@ final class SqlLexer
             ++$this->position;
         }
 
-        throw new InvalidArgumentException(sprintf('Unterminated string starting at position %d', $start));
+        throw UnterminatedStringException::atPosition($start);
     }
 
     /**

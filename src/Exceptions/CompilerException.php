@@ -11,4 +11,7 @@ namespace Cline\Ruler\Exceptions;
 
 use LogicException;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 abstract class CompilerException extends LogicException implements RulerException {}

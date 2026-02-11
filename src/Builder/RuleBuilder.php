@@ -14,19 +14,18 @@ use Cline\Ruler\Builder\Variable;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleId;
+use Cline\Ruler\Exceptions\InvalidNamespaceException;
+use Cline\Ruler\Exceptions\UnknownBuilderOperatorException;
 use Cline\Ruler\Operators\Logical\LogicalAnd;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Cline\Ruler\Operators\Logical\LogicalOr;
 use Cline\Ruler\Operators\Logical\LogicalXor;
 use Closure;
-use InvalidArgumentException;
-use LogicException;
 
 use function array_key_exists;
 use function array_keys;
 use function class_exists;
 use function is_string;
-use function sprintf;
 use function throw_unless;
 use function ucfirst;
 
@@ -93,14 +92,14 @@ final class RuleBuilder implements ArrayAccess
      *
      * @param string $namespace the fully-qualified namespace containing operator classes
      *
-     * @throws InvalidArgumentException when the namespace parameter is not a string
+     * @throws InvalidNamespaceException when the namespace parameter is not a string
      *
      * @return self returns this RuleBuilder for method chaining
      */
     public function registerOperatorNamespace(string $namespace): self
     {
         /** @phpstan-ignore function.alreadyNarrowedType */
-        throw_unless(is_string($namespace), InvalidArgumentException::class, 'Namespace argument must be a string');
+        throw_unless(is_string($namespace), InvalidNamespaceException::forValue($namespace));
 
         $this->operatorNamespaces[$namespace] = true;
 
@@ -221,7 +220,7 @@ final class RuleBuilder implements ArrayAccess
      *
      * @param string $name the operator method name to find
      *
-     * @throws LogicException when no matching operator is found in any registered namespace
+     * @throws UnknownBuilderOperatorException when no matching operator is found in any registered namespace
      *
      * @return string the fully-qualified operator class name
      */
@@ -238,6 +237,6 @@ final class RuleBuilder implements ArrayAccess
             }
         }
 
-        throw new LogicException(sprintf('Unknown operator: "%s"', $name));
+        throw UnknownBuilderOperatorException::forName($name);
     }
 }

@@ -9,7 +9,8 @@
 
 namespace Cline\Ruler\Values;
 
-use RuntimeException;
+use Cline\Ruler\Exceptions\DivisionByZeroException;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Stringable;
 
 use function ceil;
@@ -176,7 +177,7 @@ final readonly class Value implements Stringable
      */
     public function add(self $value): int|float
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return $this->value + $value->getValue();
     }
@@ -192,9 +193,9 @@ final readonly class Value implements Stringable
      */
     public function divide(self $value): int|float
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
-        throw_if(0 === $value->getValue(), RuntimeException::class, 'Division by zero');
+        throw_if(0 === $value->getValue(), DivisionByZeroException::create());
 
         return $this->value / $value->getValue();
     }
@@ -210,9 +211,9 @@ final readonly class Value implements Stringable
      */
     public function modulo(self $value): int
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
-        throw_if(0 === $value->getValue(), RuntimeException::class, 'Division by zero');
+        throw_if(0 === $value->getValue(), DivisionByZeroException::create());
 
         return $this->value % $value->getValue();
     }
@@ -228,7 +229,7 @@ final readonly class Value implements Stringable
      */
     public function multiply(self $value): int|float
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return $this->value * $value->getValue();
     }
@@ -244,7 +245,7 @@ final readonly class Value implements Stringable
      */
     public function subtract(self $value): int|float
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return $this->value - $value->getValue();
     }
@@ -258,7 +259,7 @@ final readonly class Value implements Stringable
      */
     public function negate(): int|float
     {
-        throw_unless(is_numeric($this->value), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_unless(is_numeric($this->value), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return -$this->value;
     }
@@ -272,7 +273,7 @@ final readonly class Value implements Stringable
      */
     public function ceil(): int
     {
-        throw_unless(is_numeric($this->value), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_unless(is_numeric($this->value), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return (int) ceil((float) $this->value);
     }
@@ -286,7 +287,7 @@ final readonly class Value implements Stringable
      */
     public function floor(): int
     {
-        throw_unless(is_numeric($this->value), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_unless(is_numeric($this->value), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return (int) floor((float) $this->value);
     }
@@ -302,7 +303,7 @@ final readonly class Value implements Stringable
      */
     public function exponentiate(self $value): float|int
     {
-        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), RuntimeException::class, 'Arithmetic: values must be numeric');
+        throw_if(!is_numeric($this->value) || !is_numeric($value->getValue()), ValuesNotNumericException::forOperation('Arithmetic'));
 
         return $this->value ** $value->getValue();
     }

@@ -12,6 +12,12 @@ namespace Cline\Ruler\DSL\GraphQL;
 use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\ExpectedPropositionOperandException;
+use Cline\Ruler\Exceptions\ExpectedVariableOperandException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\InvalidOperandsPropertyException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
+use Cline\Ruler\Exceptions\VariableMustHaveNameException;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
 use Cline\Ruler\Operators\Comparison\GreaterThanOrEqualTo;
@@ -36,7 +42,6 @@ use Cline\Ruler\Operators\Type\IsNull;
 use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
-use LogicException;
 use ReflectionClass;
 
 use function array_key_exists;
@@ -47,7 +52,6 @@ use function count;
 use function is_array;
 use function is_string;
 use function mb_trim;
-use function sprintf;
 use function str_ends_with;
 use function str_starts_with;
 use function throw_if;
@@ -118,11 +122,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('comparison operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
         $value = $this->extractValue($operands[1]);
@@ -141,11 +145,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('List operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('list operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
         $value = $this->extractValue($operands[1]);
@@ -164,11 +168,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('string operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
         $value = $this->extractValue($operands[1]);
@@ -186,11 +190,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($matches);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('match', 2, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('matches operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
         $pattern = $this->extractValue($operands[1]);
@@ -213,11 +217,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($isNull);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('isNull', 1, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('isNull operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
 
@@ -235,11 +239,11 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 1, LogicException::class, sprintf('Type operator %s requires exactly 1 operand', $typeName));
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('isType', 1, count($operands)));
 
         $firstOperand = $operands[0];
 
-        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, LogicException::class, 'First operand must be a Variable');
+        throw_if(!$firstOperand instanceof Variable && !$firstOperand instanceof BuilderVariable, ExpectedVariableOperandException::forContext('type operator'));
 
         $fieldName = $this->extractFieldName($firstOperand);
 
@@ -256,7 +260,7 @@ final readonly class GraphQLFilterSerializer
     {
         $name = $operand->getName();
 
-        throw_if($name === null, LogicException::class, 'Variable must have a name');
+        throw_if($name === null, VariableMustHaveNameException::forContext('serialization'));
 
         return $name;
     }
@@ -293,7 +297,7 @@ final readonly class GraphQLFilterSerializer
             $operandsProperty = $reflection->getProperty('operands');
             $value = $operandsProperty->getValue($operator);
 
-            throw_if(!is_array($value), LogicException::class, 'Operands property must be an array');
+            throw_if(!is_array($value), InvalidOperandsPropertyException::forContext('operands'));
 
             return array_values($value);
         }
@@ -304,7 +308,7 @@ final readonly class GraphQLFilterSerializer
             $method = $reflection->getMethod('getOperands');
             $result = $method->invoke($operator);
 
-            throw_if(!is_array($result), LogicException::class, 'getOperands() must return an array');
+            throw_if(!is_array($result), InvalidOperandsPropertyException::forContext('getOperands()'));
 
             return array_values($result);
         }
@@ -350,7 +354,7 @@ final readonly class GraphQLFilterSerializer
             $proposition instanceof IsNumeric => $this->serializeType($proposition, 'numeric'),
             $proposition instanceof IsBoolean => $this->serializeType($proposition, 'boolean'),
             $proposition instanceof IsArray => $this->serializeType($proposition, 'array'),
-            default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
+            default => throw UnsupportedSerializationOperatorException::forClass($proposition::class),
         };
     }
 
@@ -398,7 +402,7 @@ final readonly class GraphQLFilterSerializer
         // Otherwise, use explicit AND
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('AND'));
 
                 return $this->serializeProposition($operand);
             },
@@ -420,7 +424,7 @@ final readonly class GraphQLFilterSerializer
 
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('OR'));
 
                 return $this->serializeProposition($operand);
             },
@@ -440,10 +444,10 @@ final readonly class GraphQLFilterSerializer
     {
         $operands = $this->getOperands($not);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('NOT', 1, count($operands)));
 
         $operand = $operands[0];
-        throw_if(!$operand instanceof Proposition, LogicException::class, 'Expected Proposition operand');
+        throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('NOT'));
 
         return ['NOT' => $this->serializeProposition($operand)];
     }

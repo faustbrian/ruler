@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnsupportedNodeTypeException extends CompilerException
 {
     public static function forClass(string $nodeClass): self

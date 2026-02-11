@@ -9,8 +9,8 @@
 
 namespace Cline\Ruler\Core;
 
+use Cline\Ruler\Exceptions\EvaluatorUnavailableException;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
-use LogicException;
 
 use function throw_unless;
 
@@ -44,7 +44,7 @@ final readonly class RuleEvaluatorCompilationResult
 
     public function getEvaluator(): RuleEvaluator
     {
-        throw_unless($this->evaluator instanceof RuleEvaluator, LogicException::class, 'Compilation failed; evaluator is unavailable.');
+        throw_unless($this->evaluator instanceof RuleEvaluator, EvaluatorUnavailableException::compilationFailed());
 
         return $this->evaluator;
     }

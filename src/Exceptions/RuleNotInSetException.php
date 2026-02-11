@@ -9,6 +9,9 @@
 
 namespace Cline\Ruler\Exceptions;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class RuleNotInSetException extends RuleSetException
 {
     public static function create(): self

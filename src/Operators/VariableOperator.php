@@ -11,9 +11,10 @@ namespace Cline\Ruler\Operators;
 
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 
+use function count;
 use function throw_if;
 
 /**
@@ -51,12 +52,12 @@ abstract class VariableOperator extends Operator
      * @param VariableOperand $operand the variable operand to add to this operator's
      *                                 operand collection for evaluation
      *
-     * @throws LogicException when attempting to add a second operand to a unary operator
+     * @throws InvalidOperandCardinalityException when attempting to add a second operand to a unary operator
      */
     public function addVariable(VariableOperand $operand): void
     {
         throw_if(OperandCardinality::Unary === $this->getOperandCardinality()
-            && [] !== $this->operands, LogicException::class, static::class.' can only have 1 operand');
+            && [] !== $this->operands, InvalidOperandCardinalityException::forOperator(static::class, 'unary (1)', count($this->operands) + 1));
 
         $this->operands[] = $operand;
     }

@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnsupportedUnaryOperatorException extends CompilerException
 {
     public static function forOperator(string $operator): self

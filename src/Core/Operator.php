@@ -10,8 +10,8 @@
 namespace Cline\Ruler\Core;
 
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 
 use function count;
 use function throw_if;
@@ -59,7 +59,7 @@ abstract class Operator
      * the operand collection. Throws an exception if the operand count
      * violates the operator's cardinality constraints.
      *
-     * @throws LogicException When the operand count does not match the required cardinality
+     * @throws InvalidOperandCardinalityException When the operand count does not match the required cardinality
      *
      * @return array<int, Proposition|VariableOperand> Array of operands for this operator
      */
@@ -67,17 +67,17 @@ abstract class Operator
     {
         switch ($this->getOperandCardinality()) {
             case OperandCardinality::Unary:
-                throw_if(1 !== count($this->operands), LogicException::class, static::class.' takes only 1 operand');
+                throw_if(1 !== count($this->operands), InvalidOperandCardinalityException::forOperator(static::class, '1', count($this->operands)));
 
                 break;
 
             case OperandCardinality::Binary:
-                throw_if(2 !== count($this->operands), LogicException::class, static::class.' takes 2 operands');
+                throw_if(2 !== count($this->operands), InvalidOperandCardinalityException::forOperator(static::class, '2', count($this->operands)));
 
                 break;
 
             case OperandCardinality::Multiple:
-                throw_if([] === $this->operands, LogicException::class, static::class.' takes at least 1 operand');
+                throw_if([] === $this->operands, InvalidOperandCardinalityException::forOperator(static::class, 'at least 1', count($this->operands)));
 
                 break;
         }

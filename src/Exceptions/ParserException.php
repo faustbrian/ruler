@@ -11,4 +11,7 @@ namespace Cline\Ruler\Exceptions;
 
 use InvalidArgumentException;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 abstract class ParserException extends InvalidArgumentException implements RulerException {}

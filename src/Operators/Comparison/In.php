@@ -12,9 +12,9 @@ namespace Cline\Ruler\Operators\Comparison;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValueNotArrayException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function in_array;
 use function is_array;
@@ -36,7 +36,7 @@ final class In extends VariableOperator implements Proposition
      *
      * @param Context $context Execution context providing variable values for operand resolution
      *
-     * @throws RuntimeException When the right operand does not evaluate to an array type
+     * @throws ValueNotArrayException When the right operand does not evaluate to an array type
      *
      * @return bool True if the value exists in the array using strict comparison, false otherwise
      */
@@ -49,7 +49,7 @@ final class In extends VariableOperator implements Proposition
         $value = $left->prepareValue($context)->getValue();
         $array = $right->prepareValue($context)->getValue();
 
-        throw_unless(is_array($array), RuntimeException::class, 'In: second operand must be an array');
+        throw_unless(is_array($array), ValueNotArrayException::forOperation('In'));
 
         return in_array($value, $array, true);
     }

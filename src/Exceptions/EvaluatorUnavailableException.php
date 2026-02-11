@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use LogicException;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class EvaluatorUnavailableException extends LogicException implements RulerException
 {
     public static function compilationFailed(): self

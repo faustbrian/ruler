@@ -9,6 +9,9 @@
 
 namespace Cline\Ruler\Exceptions;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ExpressionMustBeStringException extends SerializerException
 {
     public static function create(): self

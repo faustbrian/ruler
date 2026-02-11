@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class CannotParseConditionException extends ParserException
 {
     public static function forText(string $text): self

@@ -9,14 +9,13 @@
 
 namespace Cline\Ruler\DSL\LDAP;
 
-use InvalidArgumentException;
+use Cline\Ruler\Exceptions\InvalidFilterItemException;
 
 use function in_array;
 use function mb_strlen;
 use function mb_substr;
 use function mb_trim;
 use function preg_match;
-use function sprintf;
 
 /**
  * Lexer for LDAP filter syntax.
@@ -52,7 +51,7 @@ final class LDAPLexer
      * and creating Token objects. Handles parentheses, logical operators,
      * whitespace, and comparison items.
      *
-     * @throws InvalidArgumentException If invalid syntax is encountered
+     * @throws InvalidFilterItemException If invalid syntax is encountered
      *
      * @return array<int, Token> Array of tokens including EOF marker
      */
@@ -100,7 +99,7 @@ final class LDAPLexer
      *
      * @param string $item The comparison item string to parse
      *
-     * @throws InvalidArgumentException If the item doesn't match expected format
+     * @throws InvalidFilterItemException If the item doesn't match expected format
      *
      * @return Token ITEM token with attribute, operator, and value fields
      */
@@ -119,7 +118,7 @@ final class LDAPLexer
             ]);
         }
 
-        throw new InvalidArgumentException(sprintf('Invalid filter item: %s', $item));
+        throw InvalidFilterItemException::forItem($item);
     }
 
     /**

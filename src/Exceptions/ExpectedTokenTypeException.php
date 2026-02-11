@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ExpectedTokenTypeException extends ParserException
 {
     public static function forType(string $expected, string $actual): self

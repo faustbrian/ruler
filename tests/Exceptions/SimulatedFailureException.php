@@ -11,6 +11,9 @@ namespace Cline\Ruler\Tests\Exceptions;
 
 use Exception;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class SimulatedFailureException extends Exception
 {
     public static function create(): self

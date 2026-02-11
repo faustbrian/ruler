@@ -11,6 +11,11 @@ namespace Cline\Ruler\DSL\SQL;
 
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Cline\Ruler\Exceptions\ExpectedPropositionFromCompilationException;
+use Cline\Ruler\Exceptions\InvalidOperandForCompilerException;
+use Cline\Ruler\Exceptions\UnsupportedComparisonOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedLogicalOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedNodeTypeException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -27,12 +32,10 @@ use Cline\Ruler\Operators\String\DoesNotMatch;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use InvalidArgumentException;
 
 use function array_map;
 use function mb_strlen;
 use function preg_quote;
-use function sprintf;
 use function throw_unless;
 
 /**
@@ -71,8 +74,8 @@ final readonly class SqlCompiler
      *                     Represents the complete SQL WHERE clause structure including all
      *                     nested operations and operands.
      *
-     * @throws InvalidArgumentException if the AST root does not compile to a Proposition, which
-     *                                  indicates invalid SQL structure or unsupported syntax
+     * @throws ExpectedPropositionFromCompilationException if the AST root does not compile to a Proposition, which
+     *                                                     indicates invalid SQL structure or unsupported syntax
      *
      * @return Proposition The compiled Proposition tree ready for evaluation. Contains the
      *                     complete logical structure with all operators and variables resolved.
@@ -81,7 +84,7 @@ final readonly class SqlCompiler
     {
         $result = $this->compileNode($ast);
 
-        throw_unless($result instanceof Proposition, InvalidArgumentException::class, 'SQL expression must compile to a Proposition');
+        throw_unless($result instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression('SQL expression'));
 
         return $result;
     }
@@ -96,7 +99,7 @@ final readonly class SqlCompiler
      * @param SqlNode $node the AST node to compile, which can be any SqlNode subtype
      *                      including field references, literals, comparisons, or logical operations
      *
-     * @throws InvalidArgumentException if the node type is not recognized or supported
+     * @throws UnsupportedNodeTypeException if the node type is not recognized or supported
      *
      * @return Proposition|VariableOperand The compiled component. Returns a Proposition for operations
      *                                     that produce boolean results (comparisons, logical ops), or a
@@ -113,7 +116,7 @@ final readonly class SqlCompiler
             $node instanceof BetweenNode => $this->compileBetween($node),
             $node instanceof LikeNode => $this->compileLike($node),
             $node instanceof NullNode => $this->compileNull($node),
-            default => throw new InvalidArgumentException(sprintf('Unsupported node type: %s', $node::class)),
+            default => throw UnsupportedNodeTypeException::forClass($node::class),
         };
     }
 
@@ -126,7 +129,7 @@ final readonly class SqlCompiler
      *
      * @param ComparisonNode $node the comparison node containing operator and operands
      *
-     * @throws InvalidArgumentException if the comparison operator is not recognized or supported
+     * @throws UnsupportedComparisonOperatorException if the comparison operator is not recognized or supported
      *
      * @return Proposition a Proposition instance representing the comparison operation
      *                     using the appropriate Ruler comparison operator (EqualTo, NotEqualTo,
@@ -145,7 +148,7 @@ final readonly class SqlCompiler
             '>=' => new GreaterThanOrEqualTo($left, $right),
             '<' => new LessThan($left, $right),
             '<=' => new LessThanOrEqualTo($left, $right),
-            default => throw new InvalidArgumentException(sprintf('Unsupported comparison operator: %s', $node->operator)),
+            default => throw UnsupportedComparisonOperatorException::forOperator($node->operator),
         };
     }
 
@@ -157,7 +160,8 @@ final readonly class SqlCompiler
      *
      * @param LogicalNode $node the logical node containing operator and child operands
      *
-     * @throws InvalidArgumentException if the logical operator is not recognized or supported
+     * @throws ExpectedPropositionFromCompilationException if a subexpression does not compile to a Proposition
+     * @throws UnsupportedLogicalOperatorException         if the logical operator is not recognized or supported
      *
      * @return Proposition a Proposition instance representing the logical operation using
      *                     LogicalAnd, LogicalOr, or LogicalNot depending on the operator
@@ -168,7 +172,7 @@ final readonly class SqlCompiler
             function (SqlNode $operand): Proposition {
                 $result = $this->compileNode($operand);
 
-                return $result instanceof Proposition ? $result : throw new InvalidArgumentException('Expected Proposition');
+                return $result instanceof Proposition ? $result : throw ExpectedPropositionFromCompilationException::forExpression('SQL subexpression');
             },
             $node->operands,
         );
@@ -177,7 +181,7 @@ final readonly class SqlCompiler
             'AND' => new LogicalAnd($operands),
             'OR' => new LogicalOr($operands),
             'NOT' => new LogicalNot($operands),
-            default => throw new InvalidArgumentException(sprintf('Unsupported logical operator: %s', $node->operator)),
+            default => throw UnsupportedLogicalOperatorException::forOperator($node->operator),
         };
     }
 
@@ -217,9 +221,9 @@ final readonly class SqlCompiler
         $min = $this->compileNode($node->min);
         $max = $this->compileNode($node->max);
 
-        throw_unless($field instanceof VariableOperand, InvalidArgumentException::class, 'Between field must be VariableOperand');
-        throw_unless($min instanceof VariableOperand, InvalidArgumentException::class, 'Between min must be VariableOperand');
-        throw_unless($max instanceof VariableOperand, InvalidArgumentException::class, 'Between max must be VariableOperand');
+        throw_unless($field instanceof VariableOperand, InvalidOperandForCompilerException::forOperator('Between field', 'VariableOperand'));
+        throw_unless($min instanceof VariableOperand, InvalidOperandForCompilerException::forOperator('Between min', 'VariableOperand'));
+        throw_unless($max instanceof VariableOperand, InvalidOperandForCompilerException::forOperator('Between max', 'VariableOperand'));
 
         return new Between($field, $min, $max);
     }

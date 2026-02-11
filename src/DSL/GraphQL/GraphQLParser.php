@@ -9,7 +9,9 @@
 
 namespace Cline\Ruler\DSL\GraphQL;
 
-use InvalidArgumentException;
+use Cline\Ruler\Exceptions\InvalidFilterException;
+use Cline\Ruler\Exceptions\InvalidFilterOperandException;
+use Cline\Ruler\Exceptions\UnsupportedComparisonOperatorException;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -64,7 +66,7 @@ final class GraphQLParser
         if (is_string($filter)) {
             $decoded = json_decode($filter, true, 512, JSON_THROW_ON_ERROR);
 
-            throw_unless(is_array($decoded), InvalidArgumentException::class, 'Invalid filter: expected array, got '.gettype($decoded));
+            throw_unless(is_array($decoded), InvalidFilterException::expectedArray(gettype($decoded)));
 
             /** @var array<string, mixed> $decoded */
             $filter = $decoded;
@@ -94,14 +96,14 @@ final class GraphQLParser
     {
         return match ($operator) {
             'eq', 'ne', 'gt', 'gte', 'lt', 'lte' => new ComparisonNode($operator, $field, $value),
-            'in', 'notIn' => new ListNode($operator, $field, is_array($value) ? $value : throw new InvalidArgumentException($operator.' operator expects an array')),
-            'contains', 'notContains' => new StringNode($operator, $field, is_string($value) ? $value : throw new InvalidArgumentException($operator.' operator expects a string'), false),
-            'containsInsensitive' => new StringNode('contains', $field, is_string($value) ? $value : throw new InvalidArgumentException('containsInsensitive operator expects a string'), true),
-            'notContainsInsensitive' => new StringNode('notContains', $field, is_string($value) ? $value : throw new InvalidArgumentException('notContainsInsensitive operator expects a string'), true),
-            'startsWith', 'endsWith', 'match' => new StringNode($operator, $field, is_string($value) ? $value : throw new InvalidArgumentException($operator.' operator expects a string'), false),
-            'isNull' => new NullNode($field, is_bool($value) ? $value : throw new InvalidArgumentException('isNull operator expects a boolean')),
-            'isType' => new TypeNode($field, is_string($value) ? $value : throw new InvalidArgumentException('isType operator expects a string')),
-            default => throw new InvalidArgumentException('Unsupported operator: '.$operator),
+            'in', 'notIn' => new ListNode($operator, $field, is_array($value) ? $value : throw InvalidFilterOperandException::forOperator($operator, 'an array')),
+            'contains', 'notContains' => new StringNode($operator, $field, is_string($value) ? $value : throw InvalidFilterOperandException::forOperator($operator, 'a string'), false),
+            'containsInsensitive' => new StringNode('contains', $field, is_string($value) ? $value : throw InvalidFilterOperandException::forOperator('containsInsensitive', 'a string'), true),
+            'notContainsInsensitive' => new StringNode('notContains', $field, is_string($value) ? $value : throw InvalidFilterOperandException::forOperator('notContainsInsensitive', 'a string'), true),
+            'startsWith', 'endsWith', 'match' => new StringNode($operator, $field, is_string($value) ? $value : throw InvalidFilterOperandException::forOperator($operator, 'a string'), false),
+            'isNull' => new NullNode($field, is_bool($value) ? $value : throw InvalidFilterOperandException::forOperator('isNull', 'a boolean')),
+            'isType' => new TypeNode($field, is_string($value) ? $value : throw InvalidFilterOperandException::forOperator('isType', 'a string')),
+            default => throw UnsupportedComparisonOperatorException::forOperator($operator),
         };
     }
 
@@ -138,12 +140,12 @@ final class GraphQLParser
         if (array_key_exists('AND', $filter)) {
             $andValue = $filter['AND'];
 
-            throw_unless(is_array($andValue), InvalidArgumentException::class, 'AND operator expects an array');
+            throw_unless(is_array($andValue), InvalidFilterOperandException::forOperator('AND', 'an array'));
 
             /** @var array<int, GraphQLNode> $conditions */
             $conditions = array_map(
                 function (mixed $f): GraphQLNode {
-                    throw_unless(is_array($f), InvalidArgumentException::class, 'Invalid filter in AND');
+                    throw_unless(is_array($f), InvalidFilterException::expectedArray('non-array in AND'));
 
                     /** @var array<string, mixed> $f */
 
@@ -158,12 +160,12 @@ final class GraphQLParser
         if (array_key_exists('OR', $filter)) {
             $orValue = $filter['OR'];
 
-            throw_unless(is_array($orValue), InvalidArgumentException::class, 'OR operator expects an array');
+            throw_unless(is_array($orValue), InvalidFilterOperandException::forOperator('OR', 'an array'));
 
             /** @var array<int, GraphQLNode> $conditions */
             $conditions = array_map(
                 function (mixed $f): GraphQLNode {
-                    throw_unless(is_array($f), InvalidArgumentException::class, 'Invalid filter in OR');
+                    throw_unless(is_array($f), InvalidFilterException::expectedArray('non-array in OR'));
 
                     /** @var array<string, mixed> $f */
 
@@ -178,7 +180,7 @@ final class GraphQLParser
         if (array_key_exists('NOT', $filter)) {
             $notValue = $filter['NOT'];
 
-            throw_unless(is_array($notValue), InvalidArgumentException::class, 'NOT operator expects an array');
+            throw_unless(is_array($notValue), InvalidFilterOperandException::forOperator('NOT', 'an array'));
 
             /** @var array<string, mixed> $notValue */
 

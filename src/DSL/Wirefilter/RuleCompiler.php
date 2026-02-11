@@ -11,9 +11,13 @@ namespace Cline\Ruler\DSL\Wirefilter;
 
 use Cline\Ruler\Builder\Variable;
 use Cline\Ruler\Core\Proposition;
+use Cline\Ruler\Exceptions\ExpectedPropositionFromCompilationException;
+use Cline\Ruler\Exceptions\UnsupportedBinaryOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedNodeTypeException;
+use Cline\Ruler\Exceptions\UnsupportedObjectTypeException;
+use Cline\Ruler\Exceptions\UnsupportedUnaryOperatorException;
 use Cline\Ruler\Variables\Variable as BaseVariable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use Symfony\Component\ExpressionLanguage\Node\ArgumentsNode;
 use Symfony\Component\ExpressionLanguage\Node\ArrayNode;
 use Symfony\Component\ExpressionLanguage\Node\BinaryNode;
@@ -31,7 +35,6 @@ use function in_array;
 use function is_int;
 use function is_string;
 use function iterator_to_array;
-use function sprintf;
 use function throw_unless;
 
 /**
@@ -70,7 +73,7 @@ final readonly class RuleCompiler
      *
      * @param ParsedExpression $expression The parsed DSL expression AST from ExpressionParser
      *
-     * @throws LogicException When expression doesn't compile to a valid Proposition
+     * @throws ExpectedPropositionFromCompilationException When expression doesn't compile to a valid Proposition
      *
      * @return Proposition The compiled Proposition tree
      */
@@ -78,7 +81,7 @@ final readonly class RuleCompiler
     {
         $result = $this->compileNode($expression->getNodes());
 
-        throw_unless($result instanceof Proposition, LogicException::class, 'Expression must compile to a Proposition');
+        throw_unless($result instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression('Wirefilter expression'));
 
         return $result;
     }
@@ -102,7 +105,7 @@ final readonly class RuleCompiler
      */
     private function throwUnsupportedNodeType(): never
     {
-        throw new LogicException('Unsupported object type in GetAttrNode');
+        throw UnsupportedObjectTypeException::inContext('GetAttrNode');
     }
 
     /**
@@ -110,7 +113,7 @@ final readonly class RuleCompiler
      */
     private function throwUnsupportedUnaryOperator(string $operator): never
     {
-        throw new LogicException(sprintf('Unsupported unary operator: %s', $operator));
+        throw UnsupportedUnaryOperatorException::forOperator($operator);
     }
 
     /**
@@ -121,7 +124,7 @@ final readonly class RuleCompiler
      *
      * @param Node $node The symfony/expression-language AST node to compile
      *
-     * @throws LogicException When encountering an unsupported node type
+     * @throws UnsupportedNodeTypeException When encountering an unsupported node type
      *
      * @return Proposition|VariableOperand The compiled Ruler component
      */
@@ -135,7 +138,7 @@ final readonly class RuleCompiler
             $node instanceof UnaryNode => $this->compileUnary($node),
             $node instanceof FunctionNode => $this->compileFunction($node),
             $node instanceof ArrayNode => $this->compileArray($node),
-            default => throw new LogicException(sprintf('Unsupported node type: %s', $node::class)),
+            default => throw UnsupportedNodeTypeException::forClass($node::class),
         };
     }
 
@@ -232,7 +235,7 @@ final readonly class RuleCompiler
      *
      * @param BinaryNode $node The binary operator node
      *
-     * @throws LogicException When encountering an unsupported binary operator
+     * @throws UnsupportedBinaryOperatorException When encountering an unsupported binary operator
      *
      * @return Proposition|VariableOperand The compiled operator
      */
@@ -272,7 +275,7 @@ final readonly class RuleCompiler
             'in' => 'in',
             'not in' => 'notIn',
             'matches' => 'matches',
-            default => throw new LogicException(sprintf('Unsupported binary operator: %s', $operator)),
+            default => throw UnsupportedBinaryOperatorException::forOperator($operator),
         };
 
         // Mathematical operators return VariableOperands, not Propositions
@@ -297,7 +300,7 @@ final readonly class RuleCompiler
      *
      * @param UnaryNode $node The unary operator node
      *
-     * @throws LogicException When encountering an unsupported unary operator
+     * @throws UnsupportedUnaryOperatorException When encountering an unsupported unary operator
      *
      * @return Proposition|VariableOperand The compiled operator
      */
@@ -426,7 +429,7 @@ final readonly class RuleCompiler
      * @param string            $operatorName The DSL operator name (e.g., "eq", "and", "contains")
      * @param array<int, mixed> $operands     The compiled operand values for the operator
      *
-     * @throws LogicException When operator doesn't implement Proposition interface
+     * @throws ExpectedPropositionFromCompilationException When operator doesn't implement Proposition interface
      *
      * @return Proposition The instantiated Operator
      */
@@ -443,7 +446,7 @@ final readonly class RuleCompiler
             $operator = new $operatorClass(...$operands);
         }
 
-        throw_unless($operator instanceof Proposition, LogicException::class, sprintf('Operator %s must implement Proposition', $operatorClass));
+        throw_unless($operator instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression($operatorClass));
 
         return $operator;
     }

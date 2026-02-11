@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Tests\Exceptions\UnknownFactDefinitionException;
 use Tests\Fixtures\Fact;
 use Tests\Fixtures\Invokable;
 
@@ -267,6 +268,6 @@ function resolve_fact_definition(string $definition): callable
     return match ($definition) {
         'closure' => static fn (Context $context): Fact => new Fact($context),
         'invokable' => new Invokable(),
-        default => throw new InvalidArgumentException(sprintf('Unknown fact definition "%s".', $definition)),
+        default => throw UnknownFactDefinitionException::forDefinition($definition),
     };
 }

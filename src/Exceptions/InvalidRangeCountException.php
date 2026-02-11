@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidRangeCountException extends CompilerException
 {
     public static function forOperator(string $operator, int $expected, int $actual): self

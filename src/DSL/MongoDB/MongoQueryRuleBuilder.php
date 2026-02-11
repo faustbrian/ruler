@@ -12,12 +12,13 @@ namespace Cline\Ruler\DSL\MongoDB;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Rule;
 use Cline\Ruler\Core\RuleId;
+use Cline\Ruler\Exceptions\InvalidFilterException;
 use Closure;
-use InvalidArgumentException;
 use JsonException;
 
 use const JSON_THROW_ON_ERROR;
 
+use function get_debug_type;
 use function is_array;
 use function json_decode;
 
@@ -86,7 +87,7 @@ final readonly class MongoQueryRuleBuilder
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var array<string, mixed> $query */
-        $query = is_array($decoded) ? $decoded : throw new InvalidArgumentException('JSON must decode to array');
+        $query = is_array($decoded) ? $decoded : throw InvalidFilterException::expectedArray(get_debug_type($decoded));
 
         return $this->parse($query, $ruleId);
     }
@@ -126,7 +127,7 @@ final readonly class MongoQueryRuleBuilder
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var array<string, mixed> $query */
-        $query = is_array($decoded) ? $decoded : throw new InvalidArgumentException('JSON must decode to array');
+        $query = is_array($decoded) ? $decoded : throw InvalidFilterException::expectedArray(get_debug_type($decoded));
 
         return $this->parseWithAction($query, $action, $ruleId);
     }

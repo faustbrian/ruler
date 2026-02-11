@@ -9,8 +9,8 @@
 
 namespace Cline\Ruler\Values;
 
+use Cline\Ruler\Exceptions\InvalidNumericSetException;
 use Countable;
-use RuntimeException;
 use Stringable;
 
 use function array_any;
@@ -255,13 +255,13 @@ final readonly class Set implements Countable, Stringable
     /**
      * Find the minimum numeric value in this set.
      *
-     * @throws RuntimeException when the set contains non-numeric values
+     * @throws InvalidNumericSetException when the set contains non-numeric values
      *
      * @return mixed the smallest numeric value in the set, or null for empty sets
      */
     public function min(): mixed
     {
-        throw_unless($this->isValidNumericSet(), RuntimeException::class, 'min: all values must be numeric');
+        throw_unless($this->isValidNumericSet(), InvalidNumericSetException::forOperation('min'));
 
         if ($this->value === []) {
             return null;
@@ -276,13 +276,13 @@ final readonly class Set implements Countable, Stringable
     /**
      * Find the maximum numeric value in this set.
      *
-     * @throws RuntimeException when the set contains non-numeric values
+     * @throws InvalidNumericSetException when the set contains non-numeric values
      *
      * @return mixed the largest numeric value in the set, or null for empty sets
      */
     public function max(): mixed
     {
-        throw_unless($this->isValidNumericSet(), RuntimeException::class, 'max: all values must be numeric');
+        throw_unless($this->isValidNumericSet(), InvalidNumericSetException::forOperation('max'));
 
         if ($this->value === []) {
             return null;

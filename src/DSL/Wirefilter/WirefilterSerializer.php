@@ -13,6 +13,9 @@ use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\CannotCastValueException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -40,7 +43,6 @@ use Cline\Ruler\Operators\Mathematical\Subtraction;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use ReflectionClass;
 
 use function addslashes;
@@ -97,7 +99,9 @@ final readonly class WirefilterSerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When encountering unsupported operators or structures
+     * @throws CannotCastValueException                  When value cannot be serialized
+     * @throws InvalidOperandArityException              When operator has wrong number of operands
+     * @throws UnsupportedSerializationOperatorException When operator is not supported
      *
      * @return string The Wirefilter DSL expression
      */
@@ -191,7 +195,7 @@ final readonly class WirefilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $left = $this->serializeOperand($operands[0]);
         $right = $this->serializeOperand($operands[1]);
@@ -230,7 +234,7 @@ final readonly class WirefilterSerializer
     {
         $operands = $this->getOperands($not);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('NOT', 1, count($operands)));
 
         $operand = $operands[0];
 
@@ -286,7 +290,7 @@ final readonly class WirefilterSerializer
             }
         }
 
-        throw new LogicException(sprintf('Unknown operator: %s', $operatorClass));
+        throw UnsupportedSerializationOperatorException::forClass($operatorClass);
     }
 
     /**
@@ -432,7 +436,7 @@ final readonly class WirefilterSerializer
             return (string) $value;
         }
 
-        throw new LogicException(sprintf('Cannot cast value to string: %s', gettype($value)));
+        throw CannotCastValueException::forType(gettype($value));
     }
 
     /**

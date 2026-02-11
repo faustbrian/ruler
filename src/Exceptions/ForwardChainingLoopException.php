@@ -9,6 +9,9 @@
 
 namespace Cline\Ruler\Exceptions;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ForwardChainingLoopException extends RuleSetException
 {
     public static function exceededMaxCycles(): self

@@ -9,14 +9,15 @@
 
 namespace Cline\Ruler\DSL\SQL;
 
-use InvalidArgumentException;
-use RuntimeException;
+use Cline\Ruler\Exceptions\ExpectedLiteralValueException;
+use Cline\Ruler\Exceptions\FieldNameMustBeStringException;
+use Cline\Ruler\Exceptions\OperatorMustBeStringException;
+use Cline\Ruler\Exceptions\UnexpectedTokenException;
 
 use function count;
 use function in_array;
 use function is_scalar;
 use function is_string;
-use function sprintf;
 
 /**
  * Parser for SQL WHERE clause expressions.
@@ -51,7 +52,7 @@ final class SqlParser
      *
      * @param string $sql SQL WHERE clause expression
      *
-     * @throws InvalidArgumentException if syntax is invalid
+     * @throws UnexpectedTokenException if syntax is invalid
      *
      * @return SqlNode Root node of the AST
      */
@@ -68,9 +69,7 @@ final class SqlParser
             $token = $this->current();
             $tokenValue = is_scalar($token->value) ? (string) $token->value : $token->type;
 
-            throw new InvalidArgumentException(
-                sprintf('Unexpected token at position %d: %s', $token->position, $tokenValue),
-            );
+            throw UnexpectedTokenException::forToken($tokenValue);
         }
 
         return $ast;
@@ -167,7 +166,7 @@ final class SqlParser
         // Handle parentheses
         if ($this->match(Token::LPAREN)) {
             $node = $this->parseOr();
-            $this->consume(Token::RPAREN, 'Expected closing parenthesis');
+            $this->consume(Token::RPAREN);
 
             return $node;
         }
@@ -177,7 +176,7 @@ final class SqlParser
         // IS NULL / IS NOT NULL
         if ($this->matchKeyword('IS')) {
             $negated = $this->matchKeyword('NOT');
-            $this->consumeKeyword('NULL', 'Expected NULL after IS');
+            $this->consumeKeyword('NULL');
 
             return new NullNode($left, $negated);
         }
@@ -185,7 +184,7 @@ final class SqlParser
         // BETWEEN
         if ($this->matchKeyword('BETWEEN')) {
             $min = $this->parsePrimary();
-            $this->consumeKeyword('AND', 'Expected AND in BETWEEN expression');
+            $this->consumeKeyword('AND');
             $max = $this->parsePrimary();
 
             return new BetweenNode($left, $min, $max);
@@ -211,7 +210,7 @@ final class SqlParser
                     // consume NOT
                     $this->advance();
                     // consume LIKE
-                    $pattern = $this->consumeString('Expected string pattern after LIKE');
+                    $pattern = $this->consumeString();
 
                     return new LikeNode($left, $pattern, true);
                 }
@@ -225,7 +224,7 @@ final class SqlParser
         }
 
         if ($this->matchKeyword('LIKE')) {
-            $pattern = $this->consumeString('Expected string pattern after LIKE');
+            $pattern = $this->consumeString();
 
             return new LikeNode($left, $pattern, false);
         }
@@ -235,7 +234,7 @@ final class SqlParser
             $token = $this->advance();
 
             /** @var string $operator */
-            $operator = is_string($token->value) ? $token->value : throw new RuntimeException('Operator must be string');
+            $operator = is_string($token->value) ? $token->value : throw OperatorMustBeStringException::create();
             $right = $this->parsePrimary();
 
             return new ComparisonNode($operator, $left, $right);
@@ -255,7 +254,7 @@ final class SqlParser
      * NULL, identifiers (field names), and recursively parses parenthesized
      * subexpressions.
      *
-     * @throws InvalidArgumentException When encountering an unexpected token
+     * @throws UnexpectedTokenException When encountering an unexpected token
      *
      * @return SqlNode The parsed primary node
      */
@@ -264,7 +263,7 @@ final class SqlParser
         // Handle parentheses
         if ($this->match(Token::LPAREN)) {
             $node = $this->parseOr();
-            $this->consume(Token::RPAREN, 'Expected closing parenthesis');
+            $this->consume(Token::RPAREN);
 
             return $node;
         }
@@ -298,7 +297,7 @@ final class SqlParser
             $token = $this->advance();
 
             /** @var string $fieldName */
-            $fieldName = is_string($token->value) ? $token->value : throw new RuntimeException('Field name must be string');
+            $fieldName = is_string($token->value) ? $token->value : throw FieldNameMustBeStringException::create();
 
             return new FieldNode($fieldName);
         }
@@ -306,9 +305,7 @@ final class SqlParser
         $token = $this->current();
         $tokenValue = is_scalar($token->value) ? (string) $token->value : $token->type;
 
-        throw new InvalidArgumentException(
-            sprintf('Unexpected token at position %d: %s', $token->position, $tokenValue),
-        );
+        throw UnexpectedTokenException::forToken($tokenValue);
     }
 
     /**
@@ -318,7 +315,7 @@ final class SqlParser
      */
     private function parseValueList(): array
     {
-        $this->consume(Token::LPAREN, 'Expected opening parenthesis for value list');
+        $this->consume(Token::LPAREN);
 
         $values = [];
 
@@ -335,11 +332,11 @@ final class SqlParser
             } elseif ($this->matchKeyword('NULL')) {
                 $values[] = null;
             } else {
-                throw new InvalidArgumentException('Expected literal value in IN list');
+                throw ExpectedLiteralValueException::inContext('IN list');
             }
         } while ($this->match(Token::COMMA));
 
-        $this->consume(Token::RPAREN, 'Expected closing parenthesis for value list');
+        $this->consume(Token::RPAREN);
 
         return $values;
     }
@@ -413,63 +410,55 @@ final class SqlParser
     /**
      * Consume token of specific type or throw error.
      *
-     * @param string $type    The required token type
-     * @param string $message Error message to use if token doesn't match
+     * @param string $type The required token type
      *
-     * @throws InvalidArgumentException When current token doesn't match expected type
-     *
-     * @return Token The consumed token
+     * @throws UnexpectedTokenException When current token doesn't match expected type
+     * @return Token                    The consumed token
      */
-    private function consume(string $type, string $message): Token
+    private function consume(string $type): Token
     {
         if ($this->check($type)) {
             return $this->advance();
         }
 
         $token = $this->current();
+        $tokenValue = is_scalar($token->value) ? (string) $token->value : $token->type;
 
-        throw new InvalidArgumentException(
-            sprintf('%s at position %d', $message, $token->position),
-        );
+        throw UnexpectedTokenException::forToken($tokenValue);
     }
 
     /**
      * Consume keyword token or throw error.
      *
      * @param string $keyword The required keyword value
-     * @param string $message Error message to use if keyword doesn't match
      *
-     * @throws InvalidArgumentException When current token is not the expected keyword
-     *
-     * @return Token The consumed keyword token
+     * @throws UnexpectedTokenException When current token is not the expected keyword
+     * @return Token                    The consumed keyword token
      */
-    private function consumeKeyword(string $keyword, string $message): Token
+    private function consumeKeyword(string $keyword): Token
     {
         if ($this->checkKeyword($keyword)) {
             return $this->advance();
         }
 
         $token = $this->current();
+        $tokenValue = is_scalar($token->value) ? (string) $token->value : $token->type;
 
-        throw new InvalidArgumentException(
-            sprintf('%s at position %d', $message, $token->position),
-        );
+        throw UnexpectedTokenException::forToken($tokenValue);
     }
 
     /**
      * Consume string token and return its value.
      *
-     * @param string $message Error message to use if current token is not a string
-     *
-     * @throws InvalidArgumentException When current token is not a string
-     *
-     * @return string The string value from the consumed token
+     * @throws OperatorMustBeStringException When string token value is not a string
+     * @throws UnexpectedTokenException      When current token is not a string
+     * @return string                        The string value from the consumed token
      */
-    private function consumeString(string $message): string
+    private function consumeString(): string
     {
-        $token = $this->consume(Token::STRING, $message);
+        $token = $this->consume(Token::STRING);
 
-        return is_string($token->value) ? $token->value : throw new RuntimeException('String token value must be string');
+        return is_string($token->value) ? $token->value : throw OperatorMustBeStringException::create();
     }
 
     /**

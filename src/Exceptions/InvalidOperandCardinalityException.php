@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidOperandCardinalityException extends OperatorException
 {
     public static function forOperator(string $class, string $expected, int $actual): self

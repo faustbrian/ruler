@@ -12,8 +12,9 @@ namespace Cline\Ruler\Operators;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
-use LogicException;
+use Cline\Ruler\Exceptions\InvalidOperandCardinalityException;
 
+use function count;
 use function throw_if;
 
 /**
@@ -46,13 +47,13 @@ abstract class PropositionOperator extends Operator
      *
      * @param Proposition $operand Proposition operand to add with validation
      *
-     * @throws LogicException When attempting to add more than one operand
-     *                        to a unary operator
+     * @throws InvalidOperandCardinalityException When attempting to add more than one operand
+     *                                            to a unary operator
      */
     public function addProposition(Proposition $operand): void
     {
         throw_if(OperandCardinality::Unary === $this->getOperandCardinality()
-            && [] !== $this->operands, LogicException::class, static::class.' can only have 1 operand');
+            && [] !== $this->operands, InvalidOperandCardinalityException::forOperator(static::class, 'unary (1)', count($this->operands) + 1));
 
         $this->operands[] = $operand;
     }

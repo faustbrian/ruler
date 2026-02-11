@@ -9,7 +9,7 @@
 
 namespace Cline\Ruler\DSL\Natural;
 
-use InvalidArgumentException;
+use Cline\Ruler\Exceptions\CannotParseConditionException;
 
 use function array_map;
 use function count;
@@ -45,7 +45,7 @@ final class ASTParser
      *
      * @param string $text Human-readable rule expression to parse
      *
-     * @throws InvalidArgumentException If expression cannot be parsed
+     * @throws CannotParseConditionException If expression cannot be parsed
      *
      * @return array<string, mixed> AST root node representing the parsed expression
      */
@@ -77,7 +77,7 @@ final class ASTParser
      *
      * @param string $text Condition text to parse
      *
-     * @throws InvalidArgumentException If no pattern matches the condition
+     * @throws CannotParseConditionException If no pattern matches the condition
      *
      * @return array<string, mixed> AST node for the condition
      */
@@ -93,7 +93,7 @@ final class ASTParser
             return $node;
         }
 
-        throw new InvalidArgumentException('Could not parse condition: '.$text);
+        throw CannotParseConditionException::forText($text);
     }
 
     /**
@@ -387,7 +387,7 @@ final class ASTParser
      *
      * @param string $text Normalized expression text to parse
      *
-     * @throws InvalidArgumentException If expression cannot be parsed
+     * @throws CannotParseConditionException If expression cannot be parsed
      *
      * @return array<string, mixed> AST node for the expression
      */

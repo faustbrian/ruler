@@ -11,7 +11,7 @@ namespace Tests\Fixtures;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
-use InvalidArgumentException;
+use Cline\Ruler\Exceptions\NotCallableException;
 
 use function is_callable;
 use function throw_unless;
@@ -28,7 +28,7 @@ final class CallbackProposition implements Proposition
      */
     public function __construct($callback)
     {
-        throw_unless(is_callable($callback), InvalidArgumentException::class, 'CallbackProposition expects a callable argument');
+        throw_unless(is_callable($callback), NotCallableException::forContext('CallbackProposition'));
 
         $this->callback = $callback;
     }

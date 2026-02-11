@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnsupportedObjectTypeException extends CompilerException
 {
     public static function inContext(string $context): self

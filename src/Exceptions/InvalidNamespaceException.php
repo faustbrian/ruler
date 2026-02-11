@@ -12,6 +12,9 @@ namespace Cline\Ruler\Exceptions;
 use function get_debug_type;
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidNamespaceException extends BuilderException
 {
     public static function forValue(mixed $value): self

@@ -13,6 +13,9 @@ use Cline\Ruler\Enums\RuleErrorCode;
 use Cline\Ruler\Enums\RuleErrorPhase;
 use Throwable;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class RuntimeEvaluationFailedException extends RuleEvaluatorException
 {
     /**

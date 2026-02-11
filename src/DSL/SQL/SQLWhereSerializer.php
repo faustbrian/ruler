@@ -13,6 +13,10 @@ use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\CannotCastValueException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\InvalidSerializerValueException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -29,12 +33,12 @@ use Cline\Ruler\Operators\String\DoesNotMatch;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use ReflectionClass;
 
 use function array_map;
 use function array_values;
 use function count;
+use function get_debug_type;
 use function gettype;
 use function implode;
 use function is_array;
@@ -88,7 +92,10 @@ final readonly class SQLWhereSerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When encountering unsupported operators or structures
+     * @throws CannotCastValueException                  When value cannot be cast to string
+     * @throws InvalidOperandArityException              When operators have incorrect number of operands
+     * @throws InvalidSerializerValueException           When operand values are not of expected type
+     * @throws UnsupportedSerializationOperatorException When encountering unsupported operators
      *
      * @return string The SQL WHERE clause expression
      */
@@ -216,7 +223,7 @@ final readonly class SQLWhereSerializer
             // String operators (LIKE/NOT LIKE)
             $proposition instanceof Matches => $this->serializeLike($proposition, false),
             $proposition instanceof DoesNotMatch => $this->serializeLike($proposition, true),
-            default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
+            default => throw UnsupportedSerializationOperatorException::forClass($proposition::class),
         };
     }
 
@@ -231,7 +238,7 @@ final readonly class SQLWhereSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $left = $this->serializeOperand($operands[0]);
         $right = $this->serializeOperand($operands[1]);
@@ -277,7 +284,7 @@ final readonly class SQLWhereSerializer
     {
         $operands = $this->getOperands($not);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('NOT', 1, count($operands)));
 
         $operand = $operands[0];
 
@@ -316,7 +323,7 @@ final readonly class SQLWhereSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'IN operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('IN', 2, count($operands)));
 
         $field = $this->serializeOperand($operands[0]);
         $values = $operands[1];
@@ -324,7 +331,7 @@ final readonly class SQLWhereSerializer
         // Extract array from Variable
         $array = $values instanceof Variable ? $values->getValue() : $values;
 
-        throw_unless(is_array($array), LogicException::class, 'IN operator requires array of values');
+        throw_unless(is_array($array), InvalidSerializerValueException::forExpected('array', get_debug_type($array)));
 
         $serializedValues = array_map(
             $this->serializeValue(...),
@@ -347,7 +354,7 @@ final readonly class SQLWhereSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 3, LogicException::class, 'BETWEEN operator requires exactly 3 operands');
+        throw_if(count($operands) !== 3, InvalidOperandArityException::forOperator('BETWEEN', 3, count($operands)));
 
         $field = $this->serializeOperand($operands[0]);
         $min = $this->serializeOperand($operands[1]);
@@ -367,7 +374,7 @@ final readonly class SQLWhereSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'LIKE operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('LIKE', 2, count($operands)));
 
         $field = $this->serializeOperand($operands[0]);
         $pattern = $operands[1];
@@ -375,7 +382,7 @@ final readonly class SQLWhereSerializer
         // Extract regex from Variable and convert back to SQL LIKE pattern
         $regex = $pattern instanceof Variable ? $pattern->getValue() : $pattern;
 
-        throw_unless(is_string($regex), LogicException::class, 'LIKE pattern must be a string');
+        throw_unless(is_string($regex), InvalidSerializerValueException::forExpected('string', get_debug_type($regex)));
 
         // Convert regex back to SQL LIKE pattern
         $sqlPattern = $this->regexToLikePattern($regex);
@@ -465,7 +472,7 @@ final readonly class SQLWhereSerializer
             return (string) $value;
         }
 
-        throw new LogicException(sprintf('Cannot cast value to string: %s', gettype($value)));
+        throw CannotCastValueException::forType(gettype($value));
     }
 
     /**

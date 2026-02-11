@@ -11,4 +11,7 @@ namespace Cline\Ruler\Exceptions;
 
 use RuntimeException;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 abstract class ContextException extends RuntimeException implements RulerException {}

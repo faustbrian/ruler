@@ -13,6 +13,14 @@ use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\CannotCastValueException;
+use Cline\Ruler\Exceptions\ExpectedPropositionOperandException;
+use Cline\Ruler\Exceptions\ExpectedVariableOperandException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\InvalidSerializerValueException;
+use Cline\Ruler\Exceptions\UnsupportedMatchesPatternException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
+use Cline\Ruler\Exceptions\VariableMustHaveNameException;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
 use Cline\Ruler\Operators\Comparison\GreaterThanOrEqualTo;
@@ -24,12 +32,12 @@ use Cline\Ruler\Operators\Logical\LogicalOr;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use ReflectionClass;
 
 use function array_map;
 use function array_values;
 use function count;
+use function get_debug_type;
 use function gettype;
 use function implode;
 use function is_array;
@@ -89,7 +97,7 @@ final readonly class LDAPFilterSerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When encountering unsupported operators or structures
+     * @throws UnsupportedSerializationOperatorException When encountering unsupported operators or structures
      *
      * @return string The LDAP filter expression
      */
@@ -119,7 +127,7 @@ final readonly class LDAPFilterSerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $attribute = $this->extractAttributeName($operands[0]);
         $value = $this->extractValue($operands[1]);
@@ -150,12 +158,12 @@ final readonly class LDAPFilterSerializer
     {
         $operands = $this->getOperands($matches);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('Matches', 2, count($operands)));
 
         $attribute = $this->extractAttributeName($operands[0]);
         $pattern = $this->extractValue($operands[1]);
 
-        throw_unless(is_string($pattern), LogicException::class, 'Matches pattern must be a string');
+        throw_unless(is_string($pattern), InvalidSerializerValueException::forExpected('string', get_debug_type($pattern)));
 
         // Detect approximate match (case-insensitive pattern without wildcards)
         if (preg_match('/^\/(.+)\/i$/', $pattern, $matches)) {
@@ -180,7 +188,7 @@ final readonly class LDAPFilterSerializer
             return sprintf('(%s=%s)', $attribute, $wildcardPattern);
         }
 
-        throw new LogicException(sprintf('Unsupported Matches pattern: %s', $pattern));
+        throw UnsupportedMatchesPatternException::forPattern($pattern);
     }
 
     /**
@@ -194,12 +202,12 @@ final readonly class LDAPFilterSerializer
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
-            throw_if($name === null, LogicException::class, 'Variable must have a name for LDAP serialization');
+            throw_if($name === null, VariableMustHaveNameException::forContext('LDAP serialization'));
 
             return $name;
         }
 
-        throw new LogicException('Expected Variable operand for attribute name');
+        throw ExpectedVariableOperandException::forContext('attribute name');
     }
 
     /**
@@ -214,7 +222,7 @@ final readonly class LDAPFilterSerializer
             return $operand->getValue();
         }
 
-        throw new LogicException('Expected Variable operand for value');
+        throw ExpectedVariableOperandException::forContext('value');
     }
 
     /**
@@ -241,7 +249,7 @@ final readonly class LDAPFilterSerializer
             return (string) $value;
         }
 
-        throw new LogicException(sprintf('Unsupported value type for LDAP serialization: %s', gettype($value)));
+        throw CannotCastValueException::forType(gettype($value));
     }
 
     /**
@@ -299,7 +307,7 @@ final readonly class LDAPFilterSerializer
             $proposition instanceof LessThan => $this->serializeComparison($proposition, '<'),
             // String operators (wildcard and approximate)
             $proposition instanceof Matches => $this->serializeMatches($proposition),
-            default => throw new LogicException(sprintf('Unsupported operator for LDAP serialization: %s', $proposition::class)),
+            default => throw UnsupportedSerializationOperatorException::forClass($proposition::class),
         };
     }
 
@@ -319,7 +327,7 @@ final readonly class LDAPFilterSerializer
         $serialized = array_map(
             fn (mixed $operand): string => $operand instanceof Proposition
                 ? $this->serializeProposition($operand)
-                : throw new LogicException('LDAP logical operators require Proposition operands'),
+                : throw ExpectedPropositionOperandException::forOperator('LDAP logical'),
             $operands,
         );
 
@@ -339,7 +347,7 @@ final readonly class LDAPFilterSerializer
     {
         $operands = $this->getOperands($not);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'LDAP NOT operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('NOT', 1, count($operands)));
 
         $operand = $operands[0];
 
@@ -362,6 +370,6 @@ final readonly class LDAPFilterSerializer
             return sprintf('(!%s)', $this->serializeProposition($operand));
         }
 
-        throw new LogicException('LDAP NOT operator requires Proposition operand');
+        throw ExpectedPropositionOperandException::forOperator('NOT');
     }
 }

@@ -11,4 +11,7 @@ namespace Cline\Ruler\Exceptions;
 
 use Throwable;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 interface RulerException extends Throwable {}

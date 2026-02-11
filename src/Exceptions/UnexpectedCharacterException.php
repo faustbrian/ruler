@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnexpectedCharacterException extends ParserException
 {
     public static function atPosition(int $position, string $char): self

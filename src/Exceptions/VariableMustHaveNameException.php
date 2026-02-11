@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class VariableMustHaveNameException extends SerializerException
 {
     public static function forContext(string $context): self

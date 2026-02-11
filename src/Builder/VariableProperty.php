@@ -11,9 +11,9 @@ namespace Cline\Ruler\Builder;
 
 use ArrayAccess;
 use Cline\Ruler\Builder\Concerns\FluentVariableOperators;
+use Cline\Ruler\Exceptions\CannotResolveRuleBuilderException;
 use Cline\Ruler\Variables\Concerns\ResolvesPropertyValue;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use Override;
 
 use function array_key_exists;
@@ -201,7 +201,7 @@ final class VariableProperty implements ArrayAccess, VariableOperand
 
         // This should never happen with proper usage, but provides a clear error
         // @codeCoverageIgnoreStart
-        throw new LogicException('Cannot resolve RuleBuilder from parent: parent must be Variable or VariableProperty');
+        throw CannotResolveRuleBuilderException::create();
         // @codeCoverageIgnoreEnd
     }
 }

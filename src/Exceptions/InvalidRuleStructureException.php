@@ -12,6 +12,9 @@ namespace Cline\Ruler\Exceptions;
 use Cline\Ruler\Enums\RuleErrorCode;
 use Cline\Ruler\Enums\RuleErrorPhase;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidRuleStructureException extends RuleEvaluatorException
 {
     /**

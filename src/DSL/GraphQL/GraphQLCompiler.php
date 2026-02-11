@@ -11,6 +11,12 @@ namespace Cline\Ruler\DSL\GraphQL;
 
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Cline\Ruler\Exceptions\UnsupportedComparisonOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedListOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedLogicalOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedNodeTypeException;
+use Cline\Ruler\Exceptions\UnsupportedStringOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedTypeException;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
 use Cline\Ruler\Operators\Comparison\GreaterThanOrEqualTo;
@@ -35,8 +41,6 @@ use Cline\Ruler\Operators\Type\IsNull;
 use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
-use InvalidArgumentException;
-use RuntimeException;
 
 use function array_map;
 
@@ -101,7 +105,7 @@ final readonly class GraphQLCompiler
             $node instanceof StringNode => $this->compileString($node),
             $node instanceof NullNode => $this->compileNull($node),
             $node instanceof TypeNode => $this->compileType($node),
-            default => throw new RuntimeException('Unknown node type: '.$node::class),
+            default => throw UnsupportedNodeTypeException::forClass($node::class),
         };
     }
 
@@ -129,7 +133,7 @@ final readonly class GraphQLCompiler
             'and' => new LogicalAnd($compiledConditions),
             'or' => new LogicalOr($compiledConditions),
             'not' => new LogicalNot($compiledConditions),
-            default => throw new InvalidArgumentException('Unsupported logical operator: '.$node->operator),
+            default => throw UnsupportedLogicalOperatorException::forOperator($node->operator),
         };
     }
 
@@ -158,7 +162,7 @@ final readonly class GraphQLCompiler
             'gte' => new GreaterThanOrEqualTo($field, $value),
             'lt' => new LessThan($field, $value),
             'lte' => new LessThanOrEqualTo($field, $value),
-            default => throw new InvalidArgumentException('Unsupported comparison operator: '.$node->operator),
+            default => throw UnsupportedComparisonOperatorException::forOperator($node->operator),
         };
     }
 
@@ -183,7 +187,7 @@ final readonly class GraphQLCompiler
         return match ($node->operator) {
             'in' => new In($field, $value),
             'notIn' => new NotIn($field, $value),
-            default => throw new InvalidArgumentException('Unsupported list operator: '.$node->operator),
+            default => throw UnsupportedListOperatorException::forOperator($node->operator),
         };
     }
 
@@ -216,7 +220,7 @@ final readonly class GraphQLCompiler
             'startsWith' => new StartsWith($field, $value),
             'endsWith' => new EndsWith($field, $value),
             'match' => new Matches($field, new Variable(null, '/'.$node->value.'/')),
-            default => throw new InvalidArgumentException('Unsupported string operator: '.$node->operator),
+            default => throw UnsupportedStringOperatorException::forOperator($node->operator),
         };
     }
 
@@ -264,7 +268,7 @@ final readonly class GraphQLCompiler
             'number', 'numeric' => new IsNumeric($field),
             'boolean', 'bool' => new IsBoolean($field),
             'array' => new IsArray($field),
-            default => throw new InvalidArgumentException('Unsupported type: '.$node->expectedType),
+            default => throw UnsupportedTypeException::forType($node->expectedType),
         };
     }
 }

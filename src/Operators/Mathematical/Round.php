@@ -11,10 +11,10 @@ namespace Cline\Ruler\Operators\Mathematical;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Values\Value;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function array_key_exists;
 use function is_numeric;
@@ -42,8 +42,8 @@ final class Round extends VariableOperator implements VariableOperand
      * @param Context $context Runtime context containing variable values and state
      *                         for resolving operand values
      *
-     * @throws RuntimeException When the value operand is not numeric or when
-     *                          the precision operand is provided but not numeric
+     * @throws ValuesNotNumericException When the value operand is not numeric or when
+     *                                   the precision operand is provided but not numeric
      *
      * @return Value Wrapped rounded numeric value ready for evaluation
      */
@@ -56,7 +56,7 @@ final class Round extends VariableOperator implements VariableOperand
 
         $value = $valueOperand->prepareValue($context)->getValue();
 
-        throw_unless(is_numeric($value), RuntimeException::class, 'Round: value must be numeric');
+        throw_unless(is_numeric($value), ValuesNotNumericException::forOperation('Round'));
 
         $precision = 0;
 
@@ -64,7 +64,7 @@ final class Round extends VariableOperator implements VariableOperand
             /** @var VariableOperand $precisionOperand */
             $precisionOperand = $operands[1];
             $precision = $precisionOperand->prepareValue($context)->getValue();
-            throw_unless(is_numeric($precision), RuntimeException::class, 'Round: precision must be numeric');
+            throw_unless(is_numeric($precision), ValuesNotNumericException::forOperation('Round precision'));
         }
 
         return new Value(round((float) $value, (int) $precision));

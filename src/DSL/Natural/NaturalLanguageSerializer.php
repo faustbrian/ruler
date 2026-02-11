@@ -13,6 +13,10 @@ use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\CannotCastValueException;
+use Cline\Ruler\Exceptions\ExpectedVariableOperandException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -29,7 +33,6 @@ use Cline\Ruler\Operators\String\StartsWith;
 use Cline\Ruler\Operators\String\StringContains;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use ReflectionClass;
 
 use function array_map;
@@ -42,7 +45,6 @@ use function is_bool;
 use function is_numeric;
 use function is_string;
 use function sprintf;
-use function throw_if;
 
 /**
  * Serializes Rule objects back to Natural Language DSL expression strings.
@@ -84,7 +86,10 @@ final readonly class NaturalLanguageSerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When encountering unsupported operators or structures
+     * @throws CannotCastValueException                  When encountering unsupported value types
+     * @throws ExpectedVariableOperandException          When encountering invalid operands
+     * @throws InvalidOperandArityException              When operator has wrong number of operands
+     * @throws UnsupportedSerializationOperatorException When encountering unsupported operators
      *
      * @return string The Natural Language DSL expression
      */
@@ -102,15 +107,20 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a comparison operator.
      *
-     * @param  Proposition $proposition The proposition containing two operands
-     * @param  string      $operator    The natural language operator phrase
-     * @return string      The serialized comparison expression
+     * @param Proposition $proposition The proposition containing two operands
+     * @param string      $operator    The natural language operator phrase
+     *
+     * @throws InvalidOperandArityException If operator has wrong number of operands
+     *
+     * @return string The serialized comparison expression
      */
     private function serializeComparison(Proposition $proposition, string $operator): string
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Comparison operator %s requires exactly 2 operands', $operator));
+        if (count($operands) !== 2) {
+            throw InvalidOperandArityException::forOperator($operator, 2, count($operands));
+        }
 
         $field = $this->serializeField($operands[0]);
         $value = $this->serializeValue($operands[1]);
@@ -121,14 +131,19 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a between range check.
      *
-     * @param  Between $between The between proposition
-     * @return string  The serialized between expression
+     * @param Between $between The between proposition
+     *
+     * @throws InvalidOperandArityException If operator has wrong number of operands
+     *
+     * @return string The serialized between expression
      */
     private function serializeBetween(Between $between): string
     {
         $operands = $this->getOperands($between);
 
-        throw_if(count($operands) !== 3, LogicException::class, 'Between operator requires exactly 3 operands');
+        if (count($operands) !== 3) {
+            throw InvalidOperandArityException::forOperator('Between', 3, count($operands));
+        }
 
         $field = $this->serializeField($operands[0]);
         $min = $this->serializeValue($operands[1]);
@@ -140,14 +155,19 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize an In list membership check.
      *
-     * @param  In     $in The in proposition
+     * @param In $in The in proposition
+     *
+     * @throws InvalidOperandArityException If operator has wrong number of operands
+     *
      * @return string The serialized in expression
      */
     private function serializeIn(In $in): string
     {
         $operands = $this->getOperands($in);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'In operator requires exactly 2 operands');
+        if (count($operands) !== 2) {
+            throw InvalidOperandArityException::forOperator('In', 2, count($operands));
+        }
 
         $field = $this->serializeField($operands[0]);
         $values = $this->getListValues($operands[1]);
@@ -167,14 +187,19 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a NotIn list membership check.
      *
-     * @param  NotIn  $notIn The not in proposition
+     * @param NotIn $notIn The not in proposition
+     *
+     * @throws InvalidOperandArityException If operator has wrong number of operands
+     *
      * @return string The serialized not in expression
      */
     private function serializeNotIn(NotIn $notIn): string
     {
         $operands = $this->getOperands($notIn);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'NotIn operator requires exactly 2 operands');
+        if (count($operands) !== 2) {
+            throw InvalidOperandArityException::forOperator('NotIn', 2, count($operands));
+        }
 
         $field = $this->serializeField($operands[0]);
         $values = $this->getListValues($operands[1]);
@@ -190,15 +215,20 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a string operation.
      *
-     * @param  Proposition $proposition The proposition containing two operands
-     * @param  string      $operation   The natural language operation phrase
-     * @return string      The serialized string operation expression
+     * @param Proposition $proposition The proposition containing two operands
+     * @param string      $operation   The natural language operation phrase
+     *
+     * @throws InvalidOperandArityException If operator has wrong number of operands
+     *
+     * @return string The serialized string operation expression
      */
     private function serializeStringOperation(Proposition $proposition, string $operation): string
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('String operation %s requires exactly 2 operands', $operation));
+        if (count($operands) !== 2) {
+            throw InvalidOperandArityException::forOperator($operation, 2, count($operands));
+        }
 
         $field = $this->serializeField($operands[0]);
         $value = $this->serializeValue($operands[1]);
@@ -209,7 +239,10 @@ final readonly class NaturalLanguageSerializer
     /**
      * Serialize a field reference (Variable).
      *
-     * @param  mixed  $operand The operand to serialize as a field
+     * @param mixed $operand The operand to serialize as a field
+     *
+     * @throws ExpectedVariableOperandException If operand is not a valid variable with a name
+     *
      * @return string The serialized field name
      */
     private function serializeField(mixed $operand): string
@@ -222,7 +255,7 @@ final readonly class NaturalLanguageSerializer
             }
         }
 
-        throw new LogicException('Expected variable with name for field reference');
+        throw ExpectedVariableOperandException::forContext('field reference');
     }
 
     /**
@@ -247,7 +280,10 @@ final readonly class NaturalLanguageSerializer
     /**
      * Format a raw value as natural language syntax.
      *
-     * @param  mixed  $value The value to format
+     * @param mixed $value The value to format
+     *
+     * @throws CannotCastValueException If value type cannot be formatted
+     *
      * @return string The formatted value
      */
     private function formatValue(mixed $value): string
@@ -268,13 +304,16 @@ final readonly class NaturalLanguageSerializer
             return (string) $value;
         }
 
-        throw new LogicException(sprintf('Cannot format value of type: %s', gettype($value)));
+        throw CannotCastValueException::forType(gettype($value));
     }
 
     /**
      * Get list values from a Variable operand.
      *
-     * @param  mixed             $operand The operand containing list values
+     * @param mixed $operand The operand containing list values
+     *
+     * @throws ExpectedVariableOperandException If operand is not a valid variable with array value
+     *
      * @return array<int, mixed> The list values
      */
     private function getListValues(mixed $operand): array
@@ -287,7 +326,7 @@ final readonly class NaturalLanguageSerializer
             }
         }
 
-        throw new LogicException('Expected variable with array value for list membership');
+        throw ExpectedVariableOperandException::forContext('list membership');
     }
 
     /**
@@ -350,7 +389,7 @@ final readonly class NaturalLanguageSerializer
             $proposition instanceof StringContains => $this->serializeStringOperation($proposition, 'contains'),
             $proposition instanceof StartsWith => $this->serializeStringOperation($proposition, 'starts with'),
             $proposition instanceof EndsWith => $this->serializeStringOperation($proposition, 'ends with'),
-            default => throw new LogicException(sprintf('Unsupported operator for natural language serialization: %s', $proposition::class)),
+            default => throw UnsupportedSerializationOperatorException::forClass($proposition::class),
         };
     }
 

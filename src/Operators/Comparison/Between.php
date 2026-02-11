@@ -12,9 +12,9 @@ namespace Cline\Ruler\Operators\Comparison;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function is_numeric;
 use function throw_if;
@@ -47,7 +47,7 @@ final class Between extends VariableOperator implements Proposition
      *
      * @param Context $context Execution context providing variable values for operand resolution
      *
-     * @throws RuntimeException When any operand value is not numeric
+     * @throws ValuesNotNumericException When any operand value is not numeric
      *
      * @return bool True if value is within the range [min, max], false otherwise
      */
@@ -62,7 +62,7 @@ final class Between extends VariableOperator implements Proposition
         $minVal = $min->prepareValue($context)->getValue();
         $maxVal = $max->prepareValue($context)->getValue();
 
-        throw_if(!is_numeric($val) || !is_numeric($minVal) || !is_numeric($maxVal), RuntimeException::class, 'Between: all values must be numeric');
+        throw_if(!is_numeric($val) || !is_numeric($minVal) || !is_numeric($maxVal), ValuesNotNumericException::forOperation('Between'));
 
         return $val >= $minVal && $val <= $maxVal;
     }

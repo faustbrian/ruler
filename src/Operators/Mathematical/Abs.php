@@ -11,10 +11,10 @@ namespace Cline\Ruler\Operators\Mathematical;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValuesNotNumericException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Values\Value;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function abs;
 use function is_numeric;
@@ -48,7 +48,7 @@ final class Abs extends VariableOperator implements VariableOperand
      * @param Context $context Evaluation context containing variable values and facts
      *                         required for operand resolution
      *
-     * @throws RuntimeException When the operand value is not numeric
+     * @throws ValuesNotNumericException When the operand value is not numeric
      *
      * @return Value Value object containing the absolute value of the operand
      */
@@ -59,7 +59,7 @@ final class Abs extends VariableOperator implements VariableOperand
 
         $value = $operand->prepareValue($context)->getValue();
 
-        throw_unless(is_numeric($value), RuntimeException::class, 'Abs: value must be numeric');
+        throw_unless(is_numeric($value), ValuesNotNumericException::forOperation('Abs'));
 
         /** @var float|int $value */
         return new Value(abs($value));

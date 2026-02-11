@@ -12,9 +12,9 @@ namespace Cline\Ruler\Operators\String;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValueNotStringException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function is_string;
 use function preg_match;
@@ -41,8 +41,8 @@ final class Matches extends VariableOperator implements Proposition
      * @param Context $context Runtime context containing variable values and state
      *                         for resolving operands during rule evaluation
      *
-     * @throws RuntimeException When the left operand value is not a string
-     * @throws RuntimeException When the right operand pattern is not a string
+     * @throws ValueNotStringException When the left operand value is not a string
+     * @throws ValueNotStringException When the right operand pattern is not a string
      *
      * @return bool True when the left operand value matches the right operand
      *              regex pattern, false when it does not match
@@ -56,9 +56,9 @@ final class Matches extends VariableOperator implements Proposition
         $value = $left->prepareValue($context)->getValue();
         $pattern = $right->prepareValue($context)->getValue();
 
-        throw_unless(is_string($value), RuntimeException::class, 'Matches: value must be a string');
+        throw_unless(is_string($value), ValueNotStringException::forOperation('Matches'));
 
-        throw_unless(is_string($pattern), RuntimeException::class, 'Matches: pattern must be a string');
+        throw_unless(is_string($pattern), ValueNotStringException::forOperation('Matches pattern'));
 
         return (bool) preg_match($pattern, $value);
     }

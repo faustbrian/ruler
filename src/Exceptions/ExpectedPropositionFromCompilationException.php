@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ExpectedPropositionFromCompilationException extends CompilerException
 {
     public static function forExpression(string $expression): self

@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidSerializerValueException extends SerializerException
 {
     public static function forExpected(string $expected, string $actual): self

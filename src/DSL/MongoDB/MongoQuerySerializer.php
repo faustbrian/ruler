@@ -13,6 +13,11 @@ use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Exceptions\CannotExtractFieldNameException;
+use Cline\Ruler\Exceptions\ExpectedPropositionOperandException;
+use Cline\Ruler\Exceptions\InvalidOperandArityException;
+use Cline\Ruler\Exceptions\UnsupportedSerializationOperatorException;
+use Cline\Ruler\Exceptions\VariableMustHaveNameException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -53,7 +58,6 @@ use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use LogicException;
 use ReflectionClass;
 
 use const JSON_THROW_ON_ERROR;
@@ -66,7 +70,6 @@ use function is_array;
 use function is_string;
 use function json_encode;
 use function preg_match;
-use function sprintf;
 use function throw_if;
 
 /**
@@ -108,8 +111,6 @@ final readonly class MongoQuerySerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When encountering unsupported operators or structures
-     *
      * @return string The MongoDB query JSON string
      */
     public function serialize(Rule $rule): string
@@ -132,8 +133,6 @@ final readonly class MongoQuerySerializer
      * query document as an associative array.
      *
      * @param Rule $rule The Rule to serialize
-     *
-     * @throws LogicException When encountering unsupported operators or structures
      *
      * @return array<string, mixed> The MongoDB query document array
      */
@@ -264,7 +263,7 @@ final readonly class MongoQuerySerializer
             $proposition instanceof IsNumeric => $this->serializeTypeCheck($proposition, 'number'),
             $proposition instanceof IsString => $this->serializeTypeCheck($proposition, 'string'),
             $proposition instanceof IsEmpty => $this->serializeEmpty($proposition),
-            default => throw new LogicException(sprintf('Unsupported operator: %s', $proposition::class)),
+            default => throw UnsupportedSerializationOperatorException::forClass($proposition::class),
         };
     }
 
@@ -279,7 +278,7 @@ final readonly class MongoQuerySerializer
         $operands = $this->getOperands($and);
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'AND operand must be a Proposition');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('AND'));
 
                 return $this->serializeProposition($operand);
             },
@@ -300,7 +299,7 @@ final readonly class MongoQuerySerializer
         $operands = $this->getOperands($or);
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'OR operand must be a Proposition');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('OR'));
 
                 return $this->serializeProposition($operand);
             },
@@ -321,7 +320,7 @@ final readonly class MongoQuerySerializer
         $operands = $this->getOperands($nor);
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'NOR operand must be a Proposition');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('NOR'));
 
                 return $this->serializeProposition($operand);
             },
@@ -341,10 +340,10 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($not);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'NOT operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('NOT', 1, count($operands)));
 
         $operand = $operands[0];
-        throw_if(!$operand instanceof Proposition, LogicException::class, 'NOT operand must be a Proposition');
+        throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('NOT'));
 
         return ['$not' => $this->serializeProposition($operand)];
     }
@@ -360,7 +359,7 @@ final readonly class MongoQuerySerializer
         $operands = $this->getOperands($xor);
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'XOR operand must be a Proposition');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('XOR'));
 
                 return $this->serializeProposition($operand);
             },
@@ -381,7 +380,7 @@ final readonly class MongoQuerySerializer
         $operands = $this->getOperands($nand);
         $conditions = array_map(
             function (mixed $operand): array {
-                throw_if(!$operand instanceof Proposition, LogicException::class, 'NAND operand must be a Proposition');
+                throw_if(!$operand instanceof Proposition, ExpectedPropositionOperandException::forOperator('NAND'));
 
                 return $this->serializeProposition($operand);
             },
@@ -403,7 +402,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($equalTo);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'EqualTo operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('EqualTo', 2, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
         $value = $this->extractValue($operands[1]);
@@ -428,7 +427,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 2, LogicException::class, sprintf('Binary operator %s requires exactly 2 operands', $operator));
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator($operator, 2, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
         $value = $this->extractValue($operands[1]);
@@ -446,7 +445,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($between);
 
-        throw_if(count($operands) !== 3, LogicException::class, 'Between operator requires exactly 3 operands');
+        throw_if(count($operands) !== 3, InvalidOperandArityException::forOperator('Between', 3, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
         $min = $this->extractValue($operands[1]);
@@ -465,7 +464,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($betweenDates);
 
-        throw_if(count($operands) !== 3, LogicException::class, 'BetweenDates operator requires exactly 3 operands');
+        throw_if(count($operands) !== 3, InvalidOperandArityException::forOperator('BetweenDates', 3, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
         $start = $this->extractValue($operands[1]);
@@ -484,7 +483,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($matches);
 
-        throw_if(count($operands) !== 2, LogicException::class, 'Matches operator requires exactly 2 operands');
+        throw_if(count($operands) !== 2, InvalidOperandArityException::forOperator('Matches', 2, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
         $pattern = $this->extractValue($operands[1]);
@@ -518,7 +517,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($isNull);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'IsNull operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('IsNull', 1, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -535,7 +534,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($isEmpty);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'IsEmpty operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('IsEmpty', 1, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -553,7 +552,7 @@ final readonly class MongoQuerySerializer
     {
         $operands = $this->getOperands($proposition);
 
-        throw_if(count($operands) !== 1, LogicException::class, 'Type check operator requires exactly 1 operand');
+        throw_if(count($operands) !== 1, InvalidOperandArityException::forOperator('Type check', 1, count($operands)));
 
         $field = $this->extractFieldName($operands[0]);
 
@@ -571,7 +570,7 @@ final readonly class MongoQuerySerializer
         if ($operand instanceof Variable || $operand instanceof BuilderVariable) {
             $name = $operand->getName();
 
-            throw_if($name === null, LogicException::class, 'Variable must have a name to serialize as field');
+            throw_if($name === null, VariableMustHaveNameException::forContext('MongoDB field'));
 
             return $name;
         }
@@ -590,7 +589,7 @@ final readonly class MongoQuerySerializer
             return $this->extractFieldName($innerOperands[0]);
         }
 
-        throw new LogicException(sprintf('Cannot extract field name from: %s', get_debug_type($operand)));
+        throw CannotExtractFieldNameException::forType(get_debug_type($operand));
         // @codeCoverageIgnoreEnd
     }
 }

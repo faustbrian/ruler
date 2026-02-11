@@ -14,6 +14,9 @@ use Cline\Ruler\Enums\RuleErrorPhase;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class InvalidCombinatorException extends RuleEvaluatorException
 {
     /**

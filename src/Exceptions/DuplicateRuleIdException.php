@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class DuplicateRuleIdException extends RuleSetException
 {
     public static function forId(string $id): self

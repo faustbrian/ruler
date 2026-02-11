@@ -9,6 +9,9 @@
 
 namespace Cline\Ruler\Exceptions;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnexpectedEndOfInputException extends ParserException
 {
     public static function create(): self

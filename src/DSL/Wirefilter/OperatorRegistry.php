@@ -9,6 +9,7 @@
 
 namespace Cline\Ruler\DSL\Wirefilter;
 
+use Cline\Ruler\Exceptions\UnknownDSLOperatorException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -68,11 +69,9 @@ use Cline\Ruler\Operators\Type\IsEmpty;
 use Cline\Ruler\Operators\Type\IsNull;
 use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
-use LogicException;
 
 use function array_key_exists;
 use function array_keys;
-use function sprintf;
 use function throw_unless;
 
 /**
@@ -167,13 +166,13 @@ final class OperatorRegistry
      *
      * @param string $operatorName The DSL operator name (e.g., "eq", "contains", "gt")
      *
-     * @throws LogicException When the operator name is not registered in the mapping
+     * @throws UnknownDSLOperatorException When the operator name is not registered in the mapping
      *
      * @return class-string The fully-qualified Operator class name
      */
     public function get(string $operatorName): string
     {
-        throw_unless(array_key_exists($operatorName, self::OPERATORS), LogicException::class, sprintf('Unknown DSL operator: "%s"', $operatorName));
+        throw_unless(array_key_exists($operatorName, self::OPERATORS), UnknownDSLOperatorException::forOperator($operatorName));
 
         return self::OPERATORS[$operatorName];
     }

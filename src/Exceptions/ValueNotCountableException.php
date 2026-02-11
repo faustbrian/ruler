@@ -11,6 +11,9 @@ namespace Cline\Ruler\Exceptions;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ValueNotCountableException extends OperatorException
 {
     public static function forOperation(string $operation): self

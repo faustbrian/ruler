@@ -11,11 +11,11 @@ namespace Cline\Ruler\Operators\Type;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValueNotCountableException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Values\Value;
 use Cline\Ruler\Variables\VariableOperand;
 use Countable;
-use RuntimeException;
 
 use function count;
 use function is_array;
@@ -38,7 +38,7 @@ final class ArrayCount extends VariableOperator implements VariableOperand
      * @param Context $context Evaluation context containing variable values and state
      *                         used to resolve the operand value during rule execution
      *
-     * @throws RuntimeException When the operand value is neither an array nor a Countable instance
+     * @throws ValueNotCountableException When the operand value is neither an array nor a Countable instance
      *
      * @return Value Value object containing the integer count of elements
      */
@@ -49,7 +49,7 @@ final class ArrayCount extends VariableOperator implements VariableOperand
 
         $value = $operand->prepareValue($context)->getValue();
 
-        throw_if(!is_array($value) && !$value instanceof Countable, RuntimeException::class, 'ArrayCount: value must be an array or countable');
+        throw_if(!is_array($value) && !$value instanceof Countable, ValueNotCountableException::forOperation('ArrayCount'));
 
         return new Value(count($value));
     }

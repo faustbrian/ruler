@@ -10,12 +10,13 @@
 namespace Cline\Ruler\Core;
 
 use Cline\Ruler\Enums\ConflictResolutionStrategy;
-use RuntimeException;
+use Cline\Ruler\Exceptions\DuplicateRuleIdException;
+use Cline\Ruler\Exceptions\ForwardChainingLoopException;
+use Cline\Ruler\Exceptions\RuleNotInSetException;
 
 use function array_filter;
 use function array_values;
 use function spl_object_hash;
-use function sprintf;
 use function throw_if;
 use function throw_unless;
 use function uasort;
@@ -98,7 +99,7 @@ final class RuleSet
         $id = $rule->getId();
 
         if (isset($this->ruleIds[$id]) && $this->ruleIds[$id] !== $hash) {
-            throw new RuntimeException(sprintf('Duplicate rule id "%s" in RuleSet.', $id));
+            throw DuplicateRuleIdException::forId($id);
         }
 
         $this->rules[$hash] = $rule;
@@ -131,17 +132,17 @@ final class RuleSet
     /**
      * Replace an existing rule instance while preserving insertion order.
      *
-     * @throws RuntimeException When the rule to replace is not in the set
+     * @throws RuleNotInSetException When the rule to replace is not in the set
      */
     public function replaceRule(Rule $existing, Rule $replacement): void
     {
         $existingHash = spl_object_hash($existing);
-        throw_unless(isset($this->rules[$existingHash]), RuntimeException::class, 'Cannot replace a rule that does not exist in this RuleSet.');
+        throw_unless(isset($this->rules[$existingHash]), RuleNotInSetException::create());
 
         $replacementId = $replacement->getId();
 
         if (isset($this->ruleIds[$replacementId]) && $this->ruleIds[$replacementId] !== $existingHash) {
-            throw new RuntimeException(sprintf('Duplicate rule id "%s" in RuleSet.', $replacementId));
+            throw DuplicateRuleIdException::forId($replacementId);
         }
 
         $existingId = $existing->getId();
@@ -277,7 +278,7 @@ final class RuleSet
      * @param int     $maxCycles           Hard upper bound to prevent infinite loops
      * @param bool    $allowRepeatedFiring When false, each rule may fire at most once
      *
-     * @throws RuntimeException When the cycle limit is reached while rules still fire
+     * @throws ForwardChainingLoopException When the cycle limit is reached while rules still fire
      *
      * @return RuleSetExecutionReport Structured report for all forward-chaining cycles
      */
@@ -314,7 +315,7 @@ final class RuleSet
             ++$cycle;
         } while ($firedThisCycle > 0 && $cycle < $maxCycles);
 
-        throw_if($firedThisCycle > 0, RuntimeException::class, 'Forward chaining exceeded max cycles. Potential rule loop detected.');
+        throw_if($firedThisCycle > 0, ForwardChainingLoopException::exceededMaxCycles());
 
         return new RuleSetExecutionReport($results, $cycle);
     }

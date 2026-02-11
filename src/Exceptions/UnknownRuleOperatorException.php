@@ -15,6 +15,9 @@ use Throwable;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnknownRuleOperatorException extends RuleEvaluatorException
 {
     /**

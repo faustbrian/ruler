@@ -11,10 +11,10 @@ namespace Cline\Ruler\Operators\String;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\ValueNotStringException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Values\Value;
 use Cline\Ruler\Variables\VariableOperand;
-use RuntimeException;
 
 use function is_string;
 use function mb_strlen;
@@ -37,7 +37,7 @@ final class StringLength extends VariableOperator implements VariableOperand
      * @param Context $context Evaluation context containing variable values and state
      *                         used to resolve the operand value during rule execution
      *
-     * @throws RuntimeException When the operand value is not a string
+     * @throws ValueNotStringException When the operand value is not a string
      *
      * @return Value Value object containing the integer character count of the string
      */
@@ -48,7 +48,7 @@ final class StringLength extends VariableOperator implements VariableOperand
 
         $value = $operand->prepareValue($context)->getValue();
 
-        throw_unless(is_string($value), RuntimeException::class, 'StringLength: value must be a string');
+        throw_unless(is_string($value), ValueNotStringException::forOperation('StringLength'));
 
         return new Value(mb_strlen($value));
     }

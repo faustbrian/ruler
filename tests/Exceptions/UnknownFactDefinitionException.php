@@ -13,6 +13,9 @@ use InvalidArgumentException;
 
 use function sprintf;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class UnknownFactDefinitionException extends InvalidArgumentException
 {
     public static function forDefinition(string $definition): self

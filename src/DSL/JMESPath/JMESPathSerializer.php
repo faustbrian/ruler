@@ -10,7 +10,8 @@
 namespace Cline\Ruler\DSL\JMESPath;
 
 use Cline\Ruler\Core\Rule;
-use LogicException;
+use Cline\Ruler\Exceptions\ExpressionMustBeStringException;
+use Cline\Ruler\Exceptions\MustContainJMESPathPropositionException;
 use ReflectionClass;
 
 use function is_string;
@@ -57,7 +58,7 @@ final readonly class JMESPathSerializer
      *
      * @param Rule $rule The Rule to serialize
      *
-     * @throws LogicException When the rule doesn't contain a JMESPathProposition
+     * @throws MustContainJMESPathPropositionException When the rule doesn't contain a JMESPathProposition
      *
      * @return string The JMESPath filter expression
      */
@@ -69,7 +70,7 @@ final readonly class JMESPathSerializer
         /** @var mixed $condition */
         $condition = $conditionProperty->getValue($rule);
 
-        throw_unless($condition instanceof JMESPathProposition, LogicException::class, 'Rule must contain a JMESPathProposition to serialize to JMESPath');
+        throw_unless($condition instanceof JMESPathProposition, MustContainJMESPathPropositionException::create());
 
         return $this->extractExpression($condition);
     }
@@ -86,7 +87,7 @@ final readonly class JMESPathSerializer
         $expressionProperty = $reflection->getProperty('expression');
         $expression = $expressionProperty->getValue($proposition);
 
-        throw_unless(is_string($expression), LogicException::class, 'Expression must be a string');
+        throw_unless(is_string($expression), ExpressionMustBeStringException::create());
 
         return $expression;
     }

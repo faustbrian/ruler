@@ -11,16 +11,16 @@ namespace Cline\Ruler\DSL\LDAP;
 
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Cline\Ruler\Exceptions\ExpectedPropositionFromCompilationException;
+use Cline\Ruler\Exceptions\UnsupportedNodeTypeException;
 use Cline\Ruler\Operators\String\Matches;
 use Cline\Ruler\Variables\Variable as BaseVariable;
-use LogicException;
 
 use function array_map;
 use function explode;
 use function implode;
 use function is_numeric;
 use function preg_quote;
-use function sprintf;
 use function str_contains;
 use function throw_unless;
 
@@ -59,7 +59,7 @@ final readonly class LDAPCompiler
      *
      * @param LDAPNode $ast Root node of the LDAP filter AST from the parser
      *
-     * @throws LogicException If the AST cannot be compiled to a Proposition
+     * @throws UnsupportedNodeTypeException If the AST cannot be compiled to a Proposition
      *
      * @return Proposition The compiled Proposition tree ready for evaluation
      */
@@ -112,7 +112,7 @@ final readonly class LDAPCompiler
      *
      * @param LDAPNode $node The AST node to compile
      *
-     * @throws LogicException If an unknown node type is encountered
+     * @throws UnsupportedNodeTypeException If an unknown node type is encountered
      *
      * @return Proposition The compiled component
      */
@@ -124,7 +124,7 @@ final readonly class LDAPCompiler
             $node instanceof WildcardNode => $this->compileWildcard($node),
             $node instanceof PresenceNode => $this->compilePresence($node),
             $node instanceof ApproximateNode => $this->compileApproximate($node),
-            default => throw new LogicException(sprintf('Unknown node type: %s', $node::class)),
+            default => throw UnsupportedNodeTypeException::forClass($node::class),
         };
     }
 
@@ -136,7 +136,7 @@ final readonly class LDAPCompiler
      *
      * @param LogicalNode $node The logical operator node to compile
      *
-     * @throws LogicException If the operator class doesn't implement Proposition
+     * @throws ExpectedPropositionFromCompilationException If the operator class doesn't implement Proposition
      *
      * @return Proposition The compiled logical operator
      */
@@ -151,7 +151,7 @@ final readonly class LDAPCompiler
 
         $operator = new $operatorClass($compiledConditions);
 
-        throw_unless($operator instanceof Proposition, LogicException::class, sprintf('Logical operator %s must implement Proposition', $operatorClass));
+        throw_unless($operator instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression($operatorClass));
 
         return $operator;
     }
@@ -164,7 +164,7 @@ final readonly class LDAPCompiler
      *
      * @param ComparisonNode $node The comparison node to compile
      *
-     * @throws LogicException If the operator class doesn't implement Proposition
+     * @throws ExpectedPropositionFromCompilationException If the operator class doesn't implement Proposition
      *
      * @return Proposition The compiled comparison operator
      */
@@ -180,7 +180,7 @@ final readonly class LDAPCompiler
 
         $operator = new $operatorClass($field, $valueOperand);
 
-        throw_unless($operator instanceof Proposition, LogicException::class, sprintf('Comparison operator %s must implement Proposition', $operatorClass));
+        throw_unless($operator instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression($operatorClass));
 
         return $operator;
     }
@@ -192,8 +192,6 @@ final readonly class LDAPCompiler
      * escapes each literal part, and joins with .* for regex matching.
      *
      * @param WildcardNode $node The wildcard pattern node to compile
-     *
-     * @throws LogicException If the Matches operator doesn't implement Proposition
      *
      * @return Proposition The compiled wildcard match using Matches operator
      */
@@ -222,7 +220,7 @@ final readonly class LDAPCompiler
      *
      * @param PresenceNode $node The presence check node to compile
      *
-     * @throws LogicException If the NOT operator doesn't implement Proposition
+     * @throws ExpectedPropositionFromCompilationException If the NOT operator doesn't implement Proposition
      *
      * @return Proposition The compiled presence check as NOT(field == null)
      */
@@ -238,7 +236,7 @@ final readonly class LDAPCompiler
         $isNull = new $equalToClass($field, $nullValue);
         $operator = new $notClass([$isNull]);
 
-        throw_unless($operator instanceof Proposition, LogicException::class, 'NOT operator must implement Proposition');
+        throw_unless($operator instanceof Proposition, ExpectedPropositionFromCompilationException::forExpression('NOT operator'));
 
         return $operator;
     }
@@ -249,8 +247,6 @@ final readonly class LDAPCompiler
      * Implements fuzzy matching as case-insensitive substring search using regex.
      *
      * @param ApproximateNode $node The approximate match node to compile
-     *
-     * @throws LogicException If the Matches operator doesn't implement Proposition
      *
      * @return Proposition The compiled approximate match using case-insensitive regex
      */

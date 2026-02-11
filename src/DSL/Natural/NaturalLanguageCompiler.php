@@ -12,6 +12,11 @@ namespace Cline\Ruler\DSL\Natural;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Cline\Ruler\Exceptions\MissingASTFieldException;
+use Cline\Ruler\Exceptions\UnknownASTNodeTypeException;
+use Cline\Ruler\Exceptions\UnknownComparisonOperatorException;
+use Cline\Ruler\Exceptions\UnknownStringOperationException;
+use Cline\Ruler\Exceptions\UnsupportedLogicalOperatorException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -27,7 +32,6 @@ use Cline\Ruler\Operators\String\EndsWith;
 use Cline\Ruler\Operators\String\StartsWith;
 use Cline\Ruler\Operators\String\StringContains;
 use Cline\Ruler\Variables\Variable;
-use RuntimeException;
 
 use function array_map;
 
@@ -69,14 +73,18 @@ final readonly class NaturalLanguageCompiler
      *
      * @param array<string, mixed> $ast AST node with type and associated data
      *
-     * @throws RuntimeException If AST node type is unknown or unsupported
+     * @throws MissingASTFieldException            If required AST field is missing
+     * @throws UnknownASTNodeTypeException         If AST node type is unknown or unsupported
+     * @throws UnknownComparisonOperatorException  If comparison operator is unknown
+     * @throws UnknownStringOperationException     If string operation is unknown
+     * @throws UnsupportedLogicalOperatorException If logical operator is unknown
      *
      * @return Proposition Compiled proposition representing the AST node's logic
      */
     public function compile(array $ast): Proposition
     {
         /** @var string $type */
-        $type = $ast['type'] ?? throw new RuntimeException('Missing AST node type');
+        $type = $ast['type'] ?? throw MissingASTFieldException::forField('AST node type');
 
         return match ($type) {
             'logical' => $this->compileLogical($ast),
@@ -84,7 +92,7 @@ final readonly class NaturalLanguageCompiler
             'between' => $this->compileBetween($ast),
             'in' => $this->compileIn($ast),
             'string' => $this->compileString($ast),
-            default => throw new RuntimeException('Unknown AST node type: '.$type),
+            default => throw UnknownASTNodeTypeException::forType($type),
         };
     }
 
@@ -93,14 +101,15 @@ final readonly class NaturalLanguageCompiler
      *
      * @param array<string, mixed> $ast AST node with 'operator' and 'conditions' keys
      *
-     * @throws RuntimeException If logical operator is unknown
+     * @throws MissingASTFieldException            If required AST field is missing
+     * @throws UnsupportedLogicalOperatorException If logical operator is unknown
      *
      * @return Proposition LogicalAnd or LogicalOr proposition combining conditions
      */
     private function compileLogical(array $ast): Proposition
     {
         /** @var array<array<string, mixed>> $conditionsData */
-        $conditionsData = $ast['conditions'] ?? throw new RuntimeException('Missing conditions');
+        $conditionsData = $ast['conditions'] ?? throw MissingASTFieldException::forField('conditions');
 
         $conditions = array_map(
             $this->compile(...),
@@ -108,12 +117,12 @@ final readonly class NaturalLanguageCompiler
         );
 
         /** @var string $operator */
-        $operator = $ast['operator'] ?? throw new RuntimeException('Missing operator');
+        $operator = $ast['operator'] ?? throw MissingASTFieldException::forField('operator');
 
         return match ($operator) {
             'and' => new LogicalAnd($conditions),
             'or' => new LogicalOr($conditions),
-            default => throw new RuntimeException('Unknown logical operator: '.$operator),
+            default => throw UnsupportedLogicalOperatorException::forOperator($operator),
         };
     }
 
@@ -122,19 +131,20 @@ final readonly class NaturalLanguageCompiler
      *
      * @param array<string, mixed> $ast AST node with 'operator', 'field', and 'value' keys
      *
-     * @throws RuntimeException If comparison operator is unknown
+     * @throws MissingASTFieldException           If required AST field is missing
+     * @throws UnknownComparisonOperatorException If comparison operator is unknown
      *
      * @return Proposition Comparison proposition (EqualTo, GreaterThan, etc.)
      */
     private function compileComparison(array $ast): Proposition
     {
         /** @var string $field */
-        $field = $ast['field'] ?? throw new RuntimeException('Missing field');
+        $field = $ast['field'] ?? throw MissingASTFieldException::forField('field');
         $variable = $this->fieldResolver->resolve($field);
         $value = new Variable(null, $ast['value'] ?? null);
 
         /** @var string $operator */
-        $operator = $ast['operator'] ?? throw new RuntimeException('Missing operator');
+        $operator = $ast['operator'] ?? throw MissingASTFieldException::forField('operator');
 
         return match ($operator) {
             'eq' => new EqualTo($variable, $value),
@@ -143,20 +153,23 @@ final readonly class NaturalLanguageCompiler
             'gte' => new GreaterThanOrEqualTo($variable, $value),
             'lt' => new LessThan($variable, $value),
             'lte' => new LessThanOrEqualTo($variable, $value),
-            default => throw new RuntimeException('Unknown comparison operator: '.$operator),
+            default => throw UnknownComparisonOperatorException::forOperator($operator),
         };
     }
 
     /**
      * Compile a between range check AST node.
      *
-     * @param  array<string, mixed> $ast AST node with 'field', 'min', and 'max' keys
-     * @return Proposition          Between proposition checking if field is within range
+     * @param array<string, mixed> $ast AST node with 'field', 'min', and 'max' keys
+     *
+     * @throws MissingASTFieldException If required AST field is missing
+     *
+     * @return Proposition Between proposition checking if field is within range
      */
     private function compileBetween(array $ast): Proposition
     {
         /** @var string $field */
-        $field = $ast['field'] ?? throw new RuntimeException('Missing field');
+        $field = $ast['field'] ?? throw MissingASTFieldException::forField('field');
         $variable = $this->fieldResolver->resolve($field);
         $min = new Variable(null, $ast['min'] ?? null);
         $max = new Variable(null, $ast['max'] ?? null);
@@ -167,13 +180,16 @@ final readonly class NaturalLanguageCompiler
     /**
      * Compile a list membership check AST node.
      *
-     * @param  array<string, mixed> $ast AST node with 'field', 'values', and 'negated' keys
-     * @return Proposition          In or NotIn proposition checking list membership
+     * @param array<string, mixed> $ast AST node with 'field', 'values', and 'negated' keys
+     *
+     * @throws MissingASTFieldException If required AST field is missing
+     *
+     * @return Proposition In or NotIn proposition checking list membership
      */
     private function compileIn(array $ast): Proposition
     {
         /** @var string $field */
-        $field = $ast['field'] ?? throw new RuntimeException('Missing field');
+        $field = $ast['field'] ?? throw MissingASTFieldException::forField('field');
         $variable = $this->fieldResolver->resolve($field);
         $values = new Variable(null, $ast['values'] ?? []);
 
@@ -189,25 +205,26 @@ final readonly class NaturalLanguageCompiler
      *
      * @param array<string, mixed> $ast AST node with 'operation', 'field', and 'value' keys
      *
-     * @throws RuntimeException If string operation is unknown
+     * @throws MissingASTFieldException        If required AST field is missing
+     * @throws UnknownStringOperationException If string operation is unknown
      *
      * @return Proposition String operation proposition (Contains, StartsWith, EndsWith)
      */
     private function compileString(array $ast): Proposition
     {
         /** @var string $field */
-        $field = $ast['field'] ?? throw new RuntimeException('Missing field');
+        $field = $ast['field'] ?? throw MissingASTFieldException::forField('field');
         $variable = $this->fieldResolver->resolve($field);
         $value = new Variable(null, $ast['value'] ?? '');
 
         /** @var string $operation */
-        $operation = $ast['operation'] ?? throw new RuntimeException('Missing operation');
+        $operation = $ast['operation'] ?? throw MissingASTFieldException::forField('operation');
 
         return match ($operation) {
             'contains' => new StringContains($variable, $value),
             'startsWith' => new StartsWith($variable, $value),
             'endsWith' => new EndsWith($variable, $value),
-            default => throw new RuntimeException('Unknown string operation: '.$operation),
+            default => throw UnknownStringOperationException::forOperation($operation),
         };
     }
 }

@@ -13,11 +13,11 @@ use Carbon\Carbon;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Enums\OperandCardinality;
+use Cline\Ruler\Exceptions\InvalidDateTimeException;
 use Cline\Ruler\Operators\VariableOperator;
 use Cline\Ruler\Variables\VariableOperand;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
-use RuntimeException;
 
 use function is_numeric;
 use function is_string;
@@ -55,7 +55,7 @@ final class IsBetweenDates extends VariableOperator implements Proposition
      *
      * @param Context $context Execution context containing variable values for operand resolution
      *
-     * @throws RuntimeException When any operand cannot be converted to a valid date/time
+     * @throws InvalidDateTimeException When any operand cannot be converted to a valid date/time
      *
      * @return bool True if date is between start and end (inclusive), false otherwise
      */
@@ -98,7 +98,7 @@ final class IsBetweenDates extends VariableOperator implements Proposition
      *
      * @param mixed $value Value to convert (Carbon, DateTimeInterface, string, or numeric timestamp)
      *
-     * @throws RuntimeException When the value type is unsupported or cannot be parsed
+     * @throws InvalidDateTimeException When the value type is unsupported or cannot be parsed
      *
      * @return Carbon Carbon instance representing the input date/time
      */
@@ -116,6 +116,6 @@ final class IsBetweenDates extends VariableOperator implements Proposition
             return Date::parse($value);
         }
 
-        throw new RuntimeException('IsBetweenDates: values must be valid date/time representations');
+        throw InvalidDateTimeException::forOperation('IsBetweenDates');
     }
 }

@@ -9,10 +9,12 @@
 
 namespace Cline\Ruler\DSL\LDAP;
 
-use RuntimeException;
+use Cline\Ruler\Exceptions\EmptyCompositeConditionException;
+use Cline\Ruler\Exceptions\ExpectedTokenTypeException;
+use Cline\Ruler\Exceptions\UnexpectedEndOfInputException;
+use Cline\Ruler\Exceptions\UnexpectedTokenException;
 
 use function count;
-use function sprintf;
 use function str_contains;
 use function throw_if;
 
@@ -53,7 +55,7 @@ final class LDAPParser
      *
      * @param string $filter LDAP filter expression following RFC 4515 syntax
      *
-     * @throws RuntimeException If the filter syntax is invalid
+     * @throws UnexpectedTokenException If the filter syntax is invalid
      *
      * @return LDAPNode Root node of the AST representing the entire filter
      */
@@ -72,7 +74,7 @@ final class LDAPParser
      * Expects opening parenthesis, delegates to appropriate parser based on token
      * type, then expects closing parenthesis.
      *
-     * @throws RuntimeException If unexpected token is encountered
+     * @throws UnexpectedTokenException If unexpected token is encountered
      *
      * @return LDAPNode The parsed filter node
      */
@@ -87,7 +89,7 @@ final class LDAPParser
             Token::OR => $this->parseOr(),
             Token::NOT => $this->parseNot(),
             Token::ITEM => $this->parseItem(),
-            default => throw new RuntimeException(sprintf('Unexpected token: %s', $token->type)),
+            default => throw UnexpectedTokenException::forToken($token->type),
         };
 
         $this->expect(Token::RPAREN);
@@ -101,7 +103,7 @@ final class LDAPParser
      * Consumes the '&' token and then parses all following filters until
      * reaching a closing parenthesis.
      *
-     * @throws RuntimeException If no conditions are provided
+     * @throws EmptyCompositeConditionException If no conditions are provided
      *
      * @return LogicalNode LogicalNode representing AND operation
      */
@@ -115,7 +117,7 @@ final class LDAPParser
             $conditions[] = $this->parseFilter();
         }
 
-        throw_if($conditions === [], RuntimeException::class, 'AND operator requires at least one condition');
+        throw_if($conditions === [], EmptyCompositeConditionException::forOperator('AND'));
 
         return new LogicalNode('and', $conditions);
     }
@@ -126,7 +128,7 @@ final class LDAPParser
      * Consumes the '|' token and then parses all following filters until
      * reaching a closing parenthesis.
      *
-     * @throws RuntimeException If no conditions are provided
+     * @throws EmptyCompositeConditionException If no conditions are provided
      *
      * @return LogicalNode LogicalNode representing OR operation
      */
@@ -140,7 +142,7 @@ final class LDAPParser
             $conditions[] = $this->parseFilter();
         }
 
-        throw_if($conditions === [], RuntimeException::class, 'OR operator requires at least one condition');
+        throw_if($conditions === [], EmptyCompositeConditionException::forOperator('OR'));
 
         return new LogicalNode('or', $conditions);
     }
@@ -200,13 +202,13 @@ final class LDAPParser
     /**
      * Retrieves current token without consuming it.
      *
-     * @throws RuntimeException If at end of token stream
+     * @throws UnexpectedEndOfInputException If at end of token stream
      *
      * @return Token The current token
      */
     private function current(): Token
     {
-        throw_if($this->position >= count($this->tokens), RuntimeException::class, 'Unexpected end of input');
+        throw_if($this->position >= count($this->tokens), UnexpectedEndOfInputException::create());
 
         return $this->tokens[$this->position];
     }
@@ -228,12 +230,12 @@ final class LDAPParser
      *
      * @param string $type Expected token type constant from Token class
      *
-     * @throws RuntimeException If current token doesn't match expected type
+     * @throws ExpectedTokenTypeException If current token doesn't match expected type
      */
     private function expect(string $type): void
     {
         $token = $this->current();
-        throw_if($token->type !== $type, RuntimeException::class, sprintf('Expected %s, got %s', $type, $token->type));
+        throw_if($token->type !== $type, ExpectedTokenTypeException::forType($type, $token->type));
 
         $this->advance();
     }

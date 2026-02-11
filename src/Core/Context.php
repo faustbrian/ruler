@@ -10,15 +10,15 @@
 namespace Cline\Ruler\Core;
 
 use ArrayAccess;
-use InvalidArgumentException;
-use RuntimeException;
+use Cline\Ruler\Exceptions\FrozenFactException;
+use Cline\Ruler\Exceptions\NotCallableException;
+use Cline\Ruler\Exceptions\UndefinedFactException;
 use SplObjectStorage;
 
 use function array_key_exists;
 use function array_keys;
 use function is_callable;
 use function is_object;
-use function sprintf;
 use function throw_if;
 use function throw_unless;
 
@@ -97,7 +97,7 @@ final class Context implements ArrayAccess
      *
      * @param string $name The unique name for the fact
      *
-     * @throws InvalidArgumentException If the fact name is not defined
+     * @throws UndefinedFactException If the fact name is not defined
      *
      * @return mixed The resolved value of the fact or the result of evaluating the callable
      *
@@ -105,7 +105,7 @@ final class Context implements ArrayAccess
      */
     public function offsetGet(mixed $name): mixed
     {
-        throw_unless($this->offsetExists($name), InvalidArgumentException::class, sprintf('Fact "%s" is not defined.', $name));
+        throw_unless($this->offsetExists($name), UndefinedFactException::forFact($name));
 
         $value = $this->values[$name];
 
@@ -137,11 +137,11 @@ final class Context implements ArrayAccess
      * @param string $name  The unique name for the fact
      * @param mixed  $value The value or a closure to lazily define the value
      *
-     * @throws RuntimeException If attempting to override a frozen fact
+     * @throws FrozenFactException If attempting to override a frozen fact
      */
     public function offsetSet(mixed $name, mixed $value): void
     {
-        throw_if(array_key_exists($name, $this->frozen), RuntimeException::class, sprintf('Cannot override frozen fact "%s".', $name));
+        throw_if(array_key_exists($name, $this->frozen), FrozenFactException::forFact($name));
 
         $this->keys[$name] = true;
         $this->values[$name] = $value;
@@ -179,7 +179,7 @@ final class Context implements ArrayAccess
      *
      * @param callable $callable A fact callable to share
      *
-     * @throws InvalidArgumentException If the value is not a Closure or invokable object
+     * @throws NotCallableException If the value is not a Closure or invokable object
      *
      * @return callable The passed callable for chaining
      *
@@ -187,7 +187,7 @@ final class Context implements ArrayAccess
      */
     public function share(mixed $callable): mixed
     {
-        throw_unless($this->isCallable($callable), InvalidArgumentException::class, 'Value is not a Closure or invokable object.');
+        throw_unless($this->isCallable($callable), NotCallableException::forContext('Value'));
 
         /** @var callable&object $callable */
         $this->shared->offsetSet($callable);
@@ -203,7 +203,7 @@ final class Context implements ArrayAccess
      *
      * @param callable $callable A callable to protect from being evaluated
      *
-     * @throws InvalidArgumentException If the value is not a Closure or invokable object
+     * @throws NotCallableException If the value is not a Closure or invokable object
      *
      * @return callable The passed callable for chaining
      *
@@ -211,7 +211,7 @@ final class Context implements ArrayAccess
      */
     public function protect(mixed $callable): mixed
     {
-        throw_unless($this->isCallable($callable), InvalidArgumentException::class, 'Callable is not a Closure or invokable object.');
+        throw_unless($this->isCallable($callable), NotCallableException::forContext('Callable'));
 
         /** @var callable&object $callable */
         $this->protected->offsetSet($callable);
@@ -228,13 +228,13 @@ final class Context implements ArrayAccess
      *
      * @param string $name The unique name for the fact
      *
-     * @throws InvalidArgumentException If the fact name is not defined
+     * @throws UndefinedFactException If the fact name is not defined
      *
      * @return mixed The raw value or original callable definition
      */
     public function raw(string $name): mixed
     {
-        throw_unless($this->offsetExists($name), InvalidArgumentException::class, sprintf('Fact "%s" is not defined.', $name));
+        throw_unless($this->offsetExists($name), UndefinedFactException::forFact($name));
 
         if (array_key_exists($name, $this->frozen)) {
             return $this->raw[$name];

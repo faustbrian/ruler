@@ -12,6 +12,10 @@ namespace Cline\Ruler\DSL\MongoDB;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
+use Cline\Ruler\Exceptions\InvalidOperandForCompilerException;
+use Cline\Ruler\Exceptions\InvalidRangeCountException;
+use Cline\Ruler\Exceptions\UnsupportedComparisonOperatorException;
+use Cline\Ruler\Exceptions\UnsupportedTypeException;
 use Cline\Ruler\Operators\Comparison\Between;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
@@ -52,7 +56,6 @@ use Cline\Ruler\Operators\Type\IsNumeric;
 use Cline\Ruler\Operators\Type\IsString;
 use Cline\Ruler\Variables\Variable;
 use Cline\Ruler\Variables\VariableOperand;
-use InvalidArgumentException;
 
 use function array_key_exists;
 use function array_key_first;
@@ -62,7 +65,6 @@ use function is_array;
 use function is_bool;
 use function is_numeric;
 use function is_string;
-use function sprintf;
 use function str_contains;
 use function str_starts_with;
 use function throw_if;
@@ -121,7 +123,7 @@ final readonly class MongoQueryCompiler
      */
     private static function compileBetween(VariableOperand $field, array $range): Proposition
     {
-        throw_if(count($range) !== 2, InvalidArgumentException::class, '$between requires exactly 2 values [min, max]');
+        throw_if(count($range) !== 2, InvalidRangeCountException::forOperator('$between', 2, count($range)));
 
         return new Between(
             $field,
@@ -142,7 +144,7 @@ final readonly class MongoQueryCompiler
      */
     private static function compileBetweenDates(VariableOperand $field, array $range): Proposition
     {
-        throw_if(count($range) !== 2, InvalidArgumentException::class, '$betweenDates requires exactly 2 values [start, end]');
+        throw_if(count($range) !== 2, InvalidRangeCountException::forOperator('$betweenDates', 2, count($range)));
 
         return new IsBetweenDates(
             $field,
@@ -240,14 +242,14 @@ final readonly class MongoQueryCompiler
                     '$gte' => new GreaterThanOrEqualTo($lengthVar, new Variable(null, $operand)),
                     '$lt' => new LessThan($lengthVar, new Variable(null, $operand)),
                     '$lte' => new LessThanOrEqualTo($lengthVar, new Variable(null, $operand)),
-                    default => throw new InvalidArgumentException(sprintf('Unsupported $strLength operator: %s', $operator)),
+                    default => throw UnsupportedComparisonOperatorException::forOperator($operator),
                 };
             }
 
             return count($conditions) === 1 ? $conditions[0] : new LogicalAnd($conditions);
         }
 
-        throw new InvalidArgumentException('$strLength requires a number or comparison object');
+        throw InvalidOperandForCompilerException::forOperator('$strLength', 'a number or comparison object');
     }
 
     /**
@@ -268,7 +270,7 @@ final readonly class MongoQueryCompiler
             'bool', 'boolean' => new IsBoolean($field),
             'number', 'numeric', 'int', 'double' => new IsNumeric($field),
             'string' => new IsString($field),
-            default => throw new InvalidArgumentException('Unsupported type: '.$type),
+            default => throw UnsupportedTypeException::forType($type),
         };
     }
 
@@ -308,14 +310,14 @@ final readonly class MongoQueryCompiler
                     '$gte' => new GreaterThanOrEqualTo($countVar, new Variable(null, $operand)),
                     '$lt' => new LessThan($countVar, new Variable(null, $operand)),
                     '$lte' => new LessThanOrEqualTo($countVar, new Variable(null, $operand)),
-                    default => throw new InvalidArgumentException(sprintf('Unsupported $size operator: %s', $operator)),
+                    default => throw UnsupportedComparisonOperatorException::forOperator($operator),
                 };
             }
 
             return count($conditions) === 1 ? $conditions[0] : new LogicalAnd($conditions);
         }
 
-        throw new InvalidArgumentException('$size requires a number or comparison object');
+        throw InvalidOperandForCompilerException::forOperator('$size', 'a number or comparison object');
     }
 
     /**
@@ -461,13 +463,13 @@ final readonly class MongoQueryCompiler
                 '$same' => new SameAs($fieldVar, new Variable(null, $operand)),      // Strict ===
                 '$nsame' => new NotSameAs($fieldVar, new Variable(null, $operand)),  // Strict !==
                 '$between' => (static function () use ($fieldVar, $operand): Proposition {
-                    throw_unless(is_array($operand), InvalidArgumentException::class, '$between requires array');
+                    throw_unless(is_array($operand), InvalidOperandForCompilerException::forOperator('$between', 'array'));
 
                     /** @var array<int, float|int> $operand */
                     return self::compileBetween($fieldVar, $operand);
                 })(),
                 // String operators
-                '$regex' => $this->compileRegex($fieldVar, is_string($operand) ? $operand : throw new InvalidArgumentException('$regex requires string'), is_string($value['$options'] ?? '') ? ($value['$options'] ?? '') : ''),
+                '$regex' => $this->compileRegex($fieldVar, is_string($operand) ? $operand : throw InvalidOperandForCompilerException::forOperator('$regex', 'string'), is_string($value['$options'] ?? '') ? ($value['$options'] ?? '') : ''),
                 '$notRegex' => new DoesNotMatch($fieldVar, new Variable(null, $operand)),
                 '$startsWith' => new StartsWith($fieldVar, new Variable(null, $operand)),
                 '$startsWithi' => new StartsWithInsensitive($fieldVar, new Variable(null, $operand)),
@@ -482,17 +484,17 @@ final readonly class MongoQueryCompiler
                 '$after' => new After($fieldVar, new Variable(null, $operand)),
                 '$before' => new Before($fieldVar, new Variable(null, $operand)),
                 '$betweenDates' => (static function () use ($fieldVar, $operand): Proposition {
-                    throw_unless(is_array($operand), InvalidArgumentException::class, '$betweenDates requires array');
+                    throw_unless(is_array($operand), InvalidOperandForCompilerException::forOperator('$betweenDates', 'array'));
 
                     /** @var array<int, int|string> $operand */
                     return self::compileBetweenDates($fieldVar, $operand);
                 })(),
                 // Type operators
-                '$exists' => $this->compileExists($fieldVar, is_bool($operand) ? $operand : throw new InvalidArgumentException('$exists requires bool')),
-                '$type' => $this->compileType($fieldVar, is_string($operand) ? $operand : throw new InvalidArgumentException('$type requires string')),
+                '$exists' => $this->compileExists($fieldVar, is_bool($operand) ? $operand : throw InvalidOperandForCompilerException::forOperator('$exists', 'bool')),
+                '$type' => $this->compileType($fieldVar, is_string($operand) ? $operand : throw InvalidOperandForCompilerException::forOperator('$type', 'string')),
                 '$size' => $this->compileArrayCount($fieldVar, $operand),
-                '$empty' => $this->compileEmpty($fieldVar, is_bool($operand) ? $operand : throw new InvalidArgumentException('$empty requires bool')),
-                default => throw new InvalidArgumentException('Unsupported operator: '.$operator),
+                '$empty' => $this->compileEmpty($fieldVar, is_bool($operand) ? $operand : throw InvalidOperandForCompilerException::forOperator('$empty', 'bool')),
+                default => throw UnsupportedComparisonOperatorException::forOperator($operator),
             };
         }
 

@@ -9,7 +9,7 @@
 
 namespace Cline\Ruler\Core;
 
-use RuntimeException;
+use Cline\Ruler\Exceptions\EmptyRuleIdException;
 use Stringable;
 
 use function bin2hex;
@@ -29,7 +29,7 @@ final readonly class RuleId implements Stringable
     private function __construct(
         private string $value,
     ) {
-        throw_if(mb_trim($this->value) === '', RuntimeException::class, 'Rule id cannot be empty.');
+        throw_if(mb_trim($this->value) === '', EmptyRuleIdException::create());
     }
 
     public function __toString(): string

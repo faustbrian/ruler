@@ -9,6 +9,7 @@
 
 namespace Cline\Ruler\DSL\LDAP;
 
+use Cline\Ruler\Exceptions\UnknownDSLOperatorException;
 use Cline\Ruler\Operators\Comparison\EqualTo;
 use Cline\Ruler\Operators\Comparison\GreaterThan;
 use Cline\Ruler\Operators\Comparison\GreaterThanOrEqualTo;
@@ -18,10 +19,8 @@ use Cline\Ruler\Operators\Comparison\NotEqualTo;
 use Cline\Ruler\Operators\Logical\LogicalAnd;
 use Cline\Ruler\Operators\Logical\LogicalNot;
 use Cline\Ruler\Operators\Logical\LogicalOr;
-use InvalidArgumentException;
 
 use function array_key_exists;
-use function sprintf;
 use function throw_unless;
 
 /**
@@ -55,13 +54,13 @@ final class LDAPOperatorRegistry
      *
      * @param string $operator LDAP comparison operator symbol: '=', '>=', '<=', '>', '<', or '!='
      *
-     * @throws InvalidArgumentException If the operator is not recognized
+     * @throws UnknownDSLOperatorException If the operator is not recognized
      *
      * @return class-string Fully qualified class name of the Ruler comparison operator
      */
     public function getComparison(string $operator): string
     {
-        throw_unless(array_key_exists($operator, self::COMPARISON_MAP), InvalidArgumentException::class, sprintf('Unknown comparison operator: %s', $operator));
+        throw_unless(array_key_exists($operator, self::COMPARISON_MAP), UnknownDSLOperatorException::forOperator($operator));
 
         return self::COMPARISON_MAP[$operator];
     }
@@ -71,13 +70,13 @@ final class LDAPOperatorRegistry
      *
      * @param string $operator LDAP logical operator name: 'and', 'or', or 'not'
      *
-     * @throws InvalidArgumentException If the operator is not recognized
+     * @throws UnknownDSLOperatorException If the operator is not recognized
      *
      * @return class-string Fully qualified class name of the Ruler logical operator
      */
     public function getLogical(string $operator): string
     {
-        throw_unless(array_key_exists($operator, self::LOGICAL_MAP), InvalidArgumentException::class, sprintf('Unknown logical operator: %s', $operator));
+        throw_unless(array_key_exists($operator, self::LOGICAL_MAP), UnknownDSLOperatorException::forOperator($operator));
 
         return self::LOGICAL_MAP[$operator];
     }
