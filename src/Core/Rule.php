@@ -10,15 +10,8 @@
 namespace Cline\Ruler\Core;
 
 use LogicException;
-use ReflectionFunction;
-use ReflectionMethod;
 
-use function array_key_exists;
-use function is_array;
 use function is_callable;
-use function is_object;
-use function is_string;
-use function str_contains;
 use function throw_unless;
 
 /**
@@ -42,8 +35,8 @@ final readonly class Rule implements Proposition
      *                                 this rule is satisfied. The condition is evaluated
      *                                 against a Context to produce a boolean result.
      * @param null|callable $action    Optional callback to execute when the condition
-     *                                 evaluates to true. The callback may declare a
-     *                                 Context argument, and its return value is ignored.
+     *                                 evaluates to true. The callback must accept the
+     *                                 current Context as its first argument.
      */
     public function __construct(
         private Proposition $condition,
@@ -103,7 +96,7 @@ final readonly class Rule implements Proposition
         if ($matched && $this->action !== null) {
             throw_unless(is_callable($this->action), LogicException::class, 'Rule actions must be callable.');
 
-            $this->invokeAction($this->action, $context);
+            ($this->action)($context);
             $actionExecuted = true;
         }
 
@@ -115,32 +108,6 @@ final readonly class Rule implements Proposition
             $matched,
             $actionExecuted,
         );
-    }
-
-    /**
-     * Invoke action callback with context when callback signature accepts it.
-     *
-     * Supports both legacy no-argument callbacks and new context-aware actions.
-     */
-    private function invokeAction(callable $action, Context $context): void
-    {
-        if (is_array($action)) {
-            $reflection = new ReflectionMethod($action[0], $action[1]);
-        } elseif (is_string($action) && str_contains($action, '::')) {
-            $reflection = new ReflectionMethod($action);
-        } elseif (is_object($action) && !($action instanceof \Closure)) {
-            $reflection = new ReflectionMethod($action, '__invoke');
-        } else {
-            $reflection = new ReflectionFunction($action);
-        }
-
-        if ($reflection->isVariadic() || $reflection->getNumberOfParameters() >= 1) {
-            $action($context);
-
-            return;
-        }
-
-        $action();
     }
 
     /**
@@ -190,8 +157,6 @@ final readonly class Rule implements Proposition
      */
     public function getMetadataValue(string $key): mixed
     {
-        return array_key_exists($key, $this->metadata)
-            ? $this->metadata[$key]
-            : null;
+        return $this->metadata[$key] ?? null;
     }
 }

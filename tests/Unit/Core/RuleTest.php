@@ -36,7 +36,7 @@ describe('Rule', function (): void {
 
                     return false;
                 }),
-                function () use (&$actionExecuted): void {
+                function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
             );
@@ -57,7 +57,7 @@ describe('Rule', function (): void {
 
                     return true;
                 }),
-                function () use (&$actionExecuted): void {
+                function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
             );
@@ -99,7 +99,9 @@ describe('Rule', function (): void {
                 false,
             );
 
-            expect($rule->evaluate(new Context()))->toBeFalse();
+            expect($rule->evaluate(
+                new Context(),
+            ))->toBeFalse();
         });
 
         test('execute returns structured execution details', function (): void {
@@ -108,7 +110,7 @@ describe('Rule', function (): void {
 
             $rule = new Rule(
                 new TrueProposition(),
-                function () use (&$actionExecuted): void {
+                function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
                 'r-100',

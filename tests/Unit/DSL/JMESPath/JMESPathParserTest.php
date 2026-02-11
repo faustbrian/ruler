@@ -144,7 +144,7 @@ describe('JMESPathParser', function (): void {
         test('parseWithAction executes callback when true', function (): void {
             $parser = new JMESPathParser();
             $executed = false;
-            $rule = $parser->parseWithAction('age >= `18`', function () use (&$executed): void {
+            $rule = $parser->parseWithAction('age >= `18`', function ($context) use (&$executed): void {
                 $executed = true;
             });
 
@@ -157,7 +157,7 @@ describe('JMESPathParser', function (): void {
         test('parseWithAction does not execute callback when false', function (): void {
             $parser = new JMESPathParser();
             $executed = false;
-            $rule = $parser->parseWithAction('age >= `18`', function () use (&$executed): void {
+            $rule = $parser->parseWithAction('age >= `18`', function ($context) use (&$executed): void {
                 $executed = true;
             });
 

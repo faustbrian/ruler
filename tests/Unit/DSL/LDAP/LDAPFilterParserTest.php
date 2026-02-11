@@ -213,7 +213,7 @@ describe('LDAPFilterParser', function (): void {
         test('parseWithAction executes callback when true', function (): void {
             $parser = new LDAPFilterParser();
             $executed = false;
-            $rule = $parser->parseWithAction('(age>=18)', function () use (&$executed): void {
+            $rule = $parser->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
                 $executed = true;
             });
 
@@ -226,7 +226,7 @@ describe('LDAPFilterParser', function (): void {
         test('parseWithAction does not execute callback when false', function (): void {
             $parser = new LDAPFilterParser();
             $executed = false;
-            $rule = $parser->parseWithAction('(age>=18)', function () use (&$executed): void {
+            $rule = $parser->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
                 $executed = true;
             });
 

@@ -22,17 +22,17 @@ describe('RuleSet', function (): void {
             $true = new TrueProposition();
 
             $executedActionA = false;
-            $ruleA = new Rule($true, function () use (&$executedActionA): void {
+            $ruleA = new Rule($true, function ($context) use (&$executedActionA): void {
                 $executedActionA = true;
             });
 
             $executedActionB = false;
-            $ruleB = new Rule($true, function () use (&$executedActionB): void {
+            $ruleB = new Rule($true, function ($context) use (&$executedActionB): void {
                 $executedActionB = true;
             });
 
             $executedActionC = false;
-            $ruleC = new Rule($true, function () use (&$executedActionC): void {
+            $ruleC = new Rule($true, function ($context) use (&$executedActionC): void {
                 $executedActionC = true;
             });
 
@@ -59,7 +59,7 @@ describe('RuleSet', function (): void {
 
             $lowPriority = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'low';
                 },
                 'low',
@@ -69,7 +69,7 @@ describe('RuleSet', function (): void {
 
             $highPriority = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'high';
                 },
                 'high',
@@ -94,7 +94,7 @@ describe('RuleSet', function (): void {
 
             $first = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'first';
                 },
                 'first',
@@ -104,7 +104,7 @@ describe('RuleSet', function (): void {
 
             $second = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'second';
                 },
                 'second',
@@ -129,7 +129,7 @@ describe('RuleSet', function (): void {
 
             $high = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'high';
                 },
                 'high',
@@ -139,7 +139,7 @@ describe('RuleSet', function (): void {
 
             $low = new Rule(
                 $true,
-                function () use (&$executionOrder): void {
+                function ($context) use (&$executionOrder): void {
                     $executionOrder[] = 'low';
                 },
                 'low',
@@ -169,7 +169,7 @@ describe('RuleSet', function (): void {
 
             $approve = new Rule(
                 $rb['eligible']->sameAs(true),
-                function () use ($context, &$executionOrder): void {
+                function (Context $context) use (&$executionOrder): void {
                     $executionOrder[] = 'approve';
                     $context['approved'] = true;
                 },
@@ -180,7 +180,7 @@ describe('RuleSet', function (): void {
 
             $seed = new Rule(
                 $rb['seeded']->sameAs(false),
-                function () use ($context, &$executionOrder): void {
+                function (Context $context) use (&$executionOrder): void {
                     $executionOrder[] = 'seed';
                     $context['seeded'] = true;
                     $context['eligible'] = true;
@@ -208,7 +208,7 @@ describe('RuleSet', function (): void {
 
             $rule = new Rule(
                 $rb['counter']->greaterThanOrEqualTo(0),
-                function () use ($context): void {
+                function (Context $context): void {
                     $context['counter'] = $context['counter'] + 1;
                 },
                 'counter',
@@ -231,7 +231,7 @@ describe('RuleSet', function (): void {
 
             $ruleA = new Rule(
                 $rb['flag']->sameAs(true),
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'A';
                 },
                 'A',
@@ -241,7 +241,7 @@ describe('RuleSet', function (): void {
 
             $ruleB = new Rule(
                 $rb['flag']->sameAs(false),
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'B';
                 },
                 'B',
@@ -251,7 +251,7 @@ describe('RuleSet', function (): void {
 
             $ruleDisabled = new Rule(
                 $rb['disabledFlag']->sameAs(true),
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'DISABLED';
                 },
                 'D',
@@ -277,7 +277,7 @@ describe('RuleSet', function (): void {
 
             $ruleA = new Rule(
                 $true,
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'A';
                 },
                 'rule-a',
@@ -285,7 +285,7 @@ describe('RuleSet', function (): void {
             );
             $ruleB = new Rule(
                 $true,
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'B';
                 },
                 'rule-b',
@@ -314,7 +314,7 @@ describe('RuleSet', function (): void {
 
             $original = new Rule(
                 $true,
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'original';
                 },
                 'original',
@@ -323,7 +323,7 @@ describe('RuleSet', function (): void {
 
             $replacement = new Rule(
                 $true,
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'replacement';
                 },
                 'replacement',
@@ -332,7 +332,7 @@ describe('RuleSet', function (): void {
 
             $removeMe = new Rule(
                 $true,
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed[] = 'remove';
                 },
                 'remove',
@@ -372,7 +372,7 @@ describe('RuleSet', function (): void {
 
             $rule = new Rule(
                 $true,
-                static function (): void {},
+                static function ($context): void {},
                 'loop',
                 'Loop Rule',
             );

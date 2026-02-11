@@ -210,7 +210,7 @@ describe('MongoQueryParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction(
                 ['age' => ['$gte' => 18]],
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed = true;
                 },
             );
@@ -226,7 +226,7 @@ describe('MongoQueryParser', function (): void {
             $executed = false;
             $rule = $parser->parseWithAction(
                 ['age' => ['$gte' => 18]],
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed = true;
                 },
             );
@@ -251,7 +251,7 @@ describe('MongoQueryParser', function (): void {
             $executed = false;
             $rule = $parser->parseJsonWithAction(
                 '{"age": {"$gte": 18}}',
-                function () use (&$executed): void {
+                function ($context) use (&$executed): void {
                     $executed = true;
                 },
             );

@@ -81,7 +81,7 @@ describe('RuleBuilder', function (): void {
             expect($rb->create($false)->evaluate($context))->toBeFalse();
 
             $executed = false;
-            $rule = $rb->create($true, function () use (&$executed): void {
+            $rule = $rb->create($true, function ($context) use (&$executed): void {
                 $executed = true;
             });
 

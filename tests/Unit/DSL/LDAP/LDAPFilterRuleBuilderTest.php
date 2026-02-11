@@ -94,7 +94,7 @@ test('parse not expression', function (): void {
 test('parseWithAction executes callback when true', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
     $executed = false;
-    $rule = $ldap->parseWithAction('(age>=18)', function () use (&$executed): void {
+    $rule = $ldap->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
         $executed = true;
     });
 
@@ -107,7 +107,7 @@ test('parseWithAction executes callback when true', function (): void {
 test('parseWithAction does not execute callback when false', function (): void {
     $ldap = new LDAPFilterRuleBuilder();
     $executed = false;
-    $rule = $ldap->parseWithAction('(age>=18)', function () use (&$executed): void {
+    $rule = $ldap->parseWithAction('(age>=18)', function ($context) use (&$executed): void {
         $executed = true;
     });
 
