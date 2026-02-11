@@ -14,8 +14,6 @@ use Cline\Ruler\Enums\RuleErrorPhase;
 use Exception;
 use Throwable;
 
-use function sprintf;
-
 /**
  * Exception thrown when proposition evaluation encounters invalid rule structures or combinators.
  *
@@ -25,7 +23,7 @@ use function sprintf;
  *
  * @author Brian Faust <brian@cline.sh>
  */
-final class RuleEvaluatorException extends Exception
+abstract class RuleEvaluatorException extends Exception implements RulerException
 {
     public const string ERROR_CONTRACT_VERSION = '1.0.0';
 
@@ -33,7 +31,7 @@ final class RuleEvaluatorException extends Exception
      * @param array<int, int|string> $path
      * @param array<string, mixed>   $details
      */
-    private function __construct(
+    protected function __construct(
         string $message,
         private readonly RuleErrorCode $errorCode,
         private readonly RuleErrorPhase $phase,
@@ -42,118 +40,6 @@ final class RuleEvaluatorException extends Exception
         ?Throwable $previous = null,
     ) {
         parent::__construct($message, 0, $previous);
-    }
-
-    /**
-     * Create exception for an invalid logical combinator.
-     *
-     * @param array<int, int|string> $path
-     */
-    public static function invalidCombinator(string $combinator, array $path = ['combinator']): self
-    {
-        return new self(
-            sprintf('Invalid combinator: %s', $combinator),
-            RuleErrorCode::CompileInvalidCombinator,
-            RuleErrorPhase::Compile,
-            $path,
-            ['combinator' => $combinator],
-        );
-    }
-
-    /**
-     * Create exception for an invalid rule structure.
-     *
-     * @param array<int, int|string> $path
-     * @param array<string, mixed>   $details
-     */
-    public static function invalidRuleStructure(
-        string $reason = 'Invalid rule structure',
-        array $path = [],
-        array $details = [],
-    ): self {
-        return new self(
-            $reason,
-            RuleErrorCode::CompileInvalidRuleStructure,
-            RuleErrorPhase::Compile,
-            $path,
-            $details,
-        );
-    }
-
-    /**
-     * Create exception for an invalid NOT rule configuration.
-     *
-     * @param array<int, int|string> $path
-     */
-    public static function invalidNotRule(array $path = ['value']): self
-    {
-        return new self(
-            'Logical NOT must have exactly one argument',
-            RuleErrorCode::CompileInvalidNotArity,
-            RuleErrorPhase::Compile,
-            $path,
-        );
-    }
-
-    /**
-     * Create exception for cache key generation failures.
-     */
-    public static function invalidRuleCacheKey(string $reason, ?Throwable $previous = null): self
-    {
-        return new self(
-            sprintf('Unable to generate rule cache key: %s', $reason),
-            RuleErrorCode::CompileCacheKeyGenerationFailed,
-            RuleErrorPhase::Compile,
-            ['rules'],
-            ['reason' => $reason],
-            $previous,
-        );
-    }
-
-    /**
-     * Create exception for unknown operators encountered during compilation.
-     *
-     * @param array<int, int|string> $path
-     */
-    public static function unknownOperator(
-        string $operator,
-        string $field,
-        array $path = ['operator'],
-        ?Throwable $previous = null,
-    ): self {
-        return new self(
-            sprintf('Unknown operator: "%s"', $operator),
-            RuleErrorCode::CompileUnknownOperator,
-            RuleErrorPhase::Compile,
-            $path,
-            [
-                'operator' => $operator,
-                'field' => $field,
-            ],
-            $previous,
-        );
-    }
-
-    /**
-     * Create exception for runtime evaluation failures.
-     *
-     * @param array<int, int|string> $path
-     * @param array<string, mixed>   $details
-     */
-    public static function runtimeEvaluationFailed(
-        string $reason,
-        array $path = [],
-        array $details = [],
-        ?Throwable $previous = null,
-    ): self {
-        return new self(
-            $reason,
-            RuleErrorCode::RuntimeEvaluationFailed,
-            RuleErrorPhase::Runtime,
-            $path,
-            $details,
-            $previous,
-        );
     }
 
     public function getErrorCode(): RuleErrorCode
