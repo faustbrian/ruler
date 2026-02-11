@@ -10,18 +10,12 @@
 namespace Cline\Ruler\Core;
 
 use Cline\Ruler\Builder\RuleBuilder;
-use Cline\Ruler\Builder\Variable as BuilderVariable;
-use Cline\Ruler\Builder\VariableProperty;
-use Cline\Ruler\Core\Definition\CombinatorRuleDefinition;
-use Cline\Ruler\Core\Definition\ComparisonRuleDefinition;
-use Cline\Ruler\Core\Definition\RuleCombinator;
 use Cline\Ruler\Core\Definition\RuleDefinition;
 use Cline\Ruler\Core\Definition\RuleDefinitionParser;
+use Cline\Ruler\Core\Definition\RuleDefinitionPropositionCompiler;
 use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Cline\Ruler\Exceptions\RuntimeEvaluationFailedException;
-use Cline\Ruler\Exceptions\UnknownRuleOperatorException;
-use Cline\Ruler\Variables\ContextValueReference;
 use Illuminate\Http\Request;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
@@ -29,18 +23,10 @@ use Throwable;
 use const JSON_THROW_ON_ERROR;
 
 use function array_keys;
-use function array_map;
-use function array_reduce;
-use function assert;
-use function explode;
 use function file_get_contents;
 use function is_array;
 use function is_string;
 use function json_decode;
-use function mb_substr;
-use function str_contains;
-use function str_starts_with;
-use function ucfirst;
 
 /**
  * Evaluates propositional rules against data from various sources.
@@ -511,88 +497,6 @@ final readonly class RuleEvaluator
     }
 
     /**
-     * Recursively builds a proposition from a rule definition.
-     *
-     * Processes rule definitions containing either combinators (and, or, xor, not)
-     * or operators (comparison, arithmetic, set operations) and constructs the
-     * corresponding proposition tree. Handles nested rules by recursively building
-     * sub-propositions for complex logical expressions.
-     *
-     * @param RuleDefinition $definition  Typed rule definition containing either
-     *                                    combinator nodes or comparison nodes
-     * @param RuleBuilder    $ruleBuilder Builder instance used to construct propositions
-     *                                    and access variable values through array syntax
-     *
-     * @throws RuleEvaluatorException When the rule structure is invalid, the NOT
-     *                                combinator has multiple values, or an unsupported
-     *                                combinator is encountered
-     *
-     * @return Proposition Constructed proposition representing the rule definition
-     *                     logic
-     */
-    private static function proposition(RuleDefinition $definition, RuleBuilder $ruleBuilder): Proposition
-    {
-        if ($definition instanceof CombinatorRuleDefinition) {
-            $method = 'logical'.ucfirst($definition->combinator->value);
-
-            if ($definition->combinator === RuleCombinator::Not) {
-                return $ruleBuilder->{$method}(self::proposition($definition->operands[0], $ruleBuilder));
-            }
-
-            return $ruleBuilder->{$method}(
-                ...array_map(
-                    fn (RuleDefinition $subRule): Proposition => self::proposition($subRule, $ruleBuilder),
-                    $definition->operands,
-                ),
-            );
-        }
-
-        if ($definition instanceof ComparisonRuleDefinition) {
-            // Resolve value: supports dot notation, direct variable reference, or literal
-            $value = $definition->value;
-
-            if (is_string($value) && str_starts_with($value, '@')) {
-                $value = new ContextValueReference(mb_substr($value, 1));
-            }
-
-            // Resolve field: supports dot notation for nested field access
-            $fieldString = $definition->field;
-
-            /** @var BuilderVariable $builder */
-            $builder = str_contains($fieldString, '.')
-                ? array_reduce(
-                    explode('.', $fieldString),
-                    /**
-                     * @param  BuilderVariable|RuleBuilder|VariableProperty $builder
-                     * @return BuilderVariable|VariableProperty
-                     */
-                    static fn (mixed $builder, string $segment): mixed =>
-                        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
-                        $builder[$segment],
-                    $ruleBuilder,
-                )
-                : $ruleBuilder[$fieldString];
-
-            try {
-                $result = $builder->{$definition->operator}($value);
-            } catch (Throwable $exception) {
-                throw UnknownRuleOperatorException::forOperator(
-                    $definition->operator,
-                    $definition->field,
-                    ['operator'],
-                    $exception,
-                );
-            }
-
-            assert($result instanceof Proposition);
-
-            return $result;
-        }
-
-        throw InvalidRuleStructureException::forReason();
-    }
-
-    /**
      * @param  array<mixed, mixed>  $values
      * @param  'json'|'yaml'        $format
      * @return array<string, mixed>
@@ -628,7 +532,7 @@ final readonly class RuleEvaluator
         }
 
         $ruleBuilder = new RuleBuilder();
-        $proposition = self::proposition($this->definition, $ruleBuilder);
+        $proposition = RuleDefinitionPropositionCompiler::compile($this->definition, $ruleBuilder);
 
         $rule = $ruleBuilder->create($proposition, RuleIds::fromString($key));
         $this->compiledRuleCache->put($key, $rule);
