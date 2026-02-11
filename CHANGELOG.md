@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `Rule::execute()` now returns a `RuleExecutionResult` object that includes
+  match and action execution metadata.
+- `RuleSet::executeRules()` and `RuleSet::executeForwardChaining()` now return
+  `RuleSetExecutionReport` objects instead of scalar counts.
+- `RuleEvaluator::evaluateFrom*()` methods now return
+  `RuleEvaluatorReport` objects instead of plain booleans.
+- Rule actions are now context-aware by contract and must accept a
+  `Context` argument.
+- `RuleSet` now requires non-empty, unique rule IDs for all managed rules.
+
+### Migration Notes
+
+- Replace boolean/count result assumptions with report accessors:
+  - `Rule::execute($context)->matched`
+  - `RuleSet::executeRules($context)->getActionExecutionCount()`
+  - `RuleSet::executeForwardChaining($context)->getCycleCount()`
+  - `RuleEvaluator::evaluateFromArray($values)->getResult()`
+- Update action callbacks from `fn () => ...` to
+  `fn (Context $context): void => ...`.
+- Ensure every rule added to a `RuleSet` has a stable unique ID.
+
 ## [2.0.0] - 2025-10-15
 
 ### Added

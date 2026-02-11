@@ -22,9 +22,10 @@ $rule = $rb->create(
         $rb['minNumPeople']->lessThanOrEqualTo($rb['actualNumPeople']),
         $rb['maxNumPeople']->greaterThanOrEqualTo($rb['actualNumPeople'])
     ),
-    function() {
+    function (Context $context): void {
         echo 'Capacity is within range!';
-    }
+    },
+    'capacity-in-range'
 );
 
 // Evaluate with context
@@ -34,7 +35,9 @@ $context = new Context([
     'actualNumPeople' => fn() => 6,  // Lazy evaluation
 ]);
 
-$rule->execute($context);  // "Capacity is within range!"
+$report = $rule->execute($context);  // "Capacity is within range!"
+$report->matched;                    // true
+$report->actionExecuted;             // true
 ```
 
 ### Using Text DSL
@@ -91,11 +94,11 @@ Combinations of propositions with optional action callbacks:
 ```php
 $rule = $rb->create(
     $rb['age']->greaterThanOrEqualTo(18),
-    fn() => grantAccess()
+    fn (Context $context): void => grantAccess()
 );
 
 $rule->evaluate($context);  // Returns bool
-$rule->execute($context);   // Runs callback if true
+$rule->execute($context);   // Returns RuleExecutionResult
 ```
 
 ### RuleSet
@@ -104,7 +107,8 @@ Collection of rules executed together:
 
 ```php
 $rules = new RuleSet([$rule1, $rule2, $rule3]);
-$rules->executeRules($context);  // Executes all matching rules
+$report = $rules->executeRules($context);  // RuleSetExecutionReport
+$report->getActionExecutionCount();        // Number of fired actions
 ```
 
 ## Without RuleBuilder
@@ -139,3 +143,13 @@ $rule->execute($context);
 ## Extensibility
 
 Ruler focuses exclusively on rule evaluation logic. Rule storage and retrieval are left to your implementation—whether that's an ORM, ODM, file-based DSL, or custom solution. This separation allows Ruler to integrate seamlessly into any architecture.
+
+## Migration Notes
+
+- `Rule::execute()` returns `RuleExecutionResult`.
+- `RuleSet::executeRules()` and `executeForwardChaining()` return
+  `RuleSetExecutionReport`.
+- `RuleEvaluator::evaluateFrom*()` returns `RuleEvaluatorReport`.
+- Action callbacks must accept `Context`, for example
+  `fn (Context $context): void => ...`.
+- Rules managed by `RuleSet` must have non-empty unique IDs.

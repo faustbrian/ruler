@@ -44,7 +44,8 @@ If a Rule has an action, use `execute()` to run it when the rule evaluates to tr
 ```php
 $hiJustin = $rb->create(
     $rb['userName']->equalTo('bobthecow'),
-    fn() => echo "Hi, Justin!"
+    fn (Context $context): void => print "Hi, Justin!",
+    'greet-justin'
 );
 
 $hiJustin->execute($context);  // "Hi, Justin!"
@@ -55,7 +56,8 @@ $hiJustin->execute($context);  // "Hi, Justin!"
 ```php
 $hiJon = $rb->create(
     $rb['userName']->equalTo('jwage'),
-    fn() => echo "Hey there Jon!"
+    fn (Context $context): void => print "Hey there Jon!",
+    'greet-jon'
 );
 
 $hiEveryoneElse = $rb->create(
@@ -63,9 +65,10 @@ $hiEveryoneElse = $rb->create(
         $rb->logicalNot($rb->logicalOr($hiJustin, $hiJon)),
         $userIsLoggedIn
     ),
-    function() use ($context) {
+    function (Context $context): void {
         echo sprintf("Hello, %s", $context['userName']);
-    }
+    },
+    'greet-others'
 );
 
 $rules = new RuleSet([$hiJustin, $hiJon, $hiEveryoneElse]);
@@ -73,15 +76,17 @@ $rules = new RuleSet([$hiJustin, $hiJon, $hiEveryoneElse]);
 // Add more rules dynamically
 $redirectForAuth = $rb->create(
     $rb->logicalNot($userIsLoggedIn),
-    function() {
+    function (Context $context): void {
         header('Location: /login');
         exit;
-    }
+    },
+    'redirect-auth'
 );
 $rules->addRule($redirectForAuth);
 
 // Execute all matching rules
-$rules->executeRules($context);
+$report = $rules->executeRules($context);
+$report->getActionExecutionCount();
 ```
 
 ## Working with Context
@@ -125,9 +130,10 @@ $rb->create(
         $rb['orderCount']->greaterThanOrEqualTo(5),
         $rb['reallyAnnoyingUsers']->doesNotContain($rb['userName'])
     ),
-    function() use ($shipManager, $context) {
+    function (Context $context) use ($shipManager): void {
         $shipManager->giveFreeShippingTo($context['user']);
-    }
+    },
+    'free-shipping'
 );
 ```
 
@@ -156,9 +162,10 @@ $rb->create(
         $userIsLoggedIn,
         $rb['userRoles']->contains('admin')
     ),
-    function() use ($context, $logger) {
+    function (Context $context) use ($logger): void {
         $logger->info(sprintf("Admin user %s did a thing!", $context['userFullName']));
-    }
+    },
+    'log-admin-activity'
 );
 ```
 
@@ -175,9 +182,10 @@ $rb->create(
         $userIsLoggedIn,
         $rb['user']['roles']->contains('admin')
     ),
-    function() use ($context, $logger) {
+    function (Context $context) use ($logger): void {
         $logger->info(sprintf("Admin user %s did a thing!", $context['user']['fullName']));
-    }
+    },
+    'log-admin-property-activity'
 );
 ```
 
