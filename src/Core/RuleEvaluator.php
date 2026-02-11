@@ -15,8 +15,8 @@ use Cline\Ruler\Builder\VariableProperty;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\Operator;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
+use Cline\Ruler\Variables\ContextValueReference;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Symfony\Component\Yaml\Yaml;
 
 use const JSON_THROW_ON_ERROR;
@@ -33,6 +33,8 @@ use function is_array;
 use function is_int;
 use function is_string;
 use function json_decode;
+use function md5;
+use function serialize;
 use function str_contains;
 use function throw_if;
 use function throw_unless;
@@ -165,13 +167,8 @@ final readonly class RuleEvaluator
      */
     public function evaluateFromArrayWithReport(array $values): RuleEvaluatorReport
     {
-        $ruleBuilder = new RuleBuilder();
-        $proposition = self::proposition($values, $this->rules, $ruleBuilder);
-        assert($proposition instanceof Proposition);
-
         $context = new Context($values);
-        $ruleResult = $ruleBuilder
-            ->create($proposition)
+        $ruleResult = $this->getCompiledRule()
             ->executeWithResult($context);
 
         return new RuleEvaluatorReport(
@@ -299,7 +296,7 @@ final readonly class RuleEvaluator
      * @return Operator|Proposition Constructed operator or proposition representing
      *                              the rule definition logic
      */
-    private static function proposition(array $values, array $rule, RuleBuilder $ruleBuilder): Operator|Proposition
+    private static function proposition(array $rule, RuleBuilder $ruleBuilder): Operator|Proposition
     {
         // Handle combinator-based rules (and, or, xor, not)
         if (array_key_exists('combinator', $rule)) {
@@ -318,7 +315,7 @@ final readonly class RuleEvaluator
                 $firstValue = $rule['value'][0];
 
                 $result = $ruleBuilder->{$method}(
-                    self::proposition($values, $firstValue, $ruleBuilder)
+                    self::proposition($firstValue, $ruleBuilder)
                 );
                 assert($result instanceof Operator || $result instanceof Proposition);
 
@@ -336,7 +333,7 @@ final readonly class RuleEvaluator
 
             $result = $ruleBuilder->{$method}(
                 ...array_map(
-                    fn (array $subRule): Operator|Proposition => self::proposition($values, $subRule, $ruleBuilder),
+                    fn (array $subRule): Operator|Proposition => self::proposition($subRule, $ruleBuilder),
                     $ruleValues,
                 )
             );
@@ -348,11 +345,9 @@ final readonly class RuleEvaluator
         // Handle operator-based rules (comparison, arithmetic, etc.)
         if (array_key_exists('operator', $rule)) {
             // Resolve value: supports dot notation, direct variable reference, or literal
-            $value = match (true) {
-                is_string($rule['value'] ?? null) && str_contains($rule['value'], '.') => Arr::get($values, $rule['value']),
-                is_string($rule['value'] ?? null) && array_key_exists($rule['value'], $values) => $ruleBuilder[$rule['value']],
-                default => $rule['value'],
-            };
+            $value = is_string($rule['value'] ?? null)
+                ? new ContextValueReference($rule['value'])
+                : $rule['value'];
 
             // Resolve field: supports dot notation for nested field access
             assert(array_key_exists('field', $rule));
@@ -383,5 +378,26 @@ final readonly class RuleEvaluator
         }
 
         throw RuleEvaluatorException::invalidRuleStructure();
+    }
+
+    /**
+     * Compile and cache the rule definition as an executable Rule instance.
+     */
+    private function getCompiledRule(): Rule
+    {
+        /** @var array<string, Rule> $cache */
+        static $cache = [];
+
+        $key = md5(serialize($this->rules));
+
+        if (!array_key_exists($key, $cache)) {
+            $ruleBuilder = new RuleBuilder();
+            $proposition = self::proposition($this->rules, $ruleBuilder);
+            assert($proposition instanceof Proposition);
+
+            $cache[$key] = $ruleBuilder->create($proposition);
+        }
+
+        return $cache[$key];
     }
 }

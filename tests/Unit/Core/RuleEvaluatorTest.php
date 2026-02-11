@@ -284,6 +284,48 @@ YAML;
             // Assert
             expect($result)->toBeTrue();
         });
+
+        test('reuses compiled rules across evaluations with dynamic refs', function (): void {
+            $evaluator = RuleEvaluator::createFromArray([
+                'field' => 'amount',
+                'operator' => 'greaterThan',
+                'value' => 'threshold',
+            ]);
+
+            $first = $evaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 5,
+            ]);
+
+            $second = $evaluator->evaluateFromArray([
+                'amount' => 10,
+                'threshold' => 20,
+            ]);
+
+            expect($first)->toBeTrue();
+            expect($second)->toBeFalse();
+        });
+
+        test('resolves dot-notated value references at runtime', function (): void {
+            $evaluator = RuleEvaluator::createFromArray([
+                'field' => 'score',
+                'operator' => 'greaterThanOrEqualTo',
+                'value' => 'limits.minScore',
+            ]);
+
+            $first = $evaluator->evaluateFromArray([
+                'score' => 90,
+                'limits' => ['minScore' => 80],
+            ]);
+
+            $second = $evaluator->evaluateFromArray([
+                'score' => 70,
+                'limits' => ['minScore' => 80],
+            ]);
+
+            expect($first)->toBeTrue();
+            expect($second)->toBeFalse();
+        });
     });
 
     describe('Sad Paths', function (): void {
