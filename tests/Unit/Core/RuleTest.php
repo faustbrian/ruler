@@ -146,6 +146,20 @@ describe('Rule', function (): void {
             expect($result->actionExecuted)->toBeTrue();
             expect($capturedContext)->toBe($context);
         });
+
+        test('rule always has a non-empty identifier', function (): void {
+            $auto = new Rule(
+                new TrueProposition(),
+            );
+            $manual = new Rule(
+                new TrueProposition(),
+                null,
+                'manual-id',
+            );
+
+            expect($auto->getId())->toStartWith('rule-auto-');
+            expect($manual->getId())->toBe('manual-id');
+        });
     });
 
     describe('Sad Paths', function (): void {
@@ -155,6 +169,16 @@ describe('Rule', function (): void {
             new Rule(
                 new TrueProposition(),
                 'this is not callable',
+            );
+        });
+
+        test('empty rule id is rejected', function (): void {
+            $this->expectException(RuntimeException::class);
+
+            new Rule(
+                new TrueProposition(),
+                null,
+                '',
             );
         });
     });

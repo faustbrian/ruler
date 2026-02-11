@@ -387,15 +387,16 @@ describe('RuleSet', function (): void {
     });
 
     describe('Sad Paths', function (): void {
-        test('throws when adding rule without id', function (): void {
-            $this->expectException(RuntimeException::class);
-
+        test('accepts rule with auto-generated id', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 static function ($context): void {},
             );
 
-            new RuleSet([$rule]);
+            $ruleset = new RuleSet([$rule]);
+
+            expect($ruleset->getRules())->toHaveCount(1);
+            expect($ruleset->getRules()[0]->getId())->toStartWith('rule-auto-');
         });
 
         test('throws when duplicate rule ids are added', function (): void {

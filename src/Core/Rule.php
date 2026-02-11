@@ -10,6 +10,12 @@
 namespace Cline\Ruler\Core;
 
 use Closure;
+use RuntimeException;
+
+use function bin2hex;
+use function random_bytes;
+use function sprintf;
+use function throw_if;
 
 /**
  * Represents a conditional rule with an optional action.
@@ -25,6 +31,8 @@ use Closure;
  */
 final readonly class Rule implements Proposition
 {
+    private string $id;
+
     /**
      * Create a new Rule instance.
      *
@@ -43,7 +51,7 @@ final readonly class Rule implements Proposition
          * @var null|Closure
          */
         private ?Closure $action = null,
-        private ?string $id = null,
+        ?string $id = null,
         private ?string $name = null,
         private int $priority = 0,
         private bool $enabled = true,
@@ -53,7 +61,11 @@ final readonly class Rule implements Proposition
          * @var array<string, mixed>
          */
         private array $metadata = [],
-    ) {}
+    ) {
+        $this->id = $id ?? $this->nextAutoId();
+
+        throw_if($this->id === '', RuntimeException::class, 'Rule id cannot be empty.');
+    }
 
     /**
      * Evaluate the rule condition against the given context.
@@ -106,7 +118,7 @@ final readonly class Rule implements Proposition
     /**
      * Get the unique rule identifier.
      */
-    public function getId(): ?string
+    public function getId(): string
     {
         return $this->id;
     }
@@ -151,5 +163,10 @@ final readonly class Rule implements Proposition
     public function getMetadataValue(string $key): mixed
     {
         return $this->metadata[$key] ?? null;
+    }
+
+    private function nextAutoId(): string
+    {
+        return sprintf('rule-auto-%s', bin2hex(random_bytes(8)));
     }
 }
