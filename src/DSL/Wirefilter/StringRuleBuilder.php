@@ -15,6 +15,8 @@ use Closure;
 use LogicException;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 
+use function sha1;
+
 /**
  * Facade for creating Rules from text-based DSL expressions.
  *
@@ -87,7 +89,7 @@ final readonly class StringRuleBuilder
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition);
+        return $rb->create($proposition, 'wirefilter:'.sha1($expression));
     }
 
     /**
@@ -113,6 +115,6 @@ final readonly class StringRuleBuilder
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition, $action);
+        return $rb->create($proposition, 'wirefilter-action:'.sha1($expression), $action);
     }
 }

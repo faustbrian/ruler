@@ -14,6 +14,8 @@ use Cline\Ruler\Core\Rule;
 use Closure;
 use InvalidArgumentException;
 
+use function sha1;
+
 /**
  * Builds executable rules from natural language expressions.
  *
@@ -70,7 +72,7 @@ final readonly class NaturalLanguageRuleBuilder
         $ast = $this->parser->parse($text);
         $proposition = $this->compiler->compile($ast);
 
-        return $this->ruleBuilder->create($proposition);
+        return $this->ruleBuilder->create($proposition, 'natural:'.sha1($text));
     }
 
     /**
@@ -91,6 +93,6 @@ final readonly class NaturalLanguageRuleBuilder
         $ast = $this->parser->parse($text);
         $proposition = $this->compiler->compile($ast);
 
-        return $this->ruleBuilder->create($proposition, $action);
+        return $this->ruleBuilder->create($proposition, 'natural-action:'.sha1($text), $action);
     }
 }

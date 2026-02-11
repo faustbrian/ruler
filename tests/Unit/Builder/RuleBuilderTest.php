@@ -76,12 +76,12 @@ describe('RuleBuilder', function (): void {
             $true = new TrueProposition();
             $false = new FalseProposition();
 
-            expect($rb->create($true))->toBeInstanceOf(Rule::class);
-            expect($rb->create($true)->evaluate($context))->toBeTrue();
-            expect($rb->create($false)->evaluate($context))->toBeFalse();
+            expect($rb->create($true, 'rule-true'))->toBeInstanceOf(Rule::class);
+            expect($rb->create($true, 'rule-true-eval')->evaluate($context))->toBeTrue();
+            expect($rb->create($false, 'rule-false-eval')->evaluate($context))->toBeFalse();
 
             $executed = false;
-            $rule = $rb->create($true, function ($context) use (&$executed): void {
+            $rule = $rb->create($true, 'rule-with-action', function ($context) use (&$executed): void {
                 $executed = true;
             });
 
@@ -126,17 +126,19 @@ describe('RuleBuilder', function (): void {
     });
 
     describe('Sad Paths', function (): void {
-        test('assigns deterministic ids when creating rule without id', function (): void {
+        test('uses explicit ids passed to create', function (): void {
             $rb = new RuleBuilder();
             $first = $rb->create(
                 new TrueProposition(),
+                'first-explicit-id',
             );
             $second = $rb->create(
                 new TrueProposition(),
+                'second-explicit-id',
             );
 
-            expect($first->getId())->toBe('rule-1');
-            expect($second->getId())->toBe('rule-2');
+            expect($first->getId())->toBe('first-explicit-id');
+            expect($second->getId())->toBe('second-explicit-id');
         });
 
         test('logic exception on unknown operator', function (): void {

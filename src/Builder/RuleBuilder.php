@@ -62,24 +62,22 @@ final class RuleBuilder implements ArrayAccess
      */
     private array $operatorNamespaces = [];
 
-    private int $ruleCounter = 0;
-
     /**
-     * Create a new Rule with the given condition and optional action.
+     * Create a new Rule with the given condition, explicit id, and optional action.
      *
      * @param  Proposition  $condition the propositional condition that determines when
      *                                 the rule is satisfied and the action should execute
+     * @param  string       $id        Explicit non-empty rule identifier.
      * @param  null|Closure $action    Optional callback to execute when the condition
      *                                 evaluates to true. Receives Context and returns void.
-     * @param  null|string  $id        Optional explicit rule identifier.
      * @return Rule         the constructed Rule instance
      */
-    public function create(Proposition $condition, ?Closure $action = null, ?string $id = null): Rule
+    public function create(Proposition $condition, string $id, ?Closure $action = null): Rule
     {
         return new Rule(
             $condition,
             $action,
-            $id ?? sprintf('rule-%d', ++$this->ruleCounter),
+            $id,
         );
     }
 

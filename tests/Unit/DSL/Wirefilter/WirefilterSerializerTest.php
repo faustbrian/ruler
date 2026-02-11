@@ -328,7 +328,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('name');
             $value = new Variable(null, 'John');
             $operator = new StartsWith($variable, $value);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -343,7 +343,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('text');
             $value = new Variable(null, 'test');
             $operator = new StringContains($variable, $value);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -360,7 +360,7 @@ describe('WirefilterSerializer', function (): void {
             $min = new Variable(null, 18);
             $max = new Variable(null, 65);
             $between = new Between($age, $min, $max);
-            $rule = $builder->create($between);
+            $rule = $builder->create($between, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -377,7 +377,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new GreaterThanOrEqualTo($age, new Variable(null, 18));
             $verifiedCheck = new EqualTo($verified, new Variable(null, true));
             $xor = new LogicalXor([$ageCheck, $verifiedCheck]);
-            $rule = $builder->create($xor);
+            $rule = $builder->create($xor, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -393,7 +393,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new GreaterThanOrEqualTo($age, new Variable(null, 18));
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nand = new LogicalNand([$ageCheck, $countryCheck]);
-            $rule = $builder->create($nand);
+            $rule = $builder->create($nand, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -409,7 +409,7 @@ describe('WirefilterSerializer', function (): void {
             $ageCheck = new LessThan($age, new Variable(null, 18));
             $bannedCheck = new EqualTo($banned, new Variable(null, true));
             $nor = new LogicalNor([$ageCheck, $bannedCheck]);
-            $rule = $builder->create($nor);
+            $rule = $builder->create($nor, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -446,7 +446,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $objectValue = new Variable(null, new stdClass());
             $operator = new EqualTo($variable, $objectValue);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Cannot cast value to string: object');
@@ -465,7 +465,7 @@ describe('WirefilterSerializer', function (): void {
                 }
             };
 
-            $rule = $builder->create($customOperator);
+            $rule = $builder->create($customOperator, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class);
@@ -484,7 +484,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($operator, [$variable]); // Only 1 operand instead of 2
 
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Binary operator == requires exactly 2 operands');
@@ -505,7 +505,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($notOperator, [$condition, $var2]); // 2 operands instead of 1
 
-            $rule = $builder->create($notOperator);
+            $rule = $builder->create($notOperator, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'NOT operator requires exactly 1 operand');
@@ -539,7 +539,7 @@ describe('WirefilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($notOperator, [$variable]);
 
-            $rule = $builder->create($notOperator);
+            $rule = $builder->create($notOperator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -607,7 +607,7 @@ describe('WirefilterSerializer', function (): void {
             $orOp = new LogicalOr([$ageCheck, $verifiedCheck]);
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nand = new LogicalNand([$orOp, $countryCheck]);
-            $rule = $builder->create($nand);
+            $rule = $builder->create($nand, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -628,7 +628,7 @@ describe('WirefilterSerializer', function (): void {
             $andOp = new LogicalAnd([$ageCheck, $verifiedCheck]);
             $countryCheck = new EqualTo($country, new Variable(null, 'US'));
             $nor = new LogicalNor([$andOp, $countryCheck]);
-            $rule = $builder->create($nor);
+            $rule = $builder->create($nor, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -644,7 +644,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $value = new Variable(null, 'simple_value');
             $operator = new EqualTo($variable, $value);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -666,7 +666,7 @@ describe('WirefilterSerializer', function (): void {
                 }
             };
 
-            $rule = $builder->create($customOp);
+            $rule = $builder->create($customOp, 'test-rule');
 
             // This should use the fallback path (lines 134-135)
             expect(fn (): string => $serializer->serialize($rule))
@@ -696,7 +696,7 @@ describe('WirefilterSerializer', function (): void {
             $variable = new Variable('test');
             $value = new Variable(null, 42);
             $operator = new EqualTo($variable, $value);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 

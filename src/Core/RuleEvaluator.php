@@ -393,7 +393,7 @@ final readonly class RuleEvaluator
         $ruleBuilder = new RuleBuilder();
         $proposition = self::proposition($this->definition, $ruleBuilder);
 
-        $rule = $ruleBuilder->create($proposition);
+        $rule = $ruleBuilder->create($proposition, $key);
         $this->compiledRuleCache->put($key, $rule);
 
         return $rule;

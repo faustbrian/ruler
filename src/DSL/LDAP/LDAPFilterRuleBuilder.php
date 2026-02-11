@@ -15,6 +15,8 @@ use Cline\Ruler\DSL\Wirefilter\FieldResolver;
 use Closure;
 use Exception;
 
+use function sha1;
+
 /**
  * Facade for creating Rules from LDAP filter expressions.
  *
@@ -74,7 +76,7 @@ final readonly class LDAPFilterRuleBuilder
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition);
+        return $rb->create($proposition, 'ldap:'.sha1($filter));
     }
 
     /**
@@ -95,7 +97,7 @@ final readonly class LDAPFilterRuleBuilder
 
         $rb = $this->ruleBuilder ?? new RuleBuilder();
 
-        return $rb->create($proposition, $action);
+        return $rb->create($proposition, 'ldap-action:'.sha1($filter), $action);
     }
 
     /**

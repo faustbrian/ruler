@@ -19,6 +19,8 @@ use const JSON_THROW_ON_ERROR;
 
 use function is_array;
 use function json_decode;
+use function json_encode;
+use function sha1;
 
 /**
  * Builds executable rules from MongoDB-style query documents.
@@ -64,8 +66,9 @@ final readonly class MongoQueryRuleBuilder
     public function parse(array $query): Rule
     {
         $proposition = $this->compiler->compile($query);
+        $idSource = json_encode($query, JSON_THROW_ON_ERROR);
 
-        return $this->ruleBuilder->create($proposition);
+        return $this->ruleBuilder->create($proposition, 'mongodb:'.sha1($idSource));
     }
 
     /**
@@ -103,8 +106,9 @@ final readonly class MongoQueryRuleBuilder
     public function parseWithAction(array $query, Closure $action): Rule
     {
         $proposition = $this->compiler->compile($query);
+        $idSource = json_encode($query, JSON_THROW_ON_ERROR);
 
-        return $this->ruleBuilder->create($proposition, $action);
+        return $this->ruleBuilder->create($proposition, 'mongodb-action:'.sha1($idSource), $action);
     }
 
     /**

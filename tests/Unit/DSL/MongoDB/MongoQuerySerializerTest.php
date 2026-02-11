@@ -659,7 +659,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $var = $builder['deleted_at'];
             $proposition = new IsNull($var);
-            $rule = $builder->create($proposition);
+            $rule = $builder->create($proposition, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -676,7 +676,7 @@ describe('MongoQuerySerializer', function (): void {
 
             $var = $builder['notes'];
             $proposition = new IsEmpty($var);
-            $rule = $builder->create($proposition);
+            $rule = $builder->create($proposition, 'test-rule');
 
             $result = $serializer->serialize($rule);
 

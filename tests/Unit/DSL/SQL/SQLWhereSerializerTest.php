@@ -384,7 +384,7 @@ describe('SQLWhereSerializer', function (): void {
             $min = new Variable(null, 18);
             $max = new Variable(null, 65);
             $operator = new Between($variable, $min, $max);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -425,7 +425,7 @@ describe('SQLWhereSerializer', function (): void {
 
             // Use a Set operator which is not supported by SQL serializer
             $operator = new SetContains($variable, $value);
-            $rule = $builder->create($operator);
+            $rule = $builder->create($operator, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Unsupported operator');
@@ -444,7 +444,7 @@ describe('SQLWhereSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($equalTo, [$variable]); // Only 1 operand instead of 2
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Binary operator = requires exactly 2 operands');
@@ -463,7 +463,7 @@ describe('SQLWhereSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($not, []); // No operands
 
-            $rule = $builder->create($not);
+            $rule = $builder->create($not, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'NOT operator requires exactly 1 operand');
@@ -481,7 +481,7 @@ describe('SQLWhereSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($in, [$variable]); // Only 1 operand
 
-            $rule = $builder->create($in);
+            $rule = $builder->create($in, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'IN operator requires exactly 2 operands');
@@ -495,7 +495,7 @@ describe('SQLWhereSerializer', function (): void {
             $notArray = new Variable(null, 'not-an-array');
             $in = new In($variable, $notArray);
 
-            $rule = $builder->create($in);
+            $rule = $builder->create($in, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'IN operator requires array of values');
@@ -514,7 +514,7 @@ describe('SQLWhereSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($between, [$variable, $min]); // Only 2 operands instead of 3
 
-            $rule = $builder->create($between);
+            $rule = $builder->create($between, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'BETWEEN operator requires exactly 3 operands');
@@ -532,7 +532,7 @@ describe('SQLWhereSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($matches, [$variable]); // Only 1 operand
 
-            $rule = $builder->create($matches);
+            $rule = $builder->create($matches, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'LIKE operator requires exactly 2 operands');
@@ -546,7 +546,7 @@ describe('SQLWhereSerializer', function (): void {
             $notString = new Variable(null, 123); // Not a string
             $matches = new Matches($variable, $notString);
 
-            $rule = $builder->create($matches);
+            $rule = $builder->create($matches, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'LIKE pattern must be a string');
@@ -561,7 +561,7 @@ describe('SQLWhereSerializer', function (): void {
             $objectValue = new Variable(null, new stdClass());
             $equalTo = new EqualTo($variable, $objectValue);
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Cannot cast value to string: object');
@@ -577,7 +577,7 @@ describe('SQLWhereSerializer', function (): void {
             $matches = new Matches($variable, $invalidRegex);
 
             $builder = new RuleBuilder();
-            $rule = $builder->create($matches);
+            $rule = $builder->create($matches, 'test-rule');
 
             $result = $serializer->serialize($rule);
 
@@ -614,7 +614,7 @@ describe('SQLWhereSerializer', function (): void {
             $valueVar = new Variable(null, 42); // No name, just value
             $equalTo = new EqualTo($variable, $valueVar);
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('field = 42');
@@ -665,7 +665,7 @@ describe('SQLWhereSerializer', function (): void {
             $operands[1] = 42; // Raw integer, not Variable
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             // Line 398: serializeOperand returns serializeValue for raw values
@@ -681,7 +681,7 @@ describe('SQLWhereSerializer', function (): void {
             $arrayValue = [1, 2, 3];
             $equalTo = new EqualTo($variable, new Variable(null, $arrayValue));
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             // Lines 444-449: serializeValue handles array
@@ -705,7 +705,7 @@ describe('SQLWhereSerializer', function (): void {
             $operands[0] = new Cline\Ruler\Builder\Variable($builder, 'field');
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('field = 42');
@@ -721,7 +721,7 @@ describe('SQLWhereSerializer', function (): void {
             $pattern = new Variable(null, '/^hello\\tworld$/');
             $matches = new Matches($variable, $pattern);
 
-            $rule = $builder->create($matches);
+            $rule = $builder->create($matches, 'test-rule');
             $result = $serializer->serialize($rule);
 
             // Line 144: Handle escaped characters that aren't % or _
@@ -737,7 +737,7 @@ describe('SQLWhereSerializer', function (): void {
             $nestedArray = [1, [2, 3], 4];
             $equalTo = new EqualTo($variable, new Variable(null, $nestedArray));
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             // Lines 444-449: serializeValue recursively handles arrays
@@ -753,7 +753,7 @@ describe('SQLWhereSerializer', function (): void {
             $emptyArray = [];
             $equalTo = new EqualTo($variable, new Variable(null, $emptyArray));
 
-            $rule = $builder->create($equalTo);
+            $rule = $builder->create($equalTo, 'test-rule');
             $result = $serializer->serialize($rule);
 
             // Lines 444-449: serializeValue handles empty array

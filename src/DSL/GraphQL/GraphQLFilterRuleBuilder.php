@@ -14,6 +14,12 @@ use Cline\Ruler\Core\Rule;
 use Cline\Ruler\DSL\Wirefilter\FieldResolver;
 use Closure;
 
+use const JSON_THROW_ON_ERROR;
+
+use function is_array;
+use function json_encode;
+use function sha1;
+
 /**
  * Builds executable rules from GraphQL filter syntax.
  *
@@ -73,8 +79,11 @@ final readonly class GraphQLFilterRuleBuilder
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);
+        $idSource = is_array($filter)
+            ? json_encode($filter, JSON_THROW_ON_ERROR)
+            : $filter;
 
-        return $this->ruleBuilder->create($proposition);
+        return $this->ruleBuilder->create($proposition, 'graphql:'.sha1($idSource));
     }
 
     /**
@@ -106,7 +115,10 @@ final readonly class GraphQLFilterRuleBuilder
     {
         $ast = $this->parser->parse($filter);
         $proposition = $this->compiler->compile($ast);
+        $idSource = is_array($filter)
+            ? json_encode($filter, JSON_THROW_ON_ERROR)
+            : $filter;
 
-        return $this->ruleBuilder->create($proposition, $action);
+        return $this->ruleBuilder->create($proposition, 'graphql-action:'.sha1($idSource), $action);
     }
 }

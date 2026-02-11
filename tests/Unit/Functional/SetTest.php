@@ -26,12 +26,14 @@ describe('Set', function (): void {
                 $rb['foo']->intersect(
                     $rb['bar']->symmetricDifference($rb['baz']),
                 )->setContains($rb['expected']),
+                'set-complicated-1',
             )->evaluate($context))->toBeTrue();
 
             expect($rb->create(
                 $rb['bar']->union(
                     $rb['bob'],
                 )->containsSubset($rb['foo']),
+                'set-complicated-2',
             )->evaluate($context))->toBeTrue();
         });
 
@@ -42,6 +44,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->union($rb['b']),
                 ),
+                'set-union',
             )->evaluate($context))->toBeTrue();
         })->with('setUnion');
 
@@ -52,6 +55,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->intersect($rb['b']),
                 ),
+                'set-intersect',
             )->evaluate($context))->toBeTrue();
         })->with('setIntersect');
 
@@ -62,6 +66,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->complement($rb['b']),
                 ),
+                'set-complement',
             )->evaluate($context))->toBeTrue();
         })->with('setComplement');
 
@@ -72,6 +77,7 @@ describe('Set', function (): void {
                 $rb['expected']->equalTo(
                     $rb['a']->symmetricDifference($rb['b']),
                 ),
+                'set-symmetric-difference',
             )->evaluate($context))->toBeTrue();
         })->with('setSymmetricDifference');
     });
