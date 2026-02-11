@@ -18,11 +18,71 @@ use Cline\Ruler\Enums\RuleErrorPhase;
 use Cline\Ruler\Exceptions\RuleEvaluatorException;
 use Illuminate\Http\Request;
 
+function evaluatorFromArray(
+    array $rules,
+    ?CompiledRuleCache $compiledRuleCache = null,
+    ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+): RuleEvaluator {
+    return RuleEvaluator::compileFromArray(
+        $rules,
+        $compiledRuleCache,
+        $compiledRuleKeyGenerator,
+    )->getEvaluator();
+}
+
+function evaluatorFromJson(
+    string $rules,
+    ?CompiledRuleCache $compiledRuleCache = null,
+    ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+): RuleEvaluator {
+    return RuleEvaluator::compileFromJson(
+        $rules,
+        $compiledRuleCache,
+        $compiledRuleKeyGenerator,
+    )->getEvaluator();
+}
+
+function evaluatorFromJsonFile(
+    string $rules,
+    ?CompiledRuleCache $compiledRuleCache = null,
+    ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+): RuleEvaluator {
+    return RuleEvaluator::compileFromJsonFile(
+        $rules,
+        $compiledRuleCache,
+        $compiledRuleKeyGenerator,
+    )->getEvaluator();
+}
+
+function evaluatorFromYaml(
+    string $rules,
+    ?CompiledRuleCache $compiledRuleCache = null,
+    ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+): RuleEvaluator {
+    return RuleEvaluator::compileFromYaml(
+        $rules,
+        $compiledRuleCache,
+        $compiledRuleKeyGenerator,
+    )->getEvaluator();
+}
+
+function evaluatorFromYamlFile(
+    string $rules,
+    ?CompiledRuleCache $compiledRuleCache = null,
+    ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+): RuleEvaluator {
+    return RuleEvaluator::compileFromYamlFile(
+        $rules,
+        $compiledRuleCache,
+        $compiledRuleKeyGenerator,
+    )->getEvaluator();
+}
+
 describe('RuleEvaluator', function (): void {
     describe('Happy Paths', function (): void {
         test('evaluates simple rules successfully', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'combinator' => 'and',
                 'value' => [
                     [
@@ -49,7 +109,7 @@ describe('RuleEvaluator', function (): void {
         });
 
         test('returns structured evaluation report', function (): void {
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'combinator' => 'and',
                 'value' => [
                     [
@@ -89,7 +149,7 @@ describe('RuleEvaluator', function (): void {
             ], \JSON_THROW_ON_ERROR);
 
             // Act
-            $evaluator = RuleEvaluator::createFromJson($jsonRules);
+            $evaluator = evaluatorFromJson($jsonRules);
             $result = $evaluator->evaluateFromArray(['status' => 'active']);
 
             // Assert
@@ -134,7 +194,7 @@ describe('RuleEvaluator', function (): void {
             file_put_contents($tempFile, json_encode($rules, \JSON_THROW_ON_ERROR));
 
             // Act
-            $evaluator = RuleEvaluator::createFromJsonFile($tempFile);
+            $evaluator = evaluatorFromJsonFile($tempFile);
             $result = $evaluator->evaluateFromArray(['age' => 25]);
 
             // Assert
@@ -153,7 +213,7 @@ value: active
 YAML;
 
             // Act
-            $evaluator = RuleEvaluator::createFromYaml($yamlRules);
+            $evaluator = evaluatorFromYaml($yamlRules);
             $result = $evaluator->evaluateFromArray(['status' => 'active']);
 
             // Assert
@@ -171,7 +231,7 @@ YAML;
             file_put_contents($tempFile, $yamlContent);
 
             // Act
-            $evaluator = RuleEvaluator::createFromYamlFile($tempFile);
+            $evaluator = evaluatorFromYamlFile($tempFile);
             $result = $evaluator->evaluateFromArray(['price' => 50]);
 
             // Assert
@@ -183,7 +243,7 @@ YAML;
 
         test('evaluates rules from json string', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'status',
                 'operator' => 'sameAs',
                 'value' => 'active',
@@ -199,7 +259,7 @@ YAML;
 
         test('evaluates rules from json file', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'count',
                 'operator' => 'greaterThan',
                 'value' => 10,
@@ -219,7 +279,7 @@ YAML;
 
         test('evaluates rules from yaml string', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'enabled',
                 'operator' => 'sameAs',
                 'value' => true,
@@ -237,7 +297,7 @@ YAML;
 
         test('evaluates rules from yaml file', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'level',
                 'operator' => 'greaterThanOrEqualTo',
                 'value' => 5,
@@ -260,7 +320,7 @@ YAML;
 
         test('evaluates rules from laravel request', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'user_id',
                 'operator' => 'sameAs',
                 'value' => 123,
@@ -276,7 +336,7 @@ YAML;
 
         test('handles not combinator with exactly one operand', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'combinator' => 'not',
                 'value' => [
                     [
@@ -306,7 +366,7 @@ value:
     operator: sameAs
     value: US
 YAML;
-            $evaluator = RuleEvaluator::createFromYaml($yamlRules);
+            $evaluator = evaluatorFromYaml($yamlRules);
 
             // Act
             $result = $evaluator->evaluateFromArray([
@@ -319,7 +379,7 @@ YAML;
         });
 
         test('reuses compiled rules across evaluations with dynamic refs', function (): void {
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'amount',
                 'operator' => 'greaterThan',
                 'value' => '@threshold',
@@ -346,8 +406,8 @@ YAML;
                 'value' => 'threshold',
             ];
 
-            $firstEvaluator = RuleEvaluator::createFromArray($definition);
-            $secondEvaluator = RuleEvaluator::createFromArray($definition);
+            $firstEvaluator = evaluatorFromArray($definition);
+            $secondEvaluator = evaluatorFromArray($definition);
 
             $firstRun = $firstEvaluator->evaluateFromArray([
                 'amount' => 10,
@@ -367,7 +427,7 @@ YAML;
         });
 
         test('resolves dot-notated value references at runtime', function (): void {
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'score',
                 'operator' => 'greaterThanOrEqualTo',
                 'value' => '@limits.minScore',
@@ -388,7 +448,7 @@ YAML;
         });
 
         test('treats plain string values as literals', function (): void {
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'status',
                 'operator' => 'sameAs',
                 'value' => 'active',
@@ -440,8 +500,8 @@ YAML;
                 'value' => '@threshold',
             ];
 
-            $firstEvaluator = RuleEvaluator::createFromArray($definition, $cache);
-            $secondEvaluator = RuleEvaluator::createFromArray($definition, $cache);
+            $firstEvaluator = evaluatorFromArray($definition, $cache);
+            $secondEvaluator = evaluatorFromArray($definition, $cache);
 
             $firstResult = $firstEvaluator->evaluateFromArray([
                 'amount' => 10,
@@ -491,7 +551,7 @@ YAML;
                 }
             };
 
-            $evaluator = RuleEvaluator::createFromArray(
+            $evaluator = evaluatorFromArray(
                 [
                     'field' => 'status',
                     'operator' => 'sameAs',
@@ -509,19 +569,6 @@ YAML;
     });
 
     describe('Sad Paths', function (): void {
-        test('throws on invalid combinator during construction', function (): void {
-            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
-                'combinator' => 'nandd',
-                'value' => [
-                    [
-                        'field' => 'status',
-                        'operator' => 'sameAs',
-                        'value' => 'active',
-                    ],
-                ],
-            ]))->toThrow(RuleEvaluatorException::class);
-        });
-
         test('returns structured compile failure for invalid combinator', function (): void {
             $result = RuleEvaluator::compileFromArray([
                 'combinator' => 'nandd',
@@ -553,48 +600,46 @@ YAML;
         });
 
         test('returns structured compile error payload for invalid combinator', function (): void {
-            try {
-                RuleEvaluator::createFromArray([
-                    'combinator' => 'nandd',
-                    'value' => [
-                        [
-                            'field' => 'status',
-                            'operator' => 'sameAs',
-                            'value' => 'active',
-                        ],
+            $result = RuleEvaluator::compileFromArray([
+                'combinator' => 'nandd',
+                'value' => [
+                    [
+                        'field' => 'status',
+                        'operator' => 'sameAs',
+                        'value' => 'active',
                     ],
-                ]);
-                test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $ruleEvaluatorException) {
-                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
-                expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Compile);
-                expect($ruleEvaluatorException->getPath())->toBe(['combinator']);
-                expect($ruleEvaluatorException->getDetails())->toBe(['combinator' => 'nandd']);
-            }
+                ],
+            ]);
+
+            $error = $result->getError();
+            expect($error)->toBeInstanceOf(RuleEvaluatorException::class);
+            expect($error?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidCombinator);
+            expect($error?->getPhase())->toBe(RuleErrorPhase::Compile);
+            expect($error?->getPath())->toBe(['combinator']);
+            expect($error?->getDetails())->toBe(['combinator' => 'nandd']);
         });
 
         test('returns structured compile error payload for unknown operator', function (): void {
-            try {
-                RuleEvaluator::createFromArray([
-                    'field' => 'status',
-                    'operator' => 'unknownOperator',
-                    'value' => 'active',
-                ]);
-                test()->fail('Expected RuleEvaluatorException was not thrown.');
-            } catch (RuleEvaluatorException $ruleEvaluatorException) {
-                expect($ruleEvaluatorException->getErrorCode())->toBe(RuleErrorCode::CompileUnknownOperator);
-                expect($ruleEvaluatorException->getPhase())->toBe(RuleErrorPhase::Compile);
-                expect($ruleEvaluatorException->getPath())->toBe(['operator']);
-                expect($ruleEvaluatorException->getDetails())->toBe([
-                    'operator' => 'unknownOperator',
-                    'field' => 'status',
-                ]);
-            }
+            $result = RuleEvaluator::compileFromArray([
+                'field' => 'status',
+                'operator' => 'unknownOperator',
+                'value' => 'active',
+            ]);
+
+            $error = $result->getError();
+            expect($error)->toBeInstanceOf(RuleEvaluatorException::class);
+            expect($error?->getErrorCode())->toBe(RuleErrorCode::CompileUnknownOperator);
+            expect($error?->getPhase())->toBe(RuleErrorPhase::Compile);
+            expect($error?->getPath())->toBe(['operator']);
+            expect($error?->getDetails())->toBe([
+                'operator' => 'unknownOperator',
+                'field' => 'status',
+            ]);
         });
 
         test('returns false when propositions fail', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'metrics.score',
                 'operator' => 'greaterThan',
                 'value' => 80,
@@ -609,8 +654,8 @@ YAML;
             expect($result->getResult())->toBeFalse();
         });
 
-        test('throws exception when not combinator has multiple operands', function (): void {
-            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
+        test('returns failure when not combinator has multiple operands', function (): void {
+            $result = RuleEvaluator::compileFromArray([
                 'combinator' => 'not',
                 'value' => [
                     [
@@ -624,27 +669,36 @@ YAML;
                         'value' => true,
                     ],
                 ],
-            ]))->toThrow(RuleEvaluatorException::class);
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidNotArity);
         });
 
-        test('throws exception when not combinator has no operands', function (): void {
-            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
+        test('returns failure when not combinator has no operands', function (): void {
+            $result = RuleEvaluator::compileFromArray([
                 'combinator' => 'not',
                 'value' => [],
-            ]))->toThrow(RuleEvaluatorException::class);
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidNotArity);
         });
 
-        test('throws exception for invalid rule structure without combinator or operator', function (): void {
-            expect(fn (): RuleEvaluator => RuleEvaluator::createFromArray([
+        test('returns failure for invalid rule structure without operator', function (): void {
+            $result = RuleEvaluator::compileFromArray([
                 'field' => 'status',
                 'value' => 'active',
                 // Missing 'operator' key
-            ]))->toThrow(RuleEvaluatorException::class);
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())->toBe(RuleErrorCode::CompileInvalidRuleStructure);
         });
 
         test('returns false when json evaluation fails validation', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'score',
                 'operator' => 'greaterThan',
                 'value' => 100,
@@ -660,7 +714,7 @@ YAML;
 
         test('returns false when yaml evaluation fails validation', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'authorized',
                 'operator' => 'sameAs',
                 'value' => true,
@@ -678,7 +732,7 @@ YAML;
 
         test('returns false when request evaluation fails validation', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'role',
                 'operator' => 'sameAs',
                 'value' => 'admin',
@@ -696,7 +750,7 @@ YAML;
     describe('Edge Cases', function (): void {
         test('handles empty request data', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'optional',
                 'operator' => 'sameAs',
                 'value' => null,
@@ -727,7 +781,7 @@ YAML;
                     ],
                 ],
             ], \JSON_THROW_ON_ERROR);
-            $evaluator = RuleEvaluator::createFromJson($jsonRules);
+            $evaluator = evaluatorFromJson($jsonRules);
 
             // Act
             $result = $evaluator->evaluateFromArray([
@@ -746,7 +800,7 @@ field: description
 operator: stringContains
 value: "Hello, World!"
 YAML;
-            $evaluator = RuleEvaluator::createFromYaml($yamlRules);
+            $evaluator = evaluatorFromYaml($yamlRules);
 
             // Act
             $result = $evaluator->evaluateFromArray([
@@ -766,7 +820,7 @@ YAML;
                 'value' => true,
             ];
             file_put_contents($tempFile, json_encode($rules, \JSON_THROW_ON_ERROR));
-            $evaluator = RuleEvaluator::createFromJsonFile($tempFile);
+            $evaluator = evaluatorFromJsonFile($tempFile);
 
             // Act
             $result = $evaluator->evaluateFromArray([
@@ -792,7 +846,7 @@ YAML;
 name: "José García"
 city: "São Paulo"
 YAML;
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'field' => 'name',
                 'operator' => 'sameAs',
                 'value' => 'José García',
@@ -807,7 +861,7 @@ YAML;
 
         test('handles request with query parameters and body data', function (): void {
             // Arrange
-            $evaluator = RuleEvaluator::createFromArray([
+            $evaluator = evaluatorFromArray([
                 'combinator' => 'and',
                 'value' => [
                     [

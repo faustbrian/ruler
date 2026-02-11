@@ -67,33 +67,6 @@ final readonly class RuleEvaluator
     ) {}
 
     /**
-     * Creates an evaluator from a rule definition array.
-     *
-     * @param  array<string, mixed>          $rules                    Rule definition array containing combinators,
-     *                                                                 operators, fields, and values that define the
-     *                                                                 propositional logic to evaluate
-     * @param  null|CompiledRuleCache        $compiledRuleCache        Optional shared compiled-rule cache.
-     *                                                                 When omitted, this evaluator owns an isolated
-     *                                                                 in-memory cache for its lifetime.
-     * @param  null|CompiledRuleKeyGenerator $compiledRuleKeyGenerator Optional cache
-     *                                                                 key strategy for compiled rules.
-     * @return self                          New RuleEvaluator instance initialized with the provided rules
-     */
-    public static function createFromArray(
-        array $rules,
-        ?CompiledRuleCache $compiledRuleCache = null,
-        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    ): self {
-        $result = self::compileFromArray($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
-
-        if ($result->isSuccess()) {
-            return $result->getEvaluator();
-        }
-
-        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
-    }
-
-    /**
      * Compile an evaluator from a rule definition array without throwing.
      *
      * @param  array<string, mixed>           $rules                    Rule definition array containing combinators,
@@ -133,32 +106,6 @@ final readonly class RuleEvaluator
                 ),
             );
         }
-    }
-
-    /**
-     * Creates an evaluator from a JSON rule definition string.
-     *
-     * @param  string                        $rules                    JSON-encoded rule definition containing the propositional
-     *                                                                 logic structure to evaluate
-     * @param  null|CompiledRuleCache        $compiledRuleCache        Optional shared compiled-rule cache.
-     *                                                                 Use the same instance across evaluators to share
-     *                                                                 compiled rule graphs.
-     * @param  null|CompiledRuleKeyGenerator $compiledRuleKeyGenerator Optional cache
-     *                                                                 key strategy for compiled rules.
-     * @return self                          New RuleEvaluator instance initialized with the parsed rules
-     */
-    public static function createFromJson(
-        string $rules,
-        ?CompiledRuleCache $compiledRuleCache = null,
-        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    ): self {
-        $result = self::compileFromJson($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
-
-        if ($result->isSuccess()) {
-            return $result->getEvaluator();
-        }
-
-        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
     }
 
     /**
@@ -206,29 +153,6 @@ final readonly class RuleEvaluator
     }
 
     /**
-     * Creates an evaluator from a JSON file containing rule definitions.
-     *
-     * @param  string                        $rules                    File path to a JSON file containing the rule definition
-     * @param  null|CompiledRuleCache        $compiledRuleCache        Optional shared compiled-rule cache.
-     * @param  null|CompiledRuleKeyGenerator $compiledRuleKeyGenerator Optional cache
-     *                                                                 key strategy for compiled rules.
-     * @return self                          New RuleEvaluator instance initialized with the parsed rules
-     */
-    public static function createFromJsonFile(
-        string $rules,
-        ?CompiledRuleCache $compiledRuleCache = null,
-        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    ): self {
-        $result = self::compileFromJsonFile($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
-
-        if ($result->isSuccess()) {
-            return $result->getEvaluator();
-        }
-
-        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
-    }
-
-    /**
      * Compile an evaluator from a JSON rule definition file without throwing.
      *
      * @param  string                         $rules                    File path to a JSON file containing the rule definition
@@ -258,30 +182,6 @@ final readonly class RuleEvaluator
         }
 
         return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
-    }
-
-    /**
-     * Creates an evaluator from a YAML rule definition string.
-     *
-     * @param  string                        $rules                    YAML-formatted rule definition containing the propositional
-     *                                                                 logic structure to evaluate
-     * @param  null|CompiledRuleCache        $compiledRuleCache        Optional shared compiled-rule cache.
-     * @param  null|CompiledRuleKeyGenerator $compiledRuleKeyGenerator Optional cache
-     *                                                                 key strategy for compiled rules.
-     * @return self                          New RuleEvaluator instance initialized with the parsed rules
-     */
-    public static function createFromYaml(
-        string $rules,
-        ?CompiledRuleCache $compiledRuleCache = null,
-        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    ): self {
-        $result = self::compileFromYaml($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
-
-        if ($result->isSuccess()) {
-            return $result->getEvaluator();
-        }
-
-        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
     }
 
     /**
@@ -326,29 +226,6 @@ final readonly class RuleEvaluator
                 ),
             );
         }
-    }
-
-    /**
-     * Creates an evaluator from a YAML file containing rule definitions.
-     *
-     * @param  string                        $rules                    File path to a YAML file containing the rule definition
-     * @param  null|CompiledRuleCache        $compiledRuleCache        Optional shared compiled-rule cache.
-     * @param  null|CompiledRuleKeyGenerator $compiledRuleKeyGenerator Optional cache
-     *                                                                 key strategy for compiled rules.
-     * @return self                          New RuleEvaluator instance initialized with the parsed rules
-     */
-    public static function createFromYamlFile(
-        string $rules,
-        ?CompiledRuleCache $compiledRuleCache = null,
-        ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    ): self {
-        $result = self::compileFromYamlFile($rules, $compiledRuleCache, $compiledRuleKeyGenerator);
-
-        if ($result->isSuccess()) {
-            return $result->getEvaluator();
-        }
-
-        throw $result->getError() ?? RuleEvaluatorException::invalidRuleStructure();
     }
 
     /**

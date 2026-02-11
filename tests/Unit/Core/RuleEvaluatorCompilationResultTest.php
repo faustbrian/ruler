@@ -13,11 +13,11 @@ use Cline\Ruler\Exceptions\RuleEvaluatorException;
 
 describe('RuleEvaluatorCompilationResult', function (): void {
     test('returns evaluator on success', function (): void {
-        $evaluator = RuleEvaluator::createFromArray([
+        $evaluator = RuleEvaluator::compileFromArray([
             'field' => 'status',
             'operator' => 'sameAs',
             'value' => 'active',
-        ]);
+        ])->getEvaluator();
 
         $result = RuleEvaluatorCompilationResult::success($evaluator);
 
