@@ -387,16 +387,17 @@ describe('RuleSet', function (): void {
     });
 
     describe('Sad Paths', function (): void {
-        test('accepts rule with auto-generated id', function (): void {
+        test('accepts rule with explicit id', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
                 static function ($context): void {},
+                'explicit-id',
             );
 
             $ruleset = new RuleSet([$rule]);
 
             expect($ruleset->getRules())->toHaveCount(1);
-            expect($ruleset->getRules()[0]->getId())->toStartWith('rule-auto-');
+            expect($ruleset->getRules()[0]->getId())->toBe('explicit-id');
         });
 
         test('throws when duplicate rule ids are added', function (): void {

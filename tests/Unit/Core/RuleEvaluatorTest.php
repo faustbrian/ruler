@@ -332,7 +332,7 @@ YAML;
             ]);
 
             expect($firstRun->getRuleResult()->ruleId)->toBe($secondRun->getRuleResult()->ruleId);
-            expect($firstRun->getRuleResult()->ruleId)->not->toBe($thirdRun->getRuleResult()->ruleId);
+            expect($firstRun->getRuleResult()->ruleId)->toBe($thirdRun->getRuleResult()->ruleId);
         });
 
         test('resolves dot-notated value references at runtime', function (): void {

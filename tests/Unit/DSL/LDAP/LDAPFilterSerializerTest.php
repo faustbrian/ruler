@@ -372,6 +372,8 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
             $rule = new Rule(
                 new TrueProposition(),
+                null,
+                'rule-unsupported',
             );
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
@@ -381,7 +383,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
             $var = new Variable('test', 'value');
             $equalTo = new EqualTo($var, $var, $var);
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-bad-eq-arity');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -391,7 +393,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $patternVar = new Variable(null, 123);
             $matches = new Matches($nameVar, $patternVar);
-            $rule = new Rule($matches);
+            $rule = new Rule($matches, null, 'rule-matches-pattern-type');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -401,7 +403,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $patternVar = new Variable(null, '/unsupported-pattern/');
             $matches = new Matches($nameVar, $patternVar);
-            $rule = new Rule($matches);
+            $rule = new Rule($matches, null, 'rule-matches-pattern-value');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -410,7 +412,7 @@ describe('LDAPFilterSerializer', function (): void {
             $serializer = new LDAPFilterSerializer();
             $var = new Variable('test', 'value');
             $matches = new Matches($var, $var, $var);
-            $rule = new Rule($matches);
+            $rule = new Rule($matches, null, 'rule-matches-arity');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -420,7 +422,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable();
             $valueVar = new Variable(null, 'value');
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-missing-name');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -437,7 +439,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[0] = 'not-a-variable';
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-non-var-attr');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -455,7 +457,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[1] = 'not-a-variable';
             $operandsProperty->setValue($equalTo, $operands);
 
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-non-var-value');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -465,7 +467,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('name', 'test');
             $valueVar = new Variable(null, ['array', 'value']);
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-unsupported-value');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -484,7 +486,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[] = $equalTo;
             $operandsProperty->setValue($not, $operands);
 
-            $rule = new Rule($not);
+            $rule = new Rule($not, null, 'rule-not-arity');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -498,7 +500,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operandsProperty = $reflection->getProperty('operands');
             $operandsProperty->setValue($not, ['not-a-proposition']);
 
-            $rule = new Rule($not);
+            $rule = new Rule($not, null, 'rule-not-type');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -517,7 +519,7 @@ describe('LDAPFilterSerializer', function (): void {
             $operands[1] = 'not-a-proposition';
             $operandsProperty->setValue($and, $operands);
 
-            $rule = new Rule($and);
+            $rule = new Rule($and, null, 'rule-logical-type');
 
             expect(fn (): string => $serializer->serialize($rule))->toThrow(LogicException::class);
         });
@@ -527,7 +529,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('email', 'test');
             $valueVar = new Variable();
             $equalTo = new EqualTo($nameVar, $valueVar);
-            $rule = new Rule($equalTo);
+            $rule = new Rule($equalTo, null, 'rule-null-presence');
 
             $result = $serializer->serialize($rule);
 
@@ -539,7 +541,7 @@ describe('LDAPFilterSerializer', function (): void {
             $nameVar = new Variable('field', 'test');
             $valueVar = new Variable();
             $gt = new GreaterThan($nameVar, $valueVar);
-            $rule = new Rule($gt);
+            $rule = new Rule($gt, null, 'rule-null-format');
 
             $result = $serializer->serialize($rule);
 

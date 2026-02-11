@@ -19,6 +19,8 @@ describe('Rule', function (): void {
         test('interface', function (): void {
             $rule = new Rule(
                 new TrueProposition(),
+                null,
+                'rule-interface',
             );
             expect($rule)->toBeInstanceOf(Proposition::class);
         });
@@ -39,6 +41,7 @@ describe('Rule', function (): void {
                 function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
+                'rule-one',
             );
 
             expect($ruleOne->evaluate($context))->toBeFalse();
@@ -60,6 +63,7 @@ describe('Rule', function (): void {
                 function ($context) use (&$actionExecuted): void {
                     $actionExecuted = true;
                 },
+                'rule-two',
             );
 
             expect($ruleTwo->evaluate($context))->toBeTrue();
@@ -138,6 +142,7 @@ describe('Rule', function (): void {
                 function (Context $ctx) use (&$capturedContext): void {
                     $capturedContext = $ctx;
                 },
+                'rule-context',
             );
 
             $result = $rule->execute($context);
@@ -147,17 +152,13 @@ describe('Rule', function (): void {
             expect($capturedContext)->toBe($context);
         });
 
-        test('rule always has a non-empty identifier', function (): void {
-            $auto = new Rule(
-                new TrueProposition(),
-            );
+        test('rule keeps explicitly assigned identifier', function (): void {
             $manual = new Rule(
                 new TrueProposition(),
                 null,
                 'manual-id',
             );
 
-            expect($auto->getId())->toStartWith('rule-auto-');
             expect($manual->getId())->toBe('manual-id');
         });
     });
@@ -169,6 +170,16 @@ describe('Rule', function (): void {
             new Rule(
                 new TrueProposition(),
                 'this is not callable',
+                'bad-action',
+            );
+        });
+
+        test('missing rule id is rejected', function (): void {
+            $this->expectException(TypeError::class);
+
+            new Rule(
+                new TrueProposition(),
+                null,
             );
         });
 

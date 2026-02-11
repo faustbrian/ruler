@@ -126,6 +126,19 @@ describe('RuleBuilder', function (): void {
     });
 
     describe('Sad Paths', function (): void {
+        test('assigns deterministic ids when creating rule without id', function (): void {
+            $rb = new RuleBuilder();
+            $first = $rb->create(
+                new TrueProposition(),
+            );
+            $second = $rb->create(
+                new TrueProposition(),
+            );
+
+            expect($first->getId())->toBe('rule-1');
+            expect($second->getId())->toBe('rule-2');
+        });
+
         test('logic exception on unknown operator', function (): void {
             $this->expectException(LogicException::class);
             $this->expectExceptionMessage('Unknown operator: "aLotBiggerThan"');

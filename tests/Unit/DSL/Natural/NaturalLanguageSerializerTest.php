@@ -311,7 +311,7 @@ describe('NaturalLanguageSerializer', function (): void {
             // Create a Variable without a name
             $variable = new Variable(null, 'test');
             $proposition = new EqualTo($variable, new Variable(null, 'value'));
-            $rule = new Rule($proposition);
+            $rule = new Rule($proposition, null, 'rule-missing-field-name');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Expected variable with name for field reference');
@@ -326,7 +326,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 new Variable('field'),
                 $variable,
             );
-            $rule = new Rule($proposition);
+            $rule = new Rule($proposition, null, 'rule-unsupported-value-type');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class);
@@ -341,7 +341,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 new Variable('field'),
                 $variable,
             );
-            $rule = new Rule($proposition);
+            $rule = new Rule($proposition, null, 'rule-list-membership-type');
 
             expect(fn (): string => $serializer->serialize($rule))
                 ->toThrow(LogicException::class, 'Expected variable with array value for list membership');
@@ -382,7 +382,7 @@ describe('NaturalLanguageSerializer', function (): void {
                 $orProposition,
             ]);
 
-            $rule = new Rule($andProposition);
+            $rule = new Rule($andProposition, null, 'rule-parenthesized-or');
             $result = $serializer->serialize($rule);
 
             expect($result)->toBe('age is greater than 18 and (status equals active or status equals pending)');
