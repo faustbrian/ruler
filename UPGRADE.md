@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-This document covers upgrading from `v2.x` to `v4.x`.
+This document covers upgrading from `v2.x` to `v4.x`, including `v4.1`.
 
 ## Summary Of Breaking Changes
 
@@ -11,7 +11,8 @@ This document covers upgrading from `v2.x` to `v4.x`.
    of `bool`.
 4. `RuleEvaluator::createFrom*()` has been replaced by `compileFrom*()`
    methods that return `RuleEvaluatorCompilationResult`.
-5. Rule IDs are mandatory and must be unique inside a `RuleSet`.
+5. Rule IDs are mandatory, must be `RuleId` value objects, and must be unique
+   inside a `RuleSet`.
 6. Action callbacks must accept `Context`.
 7. Rule-definition value references must be explicit (`@path.to.value`).
 8. DSL builders now require explicit `ruleId` in `parse*()` calls.
@@ -104,7 +105,7 @@ $evaluator = $compiled->getEvaluator();
 The same pattern applies to JSON/YAML/file variants (`compileFromJson`,
 `compileFromYaml`, etc.).
 
-## 5) Explicit Rule IDs Everywhere
+## 5) Explicit RuleId Value Objects Everywhere
 
 ### Before (v2)
 
@@ -115,14 +116,16 @@ $rule = $rb->create($rb['age']->greaterThan(18));
 ### After (v4)
 
 ```php
+$ruleId = \Cline\Ruler\Core\RuleIds::fromString('age-over-18');
+
 $rule = $rb->create(
     $rb['age']->greaterThan(18),
-    'age-over-18',
+    $ruleId,
 );
 ```
 
 `RuleSet` now enforces unique IDs. Reusing the same ID across different rule
-instances in one set throws.
+instances in one set throws. Raw string IDs are no longer accepted.
 
 ## 6) Action Callback Signature
 
@@ -191,7 +194,10 @@ $rule = $builder->parse('age >= 18');
 ### After (v4)
 
 ```php
-$rule = $builder->parse('age >= 18', 'age-gate');
+$rule = $builder->parse(
+    'age >= 18',
+    \Cline\Ruler\Core\RuleIds::fromString('age-gate'),
+);
 ```
 
 Same requirement applies to `parseWithAction(...)`.
@@ -217,3 +223,36 @@ try {
 ## 10) PHP Requirement
 
 Update runtime to PHP `8.5` or newer before upgrading to `v4`.
+
+## 11) v4.1 Rule Compiler Utility (Recommended)
+
+`v4.1` adds a first-class compiler for persisted rule definitions.
+
+### Before (custom compile pipeline)
+
+```php
+// parse rule payload and recursively map combinators/operators manually
+// then $ruleBuilder->create(...)
+```
+
+### After (v4.1)
+
+```php
+use Cline\Ruler\Core\RuleCompiler;
+use Cline\Ruler\Core\RuleIds;
+
+$result = RuleCompiler::compileFromArray(
+    $ruleDefinition,
+    RuleIds::fromString('business-rule-1'),
+);
+
+if (!$result->isSuccess()) {
+    $error = $result->getError();
+    // handle structured compile error
+}
+
+$rule = $result->getRule();
+```
+
+`RuleCompiler` also supports JSON/YAML and file variants, matching
+`RuleEvaluator::compileFrom*()` ergonomics.

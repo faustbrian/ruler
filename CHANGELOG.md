@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-02-11
+
+### Breaking Changes
+
+- `RuleBuilder::create(...)` and DSL `parse*()` methods no longer accept raw
+  string IDs. You must pass `RuleId` value objects (for example
+  `RuleIds::fromString('my-rule-id')`).
+
+### Added
+
+- `RuleCompiler` with non-throwing compile helpers for array/JSON/YAML payloads:
+  - `compileFromArray()`
+  - `compileFromJson()`
+  - `compileFromJsonFile()`
+  - `compileFromYaml()`
+  - `compileFromYamlFile()`
+- `RuleCompilationResult` for structured success/failure access:
+  - `isSuccess()`
+  - `getRule()`
+  - `getError()`
+- Shared internal definition-to-proposition compiler path so `RuleEvaluator`
+  and direct rule compilation use the same semantics.
+
+### Changed
+
+- `RuleEvaluator` now uses the shared typed definition compiler internally.
+- Compile-on-definition consumers no longer need custom recursive
+  `buildProposition(...)` implementations.
+
+### Upgrade Notes
+
+- If you currently convert persisted rule arrays/JSON/YAML into `Rule`
+  instances with custom mapping code, prefer `RuleCompiler` to reduce
+  duplication and drift.
+
 ## [4.0.0] - 2026-02-11
 
 ### Breaking Changes (Consumer Impact)
@@ -141,5 +176,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite
 
 [4.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...4.0.0
+[4.1.0]: https://git.cline.sh/faustbrian/ruler/compare/4.0.0...4.1.0
 [2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
 [1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0
