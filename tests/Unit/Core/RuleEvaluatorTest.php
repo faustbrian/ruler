@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\CompiledRuleCache;
 use Cline\Ruler\Core\CompiledRuleKeyGenerator;
 use Cline\Ruler\Core\Rule;
@@ -22,11 +23,13 @@ function evaluatorFromArray(
     array $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromArray(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -34,11 +37,13 @@ function evaluatorFromJson(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJson(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -46,11 +51,13 @@ function evaluatorFromJsonFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJsonFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -58,11 +65,13 @@ function evaluatorFromYaml(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYaml(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -70,11 +79,13 @@ function evaluatorFromYamlFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYamlFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -167,6 +178,71 @@ describe('RuleEvaluator', function (): void {
             expect($result->isSuccess())->toBeTrue();
             expect($result->getEvaluator()->evaluateFromArray(['status' => 'active'])->getResult())
                 ->toBeTrue();
+        });
+
+        test('compiles legacy evaluator payloads in compatibility legacy mode', function (): void {
+            $result = RuleEvaluator::compileFromArray(
+                [
+                    'type' => 'logicalAnd',
+                    'rules' => [
+                        [
+                            'field' => 'score',
+                            'operator' => 'greaterThanOrEqualTo',
+                            'value' => 'limits.minScore',
+                        ],
+                    ],
+                ],
+                compatibilityMode: CompatibilityMode::Legacy,
+            );
+
+            expect($result->isSuccess())->toBeTrue();
+            expect(
+                $result->getEvaluator()->evaluateFromArray([
+                    'score' => 75,
+                    'limits' => ['minScore' => 50],
+                ])->getResult(),
+            )->toBeTrue();
+        });
+
+        test('compiles legacy json evaluator payloads in compatibility legacy mode', function (): void {
+            $jsonRules = json_encode([
+                'type' => 'logicalAnd',
+                'rules' => [
+                    [
+                        'field' => 'score',
+                        'operator' => 'greaterThanOrEqualTo',
+                        'value' => 'limits.minScore',
+                    ],
+                ],
+            ], \JSON_THROW_ON_ERROR);
+
+            $result = RuleEvaluator::compileFromJson(
+                $jsonRules,
+                compatibilityMode: CompatibilityMode::Legacy,
+            );
+
+            expect($result->isSuccess())->toBeTrue();
+            expect(
+                $result->getEvaluator()->evaluateFromArray([
+                    'score' => 90,
+                    'limits' => ['minScore' => 50],
+                ])->getResult(),
+            )->toBeTrue();
+        });
+
+        test('fails legacy evaluator payloads in strict mode', function (): void {
+            $result = RuleEvaluator::compileFromArray([
+                'type' => 'logicalAnd',
+                'rules' => [
+                    [
+                        'field' => 'score',
+                        'operator' => 'greaterThanOrEqualTo',
+                        'value' => 'limits.minScore',
+                    ],
+                ],
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
         });
 
         test('compiles evaluator from json without throwing', function (): void {

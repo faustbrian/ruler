@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\RuleCompiler;
 use Cline\Ruler\Core\RuleId;
@@ -135,5 +136,70 @@ YAML);
                 'expected' => ['status' => 'active'],
             ]),
         ))->toBeTrue();
+    });
+
+    test('supports legacy payloads in compatibility legacy mode', function (): void {
+        $result = RuleCompiler::compileFromArray(
+            [
+                'type' => 'logicalAnd',
+                'rules' => [
+                    [
+                        'field' => 'score',
+                        'operator' => 'greaterThanOrEqualTo',
+                        'value' => 'limits.minScore',
+                    ],
+                ],
+            ],
+            compatibilityMode: CompatibilityMode::Legacy,
+        );
+
+        expect($result->isSuccess())->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'score' => 75,
+                'limits' => ['minScore' => 50],
+            ]),
+        ))->toBeTrue();
+    });
+
+    test('supports legacy json payloads in compatibility legacy mode', function (): void {
+        $json = json_encode([
+            'type' => 'logicalAnd',
+            'rules' => [
+                [
+                    'field' => 'score',
+                    'operator' => 'greaterThanOrEqualTo',
+                    'value' => 'limits.minScore',
+                ],
+            ],
+        ], \JSON_THROW_ON_ERROR);
+
+        $result = RuleCompiler::compileFromJson(
+            $json,
+            compatibilityMode: CompatibilityMode::Legacy,
+        );
+
+        expect($result->isSuccess())->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'score' => 90,
+                'limits' => ['minScore' => 50],
+            ]),
+        ))->toBeTrue();
+    });
+
+    test('rejects legacy payloads in strict mode', function (): void {
+        $result = RuleCompiler::compileFromArray([
+            'type' => 'logicalAnd',
+            'rules' => [
+                [
+                    'field' => 'score',
+                    'operator' => 'greaterThanOrEqualTo',
+                    'value' => 'limits.minScore',
+                ],
+            ],
+        ]);
+
+        expect($result->isSuccess())->toBeFalse();
     });
 });

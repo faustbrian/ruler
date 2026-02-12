@@ -23,6 +23,67 @@ use function str_starts_with;
 final readonly class RuleDefinitionMigrator
 {
     /**
+     * Apply compatibility migrations for the requested mode.
+     *
+     * @param  array<string, mixed> $ruleDefinition
+     * @return array<string, mixed>
+     */
+    public static function migrateForCompatibilityMode(array $ruleDefinition, CompatibilityMode $compatibilityMode): array
+    {
+        if ($compatibilityMode === CompatibilityMode::Strict) {
+            return $ruleDefinition;
+        }
+
+        return self::migrateLegacyStringReferences(
+            self::migrateLegacyLogicalCombinators($ruleDefinition),
+        );
+    }
+
+    /**
+     * Convert legacy logical group syntax (`type` + `rules`) to AST syntax.
+     *
+     * @param  array<string, mixed> $ruleDefinition
+     * @return array<string, mixed>
+     */
+    public static function migrateLegacyLogicalCombinators(array $ruleDefinition): array
+    {
+        if (isset($ruleDefinition['type']) && is_string($ruleDefinition['type']) && is_array($ruleDefinition['rules'] ?? null)) {
+            $combinator = match ($ruleDefinition['type']) {
+                'logicalAnd' => 'and',
+                'logicalOr' => 'or',
+                'logicalXor' => 'xor',
+                'logicalNot' => 'not',
+                default => null,
+            };
+
+            if ($combinator !== null) {
+                /** @var array<int, array<string, mixed>> $rules */
+                $rules = $ruleDefinition['rules'];
+
+                return [
+                    'combinator' => $combinator,
+                    'value' => array_map(
+                        self::migrateLegacyLogicalCombinators(...),
+                        $rules,
+                    ),
+                ];
+            }
+        }
+
+        if (isset($ruleDefinition['combinator'], $ruleDefinition['value']) && is_array($ruleDefinition['value'])) {
+            /** @var array<int, array<string, mixed>> $operands */
+            $operands = $ruleDefinition['value'];
+
+            $ruleDefinition['value'] = array_map(
+                self::migrateLegacyLogicalCombinators(...),
+                $operands,
+            );
+        }
+
+        return $ruleDefinition;
+    }
+
+    /**
      * Convert legacy dotted-string value references to explicit '@' references.
      *
      * Legacy payloads may store context references as plain strings (for

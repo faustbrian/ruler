@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-02-12
+
+### Added
+
+- Introduced `CompatibilityMode` with `CompatibilityMode::Legacy` and
+  `CompatibilityMode::Strict` (default) for centralized compatibility control.
+- Added optional `compatibilityMode` argument to:
+  - `RuleCompiler::compileFromArray()`
+  - `RuleCompiler::compileFromJson()`
+  - `RuleCompiler::compileFromJsonFile()`
+  - `RuleCompiler::compileFromYaml()`
+  - `RuleCompiler::compileFromYamlFile()`
+  - `RuleEvaluator::compileFromArray()`
+  - `RuleEvaluator::compileFromJson()`
+  - `RuleEvaluator::compileFromJsonFile()`
+  - `RuleEvaluator::compileFromYaml()`
+  - `RuleEvaluator::compileFromYamlFile()`
+- Added first-party legacy rule migration support in `RuleDefinitionMigrator`:
+  - `migrateLegacyLogicalCombinators()` for `type/rules` payloads
+  - `migrateForCompatibilityMode()` for one-step compatibility transforms
+
+### Changed
+
+- Legacy schema and implicit value-reference handling can now be opted into
+  directly via `CompatibilityMode::Legacy`, removing the need for
+  app-specific adapters.
+
 ## [4.1.0] - 2026-02-11
 
 ### Breaking Changes
@@ -177,5 +204,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [4.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...4.0.0
 [4.1.0]: https://git.cline.sh/faustbrian/ruler/compare/4.0.0...4.1.0
+[4.3.0]: https://git.cline.sh/faustbrian/ruler/compare/4.1.0...4.3.0
 [2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
 [1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0

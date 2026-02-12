@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\RuleDefinitionMigrator;
 
 describe('RuleDefinitionMigrator', function (): void {
@@ -70,5 +71,89 @@ describe('RuleDefinitionMigrator', function (): void {
         expect($migrated['value'][0]['value'])->toBe('@limits.minScore');
         expect($migrated['value'][1]['value'][0]['value'])->toBe('@thresholds.minAge');
         expect($migrated['value'][1]['value'][1]['value'])->toBe('active');
+    });
+
+    test('migrates legacy logical group syntax to ast combinators', function (): void {
+        $migrated = RuleDefinitionMigrator::migrateLegacyLogicalCombinators([
+            'type' => 'logicalAnd',
+            'rules' => [
+                [
+                    'field' => 'status',
+                    'operator' => 'sameAs',
+                    'value' => 'active',
+                ],
+                [
+                    'type' => 'logicalOr',
+                    'rules' => [
+                        [
+                            'field' => 'score',
+                            'operator' => 'greaterThan',
+                            'value' => 80,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        expect($migrated)->toBe([
+            'combinator' => 'and',
+            'value' => [
+                [
+                    'field' => 'status',
+                    'operator' => 'sameAs',
+                    'value' => 'active',
+                ],
+                [
+                    'combinator' => 'or',
+                    'value' => [
+                        [
+                            'field' => 'score',
+                            'operator' => 'greaterThan',
+                            'value' => 80,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    });
+
+    test('applies legacy compatibility migration end-to-end', function (): void {
+        $migrated = RuleDefinitionMigrator::migrateForCompatibilityMode([
+            'type' => 'logicalAnd',
+            'rules' => [
+                [
+                    'field' => 'score',
+                    'operator' => 'greaterThanOrEqualTo',
+                    'value' => 'limits.minScore',
+                ],
+            ],
+        ], CompatibilityMode::Legacy);
+
+        expect($migrated)->toBe([
+            'combinator' => 'and',
+            'value' => [
+                [
+                    'field' => 'score',
+                    'operator' => 'greaterThanOrEqualTo',
+                    'value' => '@limits.minScore',
+                ],
+            ],
+        ]);
+    });
+
+    test('does not change rules in strict compatibility mode', function (): void {
+        $legacy = [
+            'type' => 'logicalAnd',
+            'rules' => [
+                [
+                    'field' => 'score',
+                    'operator' => 'greaterThanOrEqualTo',
+                    'value' => 'limits.minScore',
+                ],
+            ],
+        ];
+
+        expect(RuleDefinitionMigrator::migrateForCompatibilityMode($legacy, CompatibilityMode::Strict))
+            ->toBe($legacy);
     });
 });

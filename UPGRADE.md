@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-This document covers upgrading from `v2.x` to `v4.x`, including `v4.1`.
+This document covers upgrading from `v2.x` to `v4.x`, including `v4.3`.
 
 ## Summary Of Breaking Changes
 
@@ -183,6 +183,24 @@ use Cline\Ruler\Core\RuleDefinitionMigrator;
 $migrated = RuleDefinitionMigrator::migrateLegacyStringReferences($legacy);
 ```
 
+As of `v4.3`, you can also opt into runtime compatibility mode instead of
+pre-migrating all payloads immediately:
+
+```php
+use Cline\Ruler\Core\CompatibilityMode;
+use Cline\Ruler\Core\RuleEvaluator;
+
+$compiled = RuleEvaluator::compileFromArray(
+    $legacyDefinition,
+    compatibilityMode: CompatibilityMode::Legacy,
+);
+```
+
+`CompatibilityMode::Legacy` supports:
+- legacy group shape: `type/rules` (`logicalAnd`, `logicalOr`, `logicalXor`,
+  `logicalNot`)
+- implicit dotted string references in `value` (for example `limits.minScore`)
+
 ## 8) DSL Parser Signatures Require `ruleId`
 
 ### Before (v2)
@@ -256,3 +274,32 @@ $rule = $result->getRule();
 
 `RuleCompiler` also supports JSON/YAML and file variants, matching
 `RuleEvaluator::compileFrom*()` ergonomics.
+
+## 12) v4.3 Compatibility Mode For Legacy Persisted Rules
+
+`v4.3` adds first-class compatibility mode to centralize legacy upgrades in
+`cline/ruler` rather than app-specific adapters.
+
+### Before (custom normalizer/migrator in each app)
+
+```php
+$normalized = normalizeLegacyRules($rules);
+$normalized = migrateLegacyReferences($normalized);
+$compiled = RuleCompiler::compileFromArray($normalized, $ruleId);
+```
+
+### After (v4.3)
+
+```php
+use Cline\Ruler\Core\CompatibilityMode;
+use Cline\Ruler\Core\RuleCompiler;
+
+$compiled = RuleCompiler::compileFromArray(
+    $rules,
+    $ruleId,
+    compatibilityMode: CompatibilityMode::Legacy,
+);
+```
+
+Strict mode remains the default (`CompatibilityMode::Strict`) and should be
+preferred once persisted rules are fully migrated.
