@@ -54,6 +54,7 @@ final readonly class RuleEvaluator
         private RuleDefinition $definition,
         private CompiledRuleCache $compiledRuleCache,
         private CompiledRuleKeyGenerator $compiledRuleKeyGenerator,
+        private CompatibilityMode $compatibilityMode,
     ) {}
 
     /**
@@ -83,6 +84,7 @@ final readonly class RuleEvaluator
                 $definition,
                 $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
                 $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
+                $compatibilityMode,
             );
             $evaluator->getCompiledRule();
 
@@ -538,7 +540,11 @@ final readonly class RuleEvaluator
         }
 
         $ruleBuilder = new RuleBuilder();
-        $proposition = RuleDefinitionPropositionCompiler::compile($this->definition, $ruleBuilder);
+        $proposition = RuleDefinitionPropositionCompiler::compile(
+            $this->definition,
+            $ruleBuilder,
+            $this->compatibilityMode,
+        );
 
         $rule = $ruleBuilder->create($proposition, RuleIds::fromString($key));
         $this->compiledRuleCache->put($key, $rule);

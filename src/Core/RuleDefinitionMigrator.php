@@ -35,7 +35,9 @@ final readonly class RuleDefinitionMigrator
         }
 
         return self::migrateLegacyStringReferences(
-            self::migrateLegacyLogicalCombinators($ruleDefinition),
+            self::migrateLegacyOperatorAliases(
+                self::migrateLegacyLogicalCombinators($ruleDefinition),
+            ),
         );
     }
 
@@ -120,6 +122,41 @@ final readonly class RuleDefinitionMigrator
         }
 
         $ruleDefinition['value'] = '@'.$ruleDefinition['value'];
+
+        return $ruleDefinition;
+    }
+
+    /**
+     * Normalize legacy operator aliases to canonical operator names.
+     *
+     * @param  array<string, mixed> $ruleDefinition
+     * @return array<string, mixed>
+     */
+    public static function migrateLegacyOperatorAliases(array $ruleDefinition): array
+    {
+        if (isset($ruleDefinition['combinator'], $ruleDefinition['value']) && is_array($ruleDefinition['value'])) {
+            /** @var array<int, array<string, mixed>> $operands */
+            $operands = $ruleDefinition['value'];
+
+            $ruleDefinition['value'] = array_map(
+                self::migrateLegacyOperatorAliases(...),
+                $operands,
+            );
+
+            return $ruleDefinition;
+        }
+
+        if (!isset($ruleDefinition['operator']) || !is_string($ruleDefinition['operator'])) {
+            return $ruleDefinition;
+        }
+
+        $ruleDefinition['operator'] = match ($ruleDefinition['operator']) {
+            'contains' => 'stringContains',
+            'doesNotContain' => 'stringDoesNotContain',
+            'in' => 'setContains',
+            'notIn' => 'setDoesNotContain',
+            default => $ruleDefinition['operator'],
+        };
 
         return $ruleDefinition;
     }

@@ -11,6 +11,9 @@ namespace Cline\Ruler\Variables;
 
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Values\Value;
+use Illuminate\Support\Arr;
+
+use function str_contains;
 
 /**
  * Propositional variable placeholder for rule evaluation.
@@ -93,6 +96,14 @@ final class Variable implements VariableOperand
     {
         if ($this->name !== null && $context->offsetExists($this->name)) {
             $value = $context[$this->name];
+        } elseif ($this->name !== null && str_contains($this->name, '.')) {
+            $values = [];
+
+            foreach ($context->keys() as $key) {
+                $values[$key] = $context[$key];
+            }
+
+            $value = Arr::get($values, $this->name, $this->value);
         } elseif ($this->value instanceof VariableOperand) {
             $value = $this->value->prepareValue($context);
         } else {

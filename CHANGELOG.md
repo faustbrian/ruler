@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Legacy schema and implicit value-reference handling can now be opted into
   directly via `CompatibilityMode::Legacy`, removing the need for
   app-specific adapters.
+- `CompatibilityMode::Legacy` now also normalizes legacy operator aliases
+  (`contains`, `doesNotContain`, `in`, `notIn`) and supports dotted `field`
+  evaluation for both flat and nested context payloads.
 
 ## [4.1.0] - 2026-02-11
 

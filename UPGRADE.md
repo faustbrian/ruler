@@ -143,10 +143,11 @@ $rule = $rb->create(
 
 ```php
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleIds;
 
 $rule = $rb->create(
     $condition,
-    'rule-id',
+    RuleIds::fromString('rule-id'),
     fn (Context $context): void => doSomething(),
 );
 ```
@@ -200,6 +201,9 @@ $compiled = RuleEvaluator::compileFromArray(
 - legacy group shape: `type/rules` (`logicalAnd`, `logicalOr`, `logicalXor`,
   `logicalNot`)
 - implicit dotted string references in `value` (for example `limits.minScore`)
+- legacy operator aliases (`contains`, `doesNotContain`, `in`, `notIn`)
+- dotted `field` lookups against flat context keys (for example
+  `sender.country`)
 
 ## 8) DSL Parser Signatures Require `ruleId`
 

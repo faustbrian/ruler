@@ -141,6 +141,44 @@ describe('RuleDefinitionMigrator', function (): void {
         ]);
     });
 
+    test('migrates legacy operator aliases recursively', function (): void {
+        $migrated = RuleDefinitionMigrator::migrateForCompatibilityMode([
+            'combinator' => 'and',
+            'value' => [
+                [
+                    'field' => 'serviceId',
+                    'operator' => 'contains',
+                    'value' => 'post',
+                ],
+                [
+                    'field' => 'country',
+                    'operator' => 'in',
+                    'value' => ['SE', 'FI'],
+                ],
+                [
+                    'combinator' => 'or',
+                    'value' => [
+                        [
+                            'field' => 'status',
+                            'operator' => 'doesNotContain',
+                            'value' => 'inactive',
+                        ],
+                        [
+                            'field' => 'category',
+                            'operator' => 'notIn',
+                            'value' => ['banned'],
+                        ],
+                    ],
+                ],
+            ],
+        ], CompatibilityMode::Legacy);
+
+        expect($migrated['value'][0]['operator'])->toBe('stringContains');
+        expect($migrated['value'][1]['operator'])->toBe('setContains');
+        expect($migrated['value'][2]['value'][0]['operator'])->toBe('stringDoesNotContain');
+        expect($migrated['value'][2]['value'][1]['operator'])->toBe('setDoesNotContain');
+    });
+
     test('does not change rules in strict compatibility mode', function (): void {
         $legacy = [
             'type' => 'logicalAnd',

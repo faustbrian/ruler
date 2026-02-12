@@ -188,6 +188,42 @@ YAML);
         ))->toBeTrue();
     });
 
+    test('supports legacy operator aliases in compatibility legacy mode', function (): void {
+        $result = RuleCompiler::compileFromArray(
+            [
+                'field' => 'serviceId',
+                'operator' => 'contains',
+                'value' => 'nord',
+            ],
+            compatibilityMode: CompatibilityMode::Legacy,
+        );
+
+        expect($result->isSuccess())->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'serviceId' => 'postnord.standard',
+            ]),
+        ))->toBeTrue();
+    });
+
+    test('supports dotted fields against flat context keys in compatibility legacy mode', function (): void {
+        $result = RuleCompiler::compileFromArray(
+            [
+                'field' => 'sender.country',
+                'operator' => 'sameAs',
+                'value' => 'FI',
+            ],
+            compatibilityMode: CompatibilityMode::Legacy,
+        );
+
+        expect($result->isSuccess())->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'sender.country' => 'FI',
+            ]),
+        ))->toBeTrue();
+    });
+
     test('rejects legacy payloads in strict mode', function (): void {
         $result = RuleCompiler::compileFromArray([
             'type' => 'logicalAnd',

@@ -52,6 +52,7 @@ final readonly class RuleCompiler
             return self::compileDefinition(
                 $definition,
                 $ruleId ?? RuleIds::fromDefinition($rules, $compiledRuleKeyGenerator),
+                $compatibilityMode,
             );
         } catch (RuleEvaluatorException $exception) {
             return RuleCompilationResult::failure($exception);
@@ -69,11 +70,14 @@ final readonly class RuleCompiler
     /**
      * Compile a rule from a typed definition without throwing.
      */
-    public static function compileDefinition(RuleDefinition $definition, RuleId $ruleId): RuleCompilationResult
-    {
+    public static function compileDefinition(
+        RuleDefinition $definition,
+        RuleId $ruleId,
+        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
+    ): RuleCompilationResult {
         try {
             $builder = new RuleBuilder();
-            $proposition = RuleDefinitionPropositionCompiler::compile($definition, $builder);
+            $proposition = RuleDefinitionPropositionCompiler::compile($definition, $builder, $compatibilityMode);
             $rule = $builder->create($proposition, $ruleId);
 
             return RuleCompilationResult::success($rule);

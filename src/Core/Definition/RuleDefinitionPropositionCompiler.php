@@ -12,6 +12,7 @@ namespace Cline\Ruler\Core\Definition;
 use Cline\Ruler\Builder\RuleBuilder;
 use Cline\Ruler\Builder\Variable as BuilderVariable;
 use Cline\Ruler\Builder\VariableProperty;
+use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\Proposition;
 use Cline\Ruler\Exceptions\InvalidRuleStructureException;
 use Cline\Ruler\Exceptions\UnknownRuleOperatorException;
@@ -35,18 +36,21 @@ use function ucfirst;
  */
 final class RuleDefinitionPropositionCompiler
 {
-    public static function compile(RuleDefinition $definition, RuleBuilder $ruleBuilder): Proposition
-    {
+    public static function compile(
+        RuleDefinition $definition,
+        RuleBuilder $ruleBuilder,
+        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
+    ): Proposition {
         if ($definition instanceof CombinatorRuleDefinition) {
             $method = 'logical'.ucfirst($definition->combinator->value);
 
             if ($definition->combinator === RuleCombinator::Not) {
-                return $ruleBuilder->{$method}(self::compile($definition->operands[0], $ruleBuilder));
+                return $ruleBuilder->{$method}(self::compile($definition->operands[0], $ruleBuilder, $compatibilityMode));
             }
 
             return $ruleBuilder->{$method}(
                 ...array_map(
-                    fn (RuleDefinition $subRule): Proposition => self::compile($subRule, $ruleBuilder),
+                    fn (RuleDefinition $subRule): Proposition => self::compile($subRule, $ruleBuilder, $compatibilityMode),
                     $definition->operands,
                 ),
             );
@@ -62,7 +66,7 @@ final class RuleDefinitionPropositionCompiler
             $fieldString = $definition->field;
 
             /** @var BuilderVariable $builder */
-            $builder = str_contains($fieldString, '.')
+            $builder = str_contains($fieldString, '.') && $compatibilityMode === CompatibilityMode::Strict
                 ? array_reduce(
                     explode('.', $fieldString),
                     /**

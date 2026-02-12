@@ -230,6 +230,42 @@ describe('RuleEvaluator', function (): void {
             )->toBeTrue();
         });
 
+        test('supports legacy operator aliases in compatibility legacy mode', function (): void {
+            $result = RuleEvaluator::compileFromArray(
+                [
+                    'field' => 'serviceId',
+                    'operator' => 'contains',
+                    'value' => 'nord',
+                ],
+                compatibilityMode: CompatibilityMode::Legacy,
+            );
+
+            expect($result->isSuccess())->toBeTrue();
+            expect(
+                $result->getEvaluator()->evaluateFromArray([
+                    'serviceId' => 'postnord.standard',
+                ])->getResult(),
+            )->toBeTrue();
+        });
+
+        test('supports dotted fields against flat context keys in compatibility legacy mode', function (): void {
+            $result = RuleEvaluator::compileFromArray(
+                [
+                    'field' => 'sender.country',
+                    'operator' => 'sameAs',
+                    'value' => 'FI',
+                ],
+                compatibilityMode: CompatibilityMode::Legacy,
+            );
+
+            expect($result->isSuccess())->toBeTrue();
+            expect(
+                $result->getEvaluator()->evaluateFromArray([
+                    'sender.country' => 'FI',
+                ])->getResult(),
+            )->toBeTrue();
+        });
+
         test('fails legacy evaluator payloads in strict mode', function (): void {
             $result = RuleEvaluator::compileFromArray([
                 'type' => 'logicalAnd',
