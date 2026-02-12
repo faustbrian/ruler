@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-02-12
+
+### Changed
+
+- Expanded `CompatibilityMode::Legacy` so legacy payload compatibility is
+  handled in `cline/ruler` instead of requiring consumer-side adapters.
+- Added legacy operator alias normalization:
+  - `contains` -> `stringContains`
+  - `doesNotContain` -> `stringDoesNotContain`
+  - `in` -> `setContains`
+  - `notIn` -> `setDoesNotContain`
+- Added dotted `field` compatibility for both flat and nested context payloads
+  when using `CompatibilityMode::Legacy`.
+- Kept `CompatibilityMode::Strict` behavior unchanged.
+
 ## [4.3.0] - 2026-02-12
 
 ### Added
@@ -208,5 +223,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [4.0.0]: https://git.cline.sh/faustbrian/ruler/compare/2.0.0...4.0.0
 [4.1.0]: https://git.cline.sh/faustbrian/ruler/compare/4.0.0...4.1.0
 [4.3.0]: https://git.cline.sh/faustbrian/ruler/compare/4.1.0...4.3.0
+[4.4.0]: https://git.cline.sh/faustbrian/ruler/compare/4.3.0...4.4.0
 [2.0.0]: https://git.cline.sh/faustbrian/ruler/compare/1.0.0...2.0.0
 [1.0.0]: https://git.cline.sh/faustbrian/ruler/releases/tag/1.0.0
