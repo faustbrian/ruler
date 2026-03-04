@@ -1,0 +1,5 @@
+{
+  "field": "status",
+  "operator": "sameAs",
+  "value": "active"
+}

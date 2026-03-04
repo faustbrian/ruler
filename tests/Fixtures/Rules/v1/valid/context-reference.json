@@ -1,0 +1,5 @@
+{
+  "field": "amount",
+  "operator": "greaterThan",
+  "value": "@limits.minimum"
+}

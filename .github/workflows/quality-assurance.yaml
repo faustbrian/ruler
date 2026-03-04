@@ -1,0 +1,71 @@
+---
+name: Quality Assurance
+on:
+    push:
+        branches: ['main']
+    pull_request: ~
+
+jobs:
+    quality-gate:
+        name: Composer Test Gate on PHP ${{ matrix.php }}
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                php: ['8.5']
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v6
+            - name: Set up PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  coverage: pcov
+                  tools: composer:v2
+            - name: Install dependencies
+              run: composer install --no-progress
+            - name: Run static analysis and tests
+              run: |
+                  composer test:lint
+                  composer test:type-coverage
+                  composer test:unit
+                  composer test:types
+                  composer test:refactor
+            - name: Run mutation gate
+              id: mutation
+              continue-on-error: true
+              env:
+                  MUTATION_LOG_PATH: artifacts/mutation-core.log
+              run: composer test:mutation-core
+            - name: Summarize mutation run
+              if: always()
+              run: |
+                  log_file="artifacts/mutation-core.log"
+
+                  if [ ! -f "${log_file}" ]; then
+                    echo "## Mutation testing" >> "${GITHUB_STEP_SUMMARY}"
+                    echo "" >> "${GITHUB_STEP_SUMMARY}"
+                    echo "No mutation log found." >> "${GITHUB_STEP_SUMMARY}"
+                    exit 0
+                  fi
+
+                  {
+                    echo "## Mutation testing"
+                    echo ""
+                    grep -E "Mutating application files|Mutations for|Mutations:|Score:|Duration:|Parallel:" "${log_file}" || true
+                  } >> "${GITHUB_STEP_SUMMARY}"
+
+                  if [ "${{ steps.mutation.outcome }}" = "failure" ]; then
+                    summary="$(grep -E "Score:|Mutations:|Duration:" "${log_file}" | tr '\n' '; ' | sed 's/; $//')"
+                    if [ -z "${summary}" ]; then
+                      summary="Mutation gate failed. See artifacts/mutation-core.log."
+                    fi
+                    echo "::error title=Mutation gate failed::${summary}"
+                    exit 1
+                  fi
+            - name: Upload mutation log artifact
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: mutation-core-log-php-${{ matrix.php }}
+                  path: artifacts/mutation-core.log
+                  if-no-files-found: ignore
