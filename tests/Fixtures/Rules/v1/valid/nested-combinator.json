@@ -1,0 +1,25 @@
+{
+  "combinator": "and",
+  "value": [
+    {
+      "field": "metrics.score",
+      "operator": "greaterThanOrEqualTo",
+      "value": 80
+    },
+    {
+      "combinator": "or",
+      "value": [
+        {
+          "field": "country",
+          "operator": "sameAs",
+          "value": "US"
+        },
+        {
+          "field": "country",
+          "operator": "sameAs",
+          "value": "CA"
+        }
+      ]
+    }
+  ]
+}

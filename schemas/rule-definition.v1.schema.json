@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cline.sh/schemas/ruler/rule-definition.v1.schema.json",
+  "title": "Ruler Rule Definition v1",
+  "description": "Canonical persisted rule payload for Cline\\Ruler v1.",
+  "$ref": "#/$defs/rule",
+  "$defs": {
+    "rule": {
+      "oneOf": [
+        { "$ref": "#/$defs/comparisonRule" },
+        { "$ref": "#/$defs/combinatorRule" }
+      ]
+    },
+    "comparisonRule": {
+      "type": "object",
+      "required": ["field", "operator", "value"],
+      "properties": {
+        "field": { "type": "string", "minLength": 1 },
+        "operator": { "type": "string", "minLength": 1 },
+        "value": true
+      },
+      "additionalProperties": false
+    },
+    "combinatorRule": {
+      "type": "object",
+      "required": ["combinator", "value"],
+      "properties": {
+        "combinator": {
+          "enum": ["and", "or", "xor", "nand", "nor", "not"]
+        },
+        "value": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/rule" }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "combinator": { "const": "not" } }
+          },
+          "then": {
+            "properties": { "value": { "maxItems": 1 } }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "combinator": "all",
+  "value": [
+    {
+      "field": "status",
+      "operator": "sameAs",
+      "value": "active"
+    }
+  ]
+}
