@@ -1,12 +1,12 @@
 ## Table of Contents
 
-1. [Persisted Rules](#doc-docs-persisted-rules) (`docs/persisted-rules.md`)
-2. [Mutation Testing Strategy](#doc-docs-mutation-testing) (`docs/mutation-testing.md`)
-3. [Overview](#doc-docs-readme) (`docs/README.md`)
-4. [Dsl Implementations](#doc-docs-dsl-implementations) (`docs/dsl-implementations.md`)
-5. [Operators](#doc-docs-operators) (`docs/operators.md`)
-6. [Rules And Context](#doc-docs-rules-and-context) (`docs/rules-and-context.md`)
-7. [Text Dsl](#doc-docs-text-dsl) (`docs/text-dsl.md`)
+1. [Persisted Rules](#doc-docs-persisted-rules)
+2. [Mutation Testing Strategy](#doc-docs-mutation-testing)
+3. [Overview](#doc-docs-readme)
+4. [Dsl Implementations](#doc-docs-dsl-implementations)
+5. [Operators](#doc-docs-operators)
+6. [Rules And Context](#doc-docs-rules-and-context)
+7. [Text Dsl](#doc-docs-text-dsl)
 <a id="doc-docs-persisted-rules"></a>
 
 # Persisted Rule Definitions
