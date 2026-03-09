@@ -24,8 +24,8 @@ composer require cline/ruler
 - **[Rules and Context](https://docs.cline.sh/ruler/rules-and-context/)** - Rule composition and dynamic context
 - **[Text-Based DSL](https://docs.cline.sh/ruler/text-dsl/)** - Wirefilter-style text syntax
 - **[DSL Implementations](https://docs.cline.sh/ruler/dsl-implementations/)** - All five DSL options compared
-- **[Persisted Rules](docs/persisted-rules.md)** - Versioning and migration guidance for stored definitions
-- **[Mutation Testing Strategy](docs/mutation-testing.md)** - Tooling decision and scope for mutation gates
+- **[Persisted Rules](DOCS.md#doc-docs-persisted-rules)** - Versioning and migration guidance for stored definitions
+- **[Mutation Testing Strategy](DOCS.md#doc-docs-mutation-testing)** - Tooling decision and scope for mutation gates
 
 ## Change log
 

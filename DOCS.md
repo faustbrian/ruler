@@ -1,12 +1,14 @@
 ## Table of Contents
 
-1. Persisted Rules (`docs/persisted-rules.md`)
-2. Mutation Testing Strategy (`docs/mutation-testing.md`)
-3. Overview (`docs/README.md`)
-4. Dsl Implementations (`docs/dsl-implementations.md`)
-5. Operators (`docs/operators.md`)
-6. Rules And Context (`docs/rules-and-context.md`)
-7. Text Dsl (`docs/text-dsl.md`)
+1. [Persisted Rules](#doc-docs-persisted-rules) (`docs/persisted-rules.md`)
+2. [Mutation Testing Strategy](#doc-docs-mutation-testing) (`docs/mutation-testing.md`)
+3. [Overview](#doc-docs-readme) (`docs/README.md`)
+4. [Dsl Implementations](#doc-docs-dsl-implementations) (`docs/dsl-implementations.md`)
+5. [Operators](#doc-docs-operators) (`docs/operators.md`)
+6. [Rules And Context](#doc-docs-rules-and-context) (`docs/rules-and-context.md`)
+7. [Text Dsl](#doc-docs-text-dsl) (`docs/text-dsl.md`)
+<a id="doc-docs-persisted-rules"></a>
+
 # Persisted Rule Definitions
 
 ## Versioning Contract
@@ -71,6 +73,8 @@ Repository fixtures and compatibility tests live under:
 When introducing a new persisted schema version, add new fixture folders and
 compatibility tests before changing compile logic.
 
+<a id="doc-docs-mutation-testing"></a>
+
 # Mutation Testing Strategy
 
 ## Current Decision
@@ -102,6 +106,8 @@ Reevaluate the mutation setup if any of the following are true:
 - Reporting requirements outgrow the current Pest-native workflow.
 
 Pest mutation testing remains the default and supported path.
+
+<a id="doc-docs-readme"></a>
 
 Ruler is a fluent rule engine with proposition-based evaluation and 50+ operators for building conditional business logic. Create readable, testable rules using either the fluent PHP API or text-based DSL syntax.
 
@@ -262,6 +268,8 @@ Ruler focuses exclusively on rule evaluation logic. Rule storage and retrieval a
   per evaluator by default. Pass the same `CompiledRuleCache` instance to share
   compiled rule graphs across evaluators.
 
+<a id="doc-docs-dsl-implementations"></a>
+
 Ruler provides five distinct DSL implementations for different use cases. Each produces the same Ruler operators but with syntax optimized for specific contexts.
 
 ## Quick Comparison
@@ -393,6 +401,8 @@ $context = new Context([
 // Then use the pre-computed value
 $builder->parse('{"total": {"$gt": 100}}');
 ```
+
+<a id="doc-docs-operators"></a>
 
 Ruler provides over 50 operators for building expressive rule conditions.
 
@@ -543,6 +553,8 @@ Register and use:
 $rb->registerOperatorNamespace('My\\Ruler\\Operators');
 $rb->create($rb['a']->aLotGreaterThan(10));
 ```
+
+<a id="doc-docs-rules-and-context"></a>
 
 ## Working with Rules
 
@@ -746,6 +758,8 @@ When the parent resolves to an **array**:
 1. Array index with the property name
 
 If none match, returns the default value (if set).
+
+<a id="doc-docs-text-dsl"></a>
 
 Ruler supports a Wirefilter-style text-based DSL for creating rules using natural, readable syntax. This complements the fluent PHP API—both produce identical results.
 
