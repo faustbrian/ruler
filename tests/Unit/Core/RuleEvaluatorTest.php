@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\CompiledRuleCache;
 use Cline\Ruler\Core\CompiledRuleKeyGenerator;
 use Cline\Ruler\Core\Rule;
@@ -23,13 +22,11 @@ function evaluatorFromArray(
     array $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromArray(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
-        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -37,13 +34,11 @@ function evaluatorFromJson(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJson(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
-        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -51,13 +46,11 @@ function evaluatorFromJsonFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJsonFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
-        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -65,13 +58,11 @@ function evaluatorFromYaml(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYaml(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
-        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -79,13 +70,11 @@ function evaluatorFromYamlFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-    CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYamlFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
-        $compatibilityMode,
     )->getEvaluator();
 }
 
@@ -180,92 +169,6 @@ describe('RuleEvaluator', function (): void {
                 ->toBeTrue();
         });
 
-        test('compiles legacy evaluator payloads in compatibility legacy mode', function (): void {
-            $result = RuleEvaluator::compileFromArray(
-                [
-                    'type' => 'logicalAnd',
-                    'rules' => [
-                        [
-                            'field' => 'score',
-                            'operator' => 'greaterThanOrEqualTo',
-                            'value' => 'limits.minScore',
-                        ],
-                    ],
-                ],
-                compatibilityMode: CompatibilityMode::Legacy,
-            );
-
-            expect($result->isSuccess())->toBeTrue();
-            expect(
-                $result->getEvaluator()->evaluateFromArray([
-                    'score' => 75,
-                    'limits' => ['minScore' => 50],
-                ])->getResult(),
-            )->toBeTrue();
-        });
-
-        test('compiles legacy json evaluator payloads in compatibility legacy mode', function (): void {
-            $jsonRules = json_encode([
-                'type' => 'logicalAnd',
-                'rules' => [
-                    [
-                        'field' => 'score',
-                        'operator' => 'greaterThanOrEqualTo',
-                        'value' => 'limits.minScore',
-                    ],
-                ],
-            ], \JSON_THROW_ON_ERROR);
-
-            $result = RuleEvaluator::compileFromJson(
-                $jsonRules,
-                compatibilityMode: CompatibilityMode::Legacy,
-            );
-
-            expect($result->isSuccess())->toBeTrue();
-            expect(
-                $result->getEvaluator()->evaluateFromArray([
-                    'score' => 90,
-                    'limits' => ['minScore' => 50],
-                ])->getResult(),
-            )->toBeTrue();
-        });
-
-        test('supports legacy operator aliases in compatibility legacy mode', function (): void {
-            $result = RuleEvaluator::compileFromArray(
-                [
-                    'field' => 'serviceId',
-                    'operator' => 'contains',
-                    'value' => 'nord',
-                ],
-                compatibilityMode: CompatibilityMode::Legacy,
-            );
-
-            expect($result->isSuccess())->toBeTrue();
-            expect(
-                $result->getEvaluator()->evaluateFromArray([
-                    'serviceId' => 'postnord.standard',
-                ])->getResult(),
-            )->toBeTrue();
-        });
-
-        test('supports dotted fields against flat context keys in compatibility legacy mode', function (): void {
-            $result = RuleEvaluator::compileFromArray(
-                [
-                    'field' => 'sender.country',
-                    'operator' => 'sameAs',
-                    'value' => 'FI',
-                ],
-                compatibilityMode: CompatibilityMode::Legacy,
-            );
-
-            expect($result->isSuccess())->toBeTrue();
-            expect(
-                $result->getEvaluator()->evaluateFromArray([
-                    'sender.country' => 'FI',
-                ])->getResult(),
-            )->toBeTrue();
-        });
-
         test('fails legacy evaluator payloads in strict mode', function (): void {
             $result = RuleEvaluator::compileFromArray([
                 'type' => 'logicalAnd',
@@ -279,6 +182,35 @@ describe('RuleEvaluator', function (): void {
             ]);
 
             expect($result->isSuccess())->toBeFalse();
+        });
+
+        test('rejects legacy operator aliases', function (): void {
+            $result = RuleEvaluator::compileFromArray([
+                'field' => 'serviceId',
+                'operator' => 'contains',
+                'value' => 'nord',
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+        });
+
+        test('always resolves dotted fields as nested paths', function (): void {
+            $evaluator = evaluatorFromArray([
+                'field' => 'sender.country',
+                'operator' => 'sameAs',
+                'value' => 'FI',
+            ]);
+
+            expect(
+                $evaluator->evaluateFromArray([
+                    'sender' => ['country' => 'FI'],
+                ])->getResult(),
+            )->toBeTrue();
+            expect(
+                $evaluator->evaluateFromArray([
+                    'sender.country' => 'FI',
+                ])->getResult(),
+            )->toBeFalse();
         });
 
         test('compiles evaluator from json without throwing', function (): void {

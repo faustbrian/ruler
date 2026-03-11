@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `CompatibilityMode` and `RuleDefinitionMigrator`.
+- Removed runtime support for legacy `type/rules` payloads, implicit dotted
+  value references, operator aliases, and flat dotted field lookups.
+- Simplified `RuleCompiler` and `RuleEvaluator` compile helpers to the
+  strict-only v5 API surface.
+
 ## [4.4.0] - 2026-02-12
 
 ### Changed

@@ -176,34 +176,9 @@ Values are now treated as literals unless prefixed with `@`.
 }
 ```
 
-For stored legacy payloads, migrate first:
-
-```php
-use Cline\Ruler\Core\RuleDefinitionMigrator;
-
-$migrated = RuleDefinitionMigrator::migrateLegacyStringReferences($legacy);
-```
-
-As of `v4.3`, you can also opt into runtime compatibility mode instead of
-pre-migrating all payloads immediately:
-
-```php
-use Cline\Ruler\Core\CompatibilityMode;
-use Cline\Ruler\Core\RuleEvaluator;
-
-$compiled = RuleEvaluator::compileFromArray(
-    $legacyDefinition,
-    compatibilityMode: CompatibilityMode::Legacy,
-);
-```
-
-`CompatibilityMode::Legacy` supports:
-- legacy group shape: `type/rules` (`logicalAnd`, `logicalOr`, `logicalXor`,
-  `logicalNot`)
-- implicit dotted string references in `value` (for example `limits.minScore`)
-- legacy operator aliases (`contains`, `doesNotContain`, `in`, `notIn`)
-- dotted `field` lookups against flat context keys (for example
-  `sender.country`)
+For stored legacy payloads, migrate them in your application before
+compile/evaluate. `v5` no longer ships a runtime compatibility layer for
+legacy `type/rules`, implicit dotted references, or operator aliases.
 
 ## 8) DSL Parser Signatures Require `ruleId`
 
@@ -279,31 +254,8 @@ $rule = $result->getRule();
 `RuleCompiler` also supports JSON/YAML and file variants, matching
 `RuleEvaluator::compileFrom*()` ergonomics.
 
-## 12) v4.3 Compatibility Mode For Legacy Persisted Rules
+## 12) v5 Removes Runtime Legacy Compatibility
 
-`v4.3` adds first-class compatibility mode to centralize legacy upgrades in
-`cline/ruler` rather than app-specific adapters.
-
-### Before (custom normalizer/migrator in each app)
-
-```php
-$normalized = normalizeLegacyRules($rules);
-$normalized = migrateLegacyReferences($normalized);
-$compiled = RuleCompiler::compileFromArray($normalized, $ruleId);
-```
-
-### After (v4.3)
-
-```php
-use Cline\Ruler\Core\CompatibilityMode;
-use Cline\Ruler\Core\RuleCompiler;
-
-$compiled = RuleCompiler::compileFromArray(
-    $rules,
-    $ruleId,
-    compatibilityMode: CompatibilityMode::Legacy,
-);
-```
-
-Strict mode remains the default (`CompatibilityMode::Strict`) and should be
-preferred once persisted rules are fully migrated.
+`v5` only supports the explicit persisted-rule schema documented in this file.
+Applications must normalize old payloads before calling `RuleCompiler` or
+`RuleEvaluator`.

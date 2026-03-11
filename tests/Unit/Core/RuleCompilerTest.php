@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-use Cline\Ruler\Core\CompatibilityMode;
 use Cline\Ruler\Core\Context;
 use Cline\Ruler\Core\RuleCompiler;
 use Cline\Ruler\Core\RuleId;
@@ -138,92 +137,6 @@ YAML);
         ))->toBeTrue();
     });
 
-    test('supports legacy payloads in compatibility legacy mode', function (): void {
-        $result = RuleCompiler::compileFromArray(
-            [
-                'type' => 'logicalAnd',
-                'rules' => [
-                    [
-                        'field' => 'score',
-                        'operator' => 'greaterThanOrEqualTo',
-                        'value' => 'limits.minScore',
-                    ],
-                ],
-            ],
-            compatibilityMode: CompatibilityMode::Legacy,
-        );
-
-        expect($result->isSuccess())->toBeTrue();
-        expect($result->getRule()->evaluate(
-            new Context([
-                'score' => 75,
-                'limits' => ['minScore' => 50],
-            ]),
-        ))->toBeTrue();
-    });
-
-    test('supports legacy json payloads in compatibility legacy mode', function (): void {
-        $json = json_encode([
-            'type' => 'logicalAnd',
-            'rules' => [
-                [
-                    'field' => 'score',
-                    'operator' => 'greaterThanOrEqualTo',
-                    'value' => 'limits.minScore',
-                ],
-            ],
-        ], \JSON_THROW_ON_ERROR);
-
-        $result = RuleCompiler::compileFromJson(
-            $json,
-            compatibilityMode: CompatibilityMode::Legacy,
-        );
-
-        expect($result->isSuccess())->toBeTrue();
-        expect($result->getRule()->evaluate(
-            new Context([
-                'score' => 90,
-                'limits' => ['minScore' => 50],
-            ]),
-        ))->toBeTrue();
-    });
-
-    test('supports legacy operator aliases in compatibility legacy mode', function (): void {
-        $result = RuleCompiler::compileFromArray(
-            [
-                'field' => 'serviceId',
-                'operator' => 'contains',
-                'value' => 'nord',
-            ],
-            compatibilityMode: CompatibilityMode::Legacy,
-        );
-
-        expect($result->isSuccess())->toBeTrue();
-        expect($result->getRule()->evaluate(
-            new Context([
-                'serviceId' => 'postnord.standard',
-            ]),
-        ))->toBeTrue();
-    });
-
-    test('supports dotted fields against flat context keys in compatibility legacy mode', function (): void {
-        $result = RuleCompiler::compileFromArray(
-            [
-                'field' => 'sender.country',
-                'operator' => 'sameAs',
-                'value' => 'FI',
-            ],
-            compatibilityMode: CompatibilityMode::Legacy,
-        );
-
-        expect($result->isSuccess())->toBeTrue();
-        expect($result->getRule()->evaluate(
-            new Context([
-                'sender.country' => 'FI',
-            ]),
-        ))->toBeTrue();
-    });
-
     test('rejects legacy payloads in strict mode', function (): void {
         $result = RuleCompiler::compileFromArray([
             'type' => 'logicalAnd',
@@ -237,5 +150,35 @@ YAML);
         ]);
 
         expect($result->isSuccess())->toBeFalse();
+    });
+
+    test('rejects legacy operator aliases', function (): void {
+        $result = RuleCompiler::compileFromArray([
+            'field' => 'serviceId',
+            'operator' => 'contains',
+            'value' => 'nord',
+        ]);
+
+        expect($result->isSuccess())->toBeFalse();
+    });
+
+    test('always resolves dotted fields as nested paths', function (): void {
+        $result = RuleCompiler::compileFromArray([
+            'field' => 'sender.country',
+            'operator' => 'sameAs',
+            'value' => 'FI',
+        ]);
+
+        expect($result->isSuccess())->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'sender' => ['country' => 'FI'],
+            ]),
+        ))->toBeTrue();
+        expect($result->getRule()->evaluate(
+            new Context([
+                'sender.country' => 'FI',
+            ]),
+        ))->toBeFalse();
     });
 });

@@ -54,7 +54,6 @@ final readonly class RuleEvaluator
         private RuleDefinition $definition,
         private CompiledRuleCache $compiledRuleCache,
         private CompiledRuleKeyGenerator $compiledRuleKeyGenerator,
-        private CompatibilityMode $compatibilityMode,
     ) {}
 
     /**
@@ -74,17 +73,14 @@ final readonly class RuleEvaluator
         array $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
     ): RuleEvaluatorCompilationResult {
         try {
-            $rules = RuleDefinitionMigrator::migrateForCompatibilityMode($rules, $compatibilityMode);
             $definition = RuleDefinitionParser::fromArray($rules);
             $evaluator = new self(
                 $rules,
                 $definition,
                 $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
                 $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
-                $compatibilityMode,
             );
             $evaluator->getCompiledRule();
 
@@ -116,7 +112,6 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
     ): RuleEvaluatorCompilationResult {
         try {
             $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
@@ -132,7 +127,7 @@ final readonly class RuleEvaluator
             }
 
             /** @var array<string, mixed> $decoded */
-            return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator, $compatibilityMode);
+            return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -160,7 +155,6 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
     ): RuleEvaluatorCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -191,7 +185,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator, $compatibilityMode);
+        return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
     }
 
     /**
@@ -208,7 +202,6 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
     ): RuleEvaluatorCompilationResult {
         try {
             $parsed = Yaml::parse($rules);
@@ -224,7 +217,7 @@ final readonly class RuleEvaluator
             }
 
             /** @var array<string, mixed> $parsed */
-            return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator, $compatibilityMode);
+            return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -252,7 +245,6 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
-        CompatibilityMode $compatibilityMode = CompatibilityMode::Strict,
     ): RuleEvaluatorCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -283,7 +275,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        return self::compileFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator, $compatibilityMode);
+        return self::compileFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
     }
 
     /**
@@ -543,7 +535,6 @@ final readonly class RuleEvaluator
         $proposition = RuleDefinitionPropositionCompiler::compile(
             $this->definition,
             $ruleBuilder,
-            $this->compatibilityMode,
         );
 
         $rule = $ruleBuilder->create($proposition, RuleIds::fromString($key));

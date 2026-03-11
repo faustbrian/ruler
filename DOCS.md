@@ -33,7 +33,7 @@ Store rule payloads with a version field:
 }
 ```
 
-## Migration: Legacy String References
+## Migration: Legacy Payloads
 
 Older payloads may encode references as plain dotted strings:
 
@@ -45,15 +45,10 @@ Older payloads may encode references as plain dotted strings:
 }
 ```
 
-Migrate before compile/evaluate:
+Normalize these payloads in your application before compile/evaluate. `v5`
+does not provide a built-in runtime compatibility or migration layer.
 
-```php
-use Cline\Ruler\Core\RuleDefinitionMigrator;
-
-$migrated = RuleDefinitionMigrator::migrateLegacyStringReferences($legacy);
-```
-
-After migration:
+After normalization:
 
 ```json
 {
