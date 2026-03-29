@@ -68,6 +68,28 @@ Repository fixtures and compatibility tests live under:
 When introducing a new persisted schema version, add new fixture folders and
 compatibility tests before changing compile logic.
 
+## Persisted Custom Operators
+
+Persisted rule payloads keep the same `field` / `operator` / `value` shape for
+custom operators. The payload stays declarative and application code provides
+the custom operator namespaces at compile time.
+
+```php
+use Cline\Ruler\Core\RuleCompileOptions;
+use Cline\Ruler\Core\RuleCompiler;
+
+$rule = [
+    'field' => 'score',
+    'operator' => 'aLotGreaterThan',
+    'value' => 10,
+];
+
+$options = RuleCompileOptions::default()
+    ->withOperatorNamespaces(['My\\Ruler\\Operators']);
+
+$result = RuleCompiler::compileFromArray($rule, options: $options);
+```
+
 <a id="doc-docs-mutation-testing"></a>
 
 # Mutation Testing Strategy
@@ -547,6 +569,24 @@ Register and use:
 ```php
 $rb->registerOperatorNamespace('My\\Ruler\\Operators');
 $rb->create($rb['a']->aLotGreaterThan(10));
+```
+
+Compile persisted rules with the same operator namespace:
+
+```php
+use Cline\Ruler\Core\RuleCompileOptions;
+use Cline\Ruler\Core\RuleEvaluator;
+
+$rules = [
+    'field' => 'score',
+    'operator' => 'aLotGreaterThan',
+    'value' => 10,
+];
+
+$options = RuleCompileOptions::default()
+    ->withOperatorNamespaces(['My\\Ruler\\Operators']);
+
+$result = RuleEvaluator::compileFromArray($rules, options: $options);
 ```
 
 <a id="doc-docs-rules-and-context"></a>

@@ -43,6 +43,7 @@ final readonly class RuleCompiler
         array $rules,
         ?RuleId $ruleId = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
             $definition = RuleDefinitionParser::fromArray($rules);
@@ -50,6 +51,7 @@ final readonly class RuleCompiler
             return self::compileDefinition(
                 $definition,
                 $ruleId ?? RuleIds::fromDefinition($rules, $compiledRuleKeyGenerator),
+                $options,
             );
         } catch (RuleEvaluatorException $exception) {
             return RuleCompilationResult::failure($exception);
@@ -70,9 +72,10 @@ final readonly class RuleCompiler
     public static function compileDefinition(
         RuleDefinition $definition,
         RuleId $ruleId,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
-            $builder = new RuleBuilder();
+            $builder = self::createRuleBuilder($options);
             $proposition = RuleDefinitionPropositionCompiler::compile($definition, $builder);
             $rule = $builder->create($proposition, $ruleId);
 
@@ -94,6 +97,7 @@ final readonly class RuleCompiler
         string $rules,
         ?RuleId $ruleId = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
             $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
@@ -109,7 +113,7 @@ final readonly class RuleCompiler
             }
 
             /** @var array<string, mixed> $decoded */
-            return self::compileFromArray($decoded, $ruleId, $compiledRuleKeyGenerator);
+            return self::compileFromArray($decoded, $ruleId, $compiledRuleKeyGenerator, $options);
         } catch (Throwable $throwable) {
             return RuleCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -128,6 +132,7 @@ final readonly class RuleCompiler
         string $rules,
         ?RuleId $ruleId = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -158,13 +163,14 @@ final readonly class RuleCompiler
             );
         }
 
-        return self::compileFromJson($contents, $ruleId, $compiledRuleKeyGenerator);
+        return self::compileFromJson($contents, $ruleId, $compiledRuleKeyGenerator, $options);
     }
 
     public static function compileFromYaml(
         string $rules,
         ?RuleId $ruleId = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
             $parsed = Yaml::parse($rules);
@@ -180,7 +186,7 @@ final readonly class RuleCompiler
             }
 
             /** @var array<string, mixed> $parsed */
-            return self::compileFromArray($parsed, $ruleId, $compiledRuleKeyGenerator);
+            return self::compileFromArray($parsed, $ruleId, $compiledRuleKeyGenerator, $options);
         } catch (Throwable $throwable) {
             return RuleCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -199,6 +205,7 @@ final readonly class RuleCompiler
         string $rules,
         ?RuleId $ruleId = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -229,6 +236,14 @@ final readonly class RuleCompiler
             );
         }
 
-        return self::compileFromYaml($contents, $ruleId, $compiledRuleKeyGenerator);
+        return self::compileFromYaml($contents, $ruleId, $compiledRuleKeyGenerator, $options);
+    }
+
+    private static function createRuleBuilder(?RuleCompileOptions $options = null): RuleBuilder
+    {
+        return ($options ?? RuleCompileOptions::default())
+            ->applyToRuleBuilder(
+                new RuleBuilder(),
+            );
     }
 }

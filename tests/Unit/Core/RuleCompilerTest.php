@@ -8,6 +8,7 @@
  */
 
 use Cline\Ruler\Core\Context;
+use Cline\Ruler\Core\RuleCompileOptions;
 use Cline\Ruler\Core\RuleCompiler;
 use Cline\Ruler\Core\RuleId;
 use Cline\Ruler\Core\RuleIds;
@@ -70,6 +71,38 @@ YAML;
         expect($yamlResult->isSuccess())->toBeTrue();
 
         $context = new Context(['score' => 75]);
+        expect($jsonResult->getRule()->evaluate($context))->toBeTrue();
+        expect($yamlResult->getRule()->evaluate($context))->toBeTrue();
+    });
+
+    test('compiles custom operators from persisted payloads when namespaces are configured', function (): void {
+        $rule = [
+            'field' => 'score',
+            'operator' => 'aLotGreaterThan',
+            'value' => 10,
+        ];
+
+        $json = json_encode($rule, \JSON_THROW_ON_ERROR);
+        $yaml = <<<'YAML'
+field: score
+operator: aLotGreaterThan
+value: 10
+YAML;
+
+        $options = RuleCompileOptions::default()
+            ->withOperatorNamespaces(['Tests\\Fixtures']);
+
+        $arrayResult = RuleCompiler::compileFromArray($rule, null, null, $options);
+        $jsonResult = RuleCompiler::compileFromJson($json, null, null, $options);
+        $yamlResult = RuleCompiler::compileFromYaml($yaml, null, null, $options);
+
+        expect($arrayResult->isSuccess())->toBeTrue();
+        expect($jsonResult->isSuccess())->toBeTrue();
+        expect($yamlResult->isSuccess())->toBeTrue();
+
+        $context = new Context(['score' => 101]);
+
+        expect($arrayResult->getRule()->evaluate($context))->toBeTrue();
         expect($jsonResult->getRule()->evaluate($context))->toBeTrue();
         expect($yamlResult->getRule()->evaluate($context))->toBeTrue();
     });
@@ -160,6 +193,18 @@ YAML);
         ]);
 
         expect($result->isSuccess())->toBeFalse();
+    });
+
+    test('fails custom operators from persisted payloads without configured namespaces', function (): void {
+        $result = RuleCompiler::compileFromArray([
+            'field' => 'score',
+            'operator' => 'aLotGreaterThan',
+            'value' => 10,
+        ]);
+
+        expect($result->isSuccess())->toBeFalse();
+        expect($result->getError()?->getErrorCode())
+            ->toBe(RuleErrorCode::CompileUnknownOperator);
     });
 
     test('always resolves dotted fields as nested paths', function (): void {

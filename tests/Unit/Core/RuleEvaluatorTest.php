@@ -10,6 +10,7 @@
 use Cline\Ruler\Core\CompiledRuleCache;
 use Cline\Ruler\Core\CompiledRuleKeyGenerator;
 use Cline\Ruler\Core\Rule;
+use Cline\Ruler\Core\RuleCompileOptions;
 use Cline\Ruler\Core\RuleEvaluator;
 use Cline\Ruler\Core\RuleEvaluatorCompilationResult;
 use Cline\Ruler\Core\RuleEvaluatorReport;
@@ -22,11 +23,13 @@ function evaluatorFromArray(
     array $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ?RuleCompileOptions $options = null,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromArray(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $options,
     )->getEvaluator();
 }
 
@@ -34,11 +37,13 @@ function evaluatorFromJson(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ?RuleCompileOptions $options = null,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJson(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $options,
     )->getEvaluator();
 }
 
@@ -46,11 +51,13 @@ function evaluatorFromJsonFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ?RuleCompileOptions $options = null,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromJsonFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $options,
     )->getEvaluator();
 }
 
@@ -58,11 +65,13 @@ function evaluatorFromYaml(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ?RuleCompileOptions $options = null,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYaml(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $options,
     )->getEvaluator();
 }
 
@@ -70,11 +79,13 @@ function evaluatorFromYamlFile(
     string $rules,
     ?CompiledRuleCache $compiledRuleCache = null,
     ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+    ?RuleCompileOptions $options = null,
 ): RuleEvaluator {
     return RuleEvaluator::compileFromYamlFile(
         $rules,
         $compiledRuleCache,
         $compiledRuleKeyGenerator,
+        $options,
     )->getEvaluator();
 }
 
@@ -194,6 +205,18 @@ describe('RuleEvaluator', function (): void {
             expect($result->isSuccess())->toBeFalse();
         });
 
+        test('fails custom operators from persisted payloads without configured namespaces', function (): void {
+            $result = RuleEvaluator::compileFromArray([
+                'field' => 'score',
+                'operator' => 'aLotGreaterThan',
+                'value' => 10,
+            ]);
+
+            expect($result->isSuccess())->toBeFalse();
+            expect($result->getError()?->getErrorCode())
+                ->toBe(RuleErrorCode::CompileUnknownOperator);
+        });
+
         test('always resolves dotted fields as nested paths', function (): void {
             $evaluator = evaluatorFromArray([
                 'field' => 'sender.country',
@@ -225,6 +248,34 @@ describe('RuleEvaluator', function (): void {
             expect($result->isSuccess())->toBeTrue();
             expect($result->getEvaluator()->evaluateFromArray(['status' => 'active'])->getResult())
                 ->toBeTrue();
+        });
+
+        test('compiles custom operators from persisted payloads when namespaces are configured', function (): void {
+            $rule = [
+                'field' => 'score',
+                'operator' => 'aLotGreaterThan',
+                'value' => 10,
+            ];
+
+            $jsonRules = json_encode($rule, \JSON_THROW_ON_ERROR);
+            $yamlRules = <<<'YAML'
+field: score
+operator: aLotGreaterThan
+value: 10
+YAML;
+
+            $options = RuleCompileOptions::default()
+                ->withOperatorNamespaces(['Tests\\Fixtures']);
+
+            $arrayEvaluator = evaluatorFromArray($rule, options: $options);
+            $jsonEvaluator = evaluatorFromJson($jsonRules, options: $options);
+            $yamlEvaluator = evaluatorFromYaml($yamlRules, options: $options);
+
+            $values = ['score' => 101];
+
+            expect($arrayEvaluator->evaluateFromArray($values)->getResult())->toBeTrue();
+            expect($jsonEvaluator->evaluateFromArray($values)->getResult())->toBeTrue();
+            expect($yamlEvaluator->evaluateFromArray($values)->getResult())->toBeTrue();
         });
 
         test('creates evaluator from json file', function (): void {

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `RuleCompileOptions` so persisted rule compilation can register
+  custom operator namespaces without changing the v1 rule schema.
+- Added optional `options` arguments to:
+  - `RuleCompiler::compileFromArray()`
+  - `RuleCompiler::compileFromJson()`
+  - `RuleCompiler::compileFromJsonFile()`
+  - `RuleCompiler::compileFromYaml()`
+  - `RuleCompiler::compileFromYamlFile()`
+  - `RuleEvaluator::compileFromArray()`
+  - `RuleEvaluator::compileFromJson()`
+  - `RuleEvaluator::compileFromJsonFile()`
+  - `RuleEvaluator::compileFromYaml()`
+  - `RuleEvaluator::compileFromYamlFile()`
+
+### Changed
+
+- Persisted rules can now use custom operators by supplying compile-time
+  operator namespaces while keeping the existing `field` / `operator` /
+  `value` payload shape.
+- `RuleEvaluator` compiled-rule cache keys now include custom operator
+  namespaces when compile options are used, preventing cache collisions
+  between evaluators that share the same persisted rule payload.
+
 ### Removed
 
 - Removed `CompatibilityMode` and `RuleDefinitionMigrator`.

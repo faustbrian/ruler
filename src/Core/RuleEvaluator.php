@@ -54,6 +54,7 @@ final readonly class RuleEvaluator
         private RuleDefinition $definition,
         private CompiledRuleCache $compiledRuleCache,
         private CompiledRuleKeyGenerator $compiledRuleKeyGenerator,
+        private RuleCompileOptions $options,
     ) {}
 
     /**
@@ -73,6 +74,7 @@ final readonly class RuleEvaluator
         array $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleEvaluatorCompilationResult {
         try {
             $definition = RuleDefinitionParser::fromArray($rules);
@@ -81,6 +83,7 @@ final readonly class RuleEvaluator
                 $definition,
                 $compiledRuleCache ?? new InMemoryCompiledRuleCache(),
                 $compiledRuleKeyGenerator ?? new CanonicalJsonCompiledRuleKeyGenerator(),
+                $options ?? RuleCompileOptions::default(),
             );
             $evaluator->getCompiledRule();
 
@@ -112,6 +115,7 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleEvaluatorCompilationResult {
         try {
             $decoded = json_decode($rules, true, 512, JSON_THROW_ON_ERROR);
@@ -127,7 +131,7 @@ final readonly class RuleEvaluator
             }
 
             /** @var array<string, mixed> $decoded */
-            return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator);
+            return self::compileFromArray($decoded, $compiledRuleCache, $compiledRuleKeyGenerator, $options);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -155,6 +159,7 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleEvaluatorCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -185,7 +190,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
+        return self::compileFromJson($contents, $compiledRuleCache, $compiledRuleKeyGenerator, $options);
     }
 
     /**
@@ -202,6 +207,7 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleEvaluatorCompilationResult {
         try {
             $parsed = Yaml::parse($rules);
@@ -217,7 +223,7 @@ final readonly class RuleEvaluator
             }
 
             /** @var array<string, mixed> $parsed */
-            return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator);
+            return self::compileFromArray($parsed, $compiledRuleCache, $compiledRuleKeyGenerator, $options);
         } catch (Throwable $throwable) {
             return RuleEvaluatorCompilationResult::failure(
                 InvalidRuleStructureException::forReason(
@@ -245,6 +251,7 @@ final readonly class RuleEvaluator
         string $rules,
         ?CompiledRuleCache $compiledRuleCache = null,
         ?CompiledRuleKeyGenerator $compiledRuleKeyGenerator = null,
+        ?RuleCompileOptions $options = null,
     ): RuleEvaluatorCompilationResult {
         try {
             $contents = file_get_contents($rules);
@@ -275,7 +282,7 @@ final readonly class RuleEvaluator
             );
         }
 
-        return self::compileFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator);
+        return self::compileFromYaml($contents, $compiledRuleCache, $compiledRuleKeyGenerator, $options);
     }
 
     /**
@@ -524,14 +531,16 @@ final readonly class RuleEvaluator
      */
     private function getCompiledRule(): Rule
     {
-        $key = $this->compiledRuleKeyGenerator->generate($this->rules);
+        $key = $this->compiledRuleKeyGenerator->generate($this->getCompiledRuleKeyPayload());
         $cachedRule = $this->compiledRuleCache->get($key);
 
         if ($cachedRule instanceof Rule) {
             return $cachedRule;
         }
 
-        $ruleBuilder = new RuleBuilder();
+        $ruleBuilder = $this->options->applyToRuleBuilder(
+            new RuleBuilder(),
+        );
         $proposition = RuleDefinitionPropositionCompiler::compile(
             $this->definition,
             $ruleBuilder,
@@ -541,5 +550,20 @@ final readonly class RuleEvaluator
         $this->compiledRuleCache->put($key, $rule);
 
         return $rule;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getCompiledRuleKeyPayload(): array
+    {
+        if ($this->options->getOperatorNamespaces() === []) {
+            return $this->rules;
+        }
+
+        return [
+            'rules' => $this->rules,
+            'operatorNamespaces' => $this->options->getOperatorNamespaces(),
+        ];
     }
 }
